@@ -1,16 +1,16 @@
 {
-    "name": "rawilk/:package_name",
-    "description": ":package_description",
+    "name": "rawilk/laravel-settings",
+    "description": "Store Laravel application settings in the database.",
     "keywords": [
         "rawilk",
-        ":package_name"
+        "laravel-settings"
     ],
-    "homepage": "https://github.com/rawilk/:package_name",
+    "homepage": "https://github.com/rawilk/laravel-settings",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": ":author_email",
+            "name": "Randall Wilk",
+            "email": "randall@randallwilk.dev",
             "homepage": "https://randallwilk.dev",
             "role": "Developer"
         }
