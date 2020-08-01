@@ -12,19 +12,19 @@ This is where your description should go. Limit it to a paragraph or two. Consid
 You can install the package via composer:
 
 ```bash
-composer require rawilk/package-skeleton-laravel
+composer require rawilk/laravel-settings
 ```
 
 You can publish and run the migrations with:
 
 ```bash
-php artisan vendor:publish --provider="Rawilk\Skeleton\SkeletonServiceProvider" --tag="migrations"
+php artisan vendor:publish --provider="Rawilk\Settings\SettingsServiceProvider" --tag="migrations"
 php artisan migrate
 ```
 
 You can publish the config file with:
 ```bash
-php artisan vendor:publish --provider="Rawilk\Skeleton\SkeletonServiceProvider" --tag="config"
+php artisan vendor:publish --provider="Rawilk\Settings\SettingsServiceProvider" --tag="config"
 ```
 
 This is the contents of the published config file:

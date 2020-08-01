@@ -1,9 +1,9 @@
 <?php
 
-namespace Rawilk\Skeleton\Tests;
+namespace Rawilk\Settings\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
-use Rawilk\Skeleton\SkeletonServiceProvider;
+use Rawilk\Settings\SettingsServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -17,7 +17,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
-            SkeletonServiceProvider::class,
+            SettingsServiceProvider::class,
         ];
     }
 

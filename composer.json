@@ -3,7 +3,8 @@
     "description": "Store Laravel application settings in the database.",
     "keywords": [
         "rawilk",
-        "laravel-settings"
+        "laravel-settings",
+        "settings"
     ],
     "homepage": "https://github.com/rawilk/laravel-settings",
     "license": "MIT",
@@ -27,12 +28,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Rawilk\\Skeleton\\": "src"
+            "Rawilk\\Settings\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Rawilk\\Skeleton\\Tests\\": "tests"
+            "Rawilk\\Settings\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -47,10 +48,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Rawilk\\Skeleton\\SkeletonServiceProvider"
+                "SettingsServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "Rawilk\\Skeleton\\Facades\\SkeletonFacade"
+                "Settings": "SettingsFacade"
             }
         }
     },

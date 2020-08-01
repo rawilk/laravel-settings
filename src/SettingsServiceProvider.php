@@ -1,11 +1,10 @@
 <?php
 
-namespace Rawilk\Skeleton;
+namespace Rawilk\Settings;
 
 use Illuminate\Support\ServiceProvider;
-use Rawilk\Skeleton\Commands\SkeletonCommand;
 
-class SkeletonServiceProvider extends ServiceProvider
+class SettingsServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
