@@ -199,6 +199,8 @@ You can easily extend settings to use your own drivers for storing and retrievin
 app('SettingsFactory')->extend('myCustomDriver', function ($app, $config) {
     return new MyCustomDriver($config);
 });
+
+> **Note:** Your custom driver must implement the `\Rawilk\Settings\Contracts\Driver` interface.
 ```
 
 ## Testing
