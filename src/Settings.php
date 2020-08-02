@@ -5,6 +5,7 @@ namespace Rawilk\Settings;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Macroable;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializer;
@@ -13,6 +14,8 @@ use Rawilk\Settings\Support\ValueSerializer;
 
 class Settings implements Driver
 {
+    use Macroable;
+
     protected ?Cache $cache = null;
     protected ?Context $context = null;
     protected Driver $driver;
