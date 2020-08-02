@@ -17,7 +17,9 @@
         }
     ],
     "require": {
-        "php": "^7.4"
+        "php": "^7.4",
+        "illuminate/database": "^6.0|^7.0",
+        "illuminate/support": "^6.0|^7.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.16",
@@ -29,7 +31,10 @@
     "autoload": {
         "psr-4": {
             "Rawilk\\Settings\\": "src"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -48,10 +53,11 @@
     "extra": {
         "laravel": {
             "providers": [
-                "SettingsServiceProvider"
+                "Rawilk\\Settings\\SettingsServiceProvider"
             ],
             "aliases": {
-                "Settings": "SettingsFacade"
+                "Settings": "Rawilk\\Settings\\Facades\\Settings",
+                "SettingsFactory": "Rawilk\\Settings\\Drivers\\Factory"
             }
         }
     },

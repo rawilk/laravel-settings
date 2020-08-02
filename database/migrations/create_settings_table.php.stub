@@ -4,17 +4,14 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSkeletonTable extends Migration
+class CreateSettingsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('settings', static function (Blueprint $table) {
+        Schema::create(config('settings.table'), static function (Blueprint $table) {
             $table->bigIncrements('id');
-
-            // add fields
-
-            $table->dateTime('created_at')->nullable();
-            $table->dateTime('updated_at')->nullable();
+            $table->string('key')->unique()->index();
+            $table->longText('value')->nullable();
         });
     }
 }
