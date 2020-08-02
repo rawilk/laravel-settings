@@ -7,6 +7,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
 use Rawilk\Settings\Contracts\Driver;
+use Rawilk\Settings\Contracts\Setting as SettingContract;
 
 class Factory
 {
@@ -38,6 +39,11 @@ class Factory
             $this->app['db']->connection(Arr::get($config, 'connection')),
             $this->app['config']['settings.table']
         );
+    }
+
+    protected function createEloquentDriver(): EloquentDriver
+    {
+        return new EloquentDriver(app(SettingContract::class));
     }
 
     protected function getDefaultDriver(): string
@@ -80,7 +86,8 @@ class Factory
             return $this->callCustomCreator($driverConfig);
         }
 
-        if (! method_exists($this, $method = "create{$driverConfig['driver']}Driver")) {
+        $method = 'create' . ucfirst($driverConfig['driver']) . 'Driver';
+        if (! method_exists($this, $method)) {
             throw new InvalidArgumentException(
                 "Unsupported settings driver: {$driverConfig['driver']}."
             );

@@ -50,7 +50,7 @@ return [
     | to add more drivers in the `drivers` configuration below.
     |
     */
-    'driver' => env('SETTINGS_DRIVER', 'database'),
+    'driver' => env('SETTINGS_DRIVER', 'eloquent'),
 
     /*
     |--------------------------------------------------------------------------
@@ -68,6 +68,15 @@ return [
         'database' => [
             'driver' => 'database',
             'connection' => env('DB_CONNECTION', 'mysql'),
+        ],
+        'eloquent' => [
+            'driver' => 'eloquent',
+
+            /*
+             * You can use any model you like for the setting, but it needs to implement
+             * the \Rawilk\Settings\Contracts\Setting interface.
+             */
+            'model' => \Rawilk\Settings\Models\Setting::class,
         ],
     ],
 ];

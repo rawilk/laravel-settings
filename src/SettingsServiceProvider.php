@@ -3,6 +3,7 @@
 namespace Rawilk\Settings;
 
 use Illuminate\Support\ServiceProvider;
+use Rawilk\Settings\Contracts\Setting as SettingContract;
 use Rawilk\Settings\Drivers\Factory;
 
 class SettingsServiceProvider extends ServiceProvider
@@ -12,6 +13,8 @@ class SettingsServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->bootForConsole();
         }
+
+        $this->registerModelBindings();
     }
 
     public function register(): void
@@ -32,6 +35,17 @@ class SettingsServiceProvider extends ServiceProvider
                 __DIR__ . '/../database/migrations/create_settings_table.php.stub' => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_settings_table.php'),
             ], 'migrations');
         }
+    }
+
+    protected function registerModelBindings(): void
+    {
+        $config = $this->app['config']['settings.drivers.eloquent'];
+
+        if (! $config) {
+            return;
+        }
+
+        $this->app->bind(SettingContract::class, $config['model']);
     }
 
     protected function registerSettings(): void

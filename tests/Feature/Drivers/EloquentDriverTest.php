@@ -2,19 +2,19 @@
 
 namespace Rawilk\Settings\Tests\Feature\Drivers;
 
-use Illuminate\Support\Facades\DB;
-use Rawilk\Settings\Drivers\DatabaseDriver;
+use Rawilk\Settings\Contracts\Setting;
+use Rawilk\Settings\Drivers\EloquentDriver;
 use Rawilk\Settings\Tests\TestCase;
 
-class DatabaseDriverTest extends TestCase
+class EloquentDriverTest extends TestCase
 {
-    protected DatabaseDriver $driver;
+    protected EloquentDriver $driver;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->driver = new DatabaseDriver(app('db')->connection(), 'settings');
+        $this->driver = new EloquentDriver(app(Setting::class));
     }
 
     /** @test */
@@ -22,8 +22,8 @@ class DatabaseDriverTest extends TestCase
     {
         $this->driver->set('foo', 'bar');
 
-        self::assertEquals(1, DB::table('settings')->count());
-        self::assertEquals('bar', DB::table('settings')->where('key', 'foo')->value('value'));
+        self::assertCount(1, app(Setting::class)->all());
+        self::assertEquals('bar', app(Setting::class)->first()->value);
     }
 
     /** @test */
@@ -31,12 +31,12 @@ class DatabaseDriverTest extends TestCase
     {
         $this->driver->set('foo', 'bar');
 
-        self::assertEquals('bar', DB::table('settings')->where('key', 'foo')->value('value'));
+        self::assertEquals('bar', app(Setting::class)->first()->value);
 
         $this->driver->set('foo', 'updated value');
 
-        self::assertEquals(1, DB::table('settings')->count());
-        self::assertEquals('updated value', DB::table('settings')->where('key', 'foo')->value('value'));
+        self::assertCount(1, app(Setting::class)->all());
+        self::assertEquals('updated value', app(Setting::class)->first()->value);
     }
 
     /** @test */
@@ -47,15 +47,14 @@ class DatabaseDriverTest extends TestCase
         $this->driver->set('foo', 'bar');
 
         self::assertTrue($this->driver->has('foo'));
-        self::assertFalse($this->driver->has('not exists'));
     }
 
     /** @test */
     public function it_gets_a_persisted_setting_value(): void
     {
-        $this->driver->set('foo', 'some value');
+        $this->driver->set('foo', 'bar');
 
-        self::assertEquals('some value', $this->driver->get('foo'));
+        self::assertEquals('bar', $this->driver->get('foo'));
     }
 
     /** @test */

@@ -2,7 +2,6 @@
 
 namespace Rawilk\Settings\Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Rawilk\Settings\Facades\Settings;
@@ -11,8 +10,6 @@ use Rawilk\Settings\Tests\TestCase;
 
 class SettingsTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();
