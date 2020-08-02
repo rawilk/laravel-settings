@@ -17,7 +17,7 @@ class DatabaseDriver implements Driver
         $this->table = $table;
     }
 
-    public function forget($key)
+    public function forget($key): void
     {
         $this->table()->where('key', $key)->delete();
     }
@@ -34,7 +34,7 @@ class DatabaseDriver implements Driver
         return $this->table()->where('key', $key)->exists();
     }
 
-    public function set(string $key, $value = null)
+    public function set(string $key, $value = null): void
     {
         try {
             $this->table()->insert(compact('key', 'value'));
