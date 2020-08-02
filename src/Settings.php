@@ -31,6 +31,12 @@ class Settings implements Driver
         $this->valueSerializer = new ValueSerializer;
     }
 
+    // mainly for testing purposes
+    public function getDriver(): Driver
+    {
+        return $this->driver;
+    }
+
     public function context(Context $context = null): self
     {
         $this->context = $context;
