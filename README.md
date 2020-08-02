@@ -186,22 +186,25 @@ You can easily extend settings to use your own drivers for storing and retrievin
 ```php
 'drivers' => [
     // ... other drivers
-    'my_custom_driver' => [
-        'driver' => 'myCustomDriver',
+    'custom' => [
+        'driver' => 'custom',
         // driver specific configuration
     ],
 ],
 ```
 
+You will then need to tell settings about your driver in a service provider:
+
 ```php
 // The callback function is used to create your custom driver, and will receive an application instance and an array of your
 // driver's configuration.
-app('SettingsFactory')->extend('myCustomDriver', function ($app, $config) {
-    return new MyCustomDriver($config);
-});
+app('SettingsFactory')->extend('custom', fn ($app, $config) => new CustomDriver($config));
+
+// You can also set this driver as the default driver
+app('SettingsFactory')->setDefaultDriver('custom');
+```
 
 > **Note:** Your custom driver must implement the `\Rawilk\Settings\Contracts\Driver` interface.
-```
 
 ## Testing
 
