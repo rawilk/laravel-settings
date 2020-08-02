@@ -377,6 +377,7 @@ class SettingsTest extends TestCase
                     return false;
                 }
                 // Or else fall through
+                // no break
             case 'a':
             case 'O':
                 return (bool) preg_match("/^{$token}:[0-9]+:/s", $data);
@@ -384,6 +385,7 @@ class SettingsTest extends TestCase
             case 'i':
             case 'd':
                 $end = '';
+
                 return (bool) preg_match("/^{$token}:[0-9.E+-]+;$end/", $data);
         }
 
