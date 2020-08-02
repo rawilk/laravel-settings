@@ -4,7 +4,9 @@
     "keywords": [
         "rawilk",
         "laravel-settings",
-        "settings"
+        "settings",
+        "database settings",
+        "eloquent model settings"
     ],
     "homepage": "https://github.com/rawilk/laravel-settings",
     "license": "MIT",
