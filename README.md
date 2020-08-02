@@ -196,11 +196,11 @@ You can easily extend settings to use your own drivers for storing and retrievin
 You will then need to tell settings about your driver in a service provider:
 
 ```php
-// The callback function is used to create your custom driver, and will receive an application instance and an array of your
-// driver's configuration.
+// The callback function is used to create your custom driver, and will receive 
+// an application instance and an array of your driver's configuration.
 app('SettingsFactory')->extend('custom', fn ($app, $config) => new CustomDriver($config));
 
-// You can also set this driver as the default driver
+// You can also set this driver as the default driver here, or in the config file.
 app('SettingsFactory')->setDefaultDriver('custom');
 ```
 
