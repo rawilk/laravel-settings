@@ -22,6 +22,9 @@ settings()->get('foo');
 settings('foo');
 ```
 
+## Documentation
+For more comprehensive documentation, please visit: https://docs.randallwilk.dev/laravel-settings
+
 ## Installation
 
 You can install the package via composer:
