@@ -17,7 +17,7 @@ config file, with the following minimum configuration:
 ],
 ```
 
-<x-tip>Replace <strong>custom</strong> with your driver name.</x-tip>
+>{.tip} Replace **custom** with your driver name.
 
 You will then need to tell settings about your custom driver in a service provider:
 
@@ -46,4 +46,4 @@ interface Driver
 }
 ```
 
-<x-tip><strong>Note:</strong> Your custom drivers <strong>do not need to handle encryption or caching</strong>; the settings service will handle that for you.</x-tip>
+>{.tip} **Note:** Your custom drivers **do not need to handle encryption or caching**; the settings service will handle that for you.

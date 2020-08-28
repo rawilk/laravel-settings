@@ -19,4 +19,4 @@ Settings::context($userContext)->isTrue('notifications'); // true
 Settings::context($user2Context)->isTrue('notifications'); // false
 ```
 
-<x-tip>You can put anything you want in context, as long as it's in array form.</x-tip>
+>{.tip} You can put anything you want in context, as long as it's in array form.
