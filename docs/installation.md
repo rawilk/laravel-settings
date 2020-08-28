@@ -100,9 +100,9 @@ return [
             'driver' => 'eloquent',
 
             /*
-            * You can use any model you like for the setting, but it needs to implement
-            * the \Rawilk\Settings\Contracts\Setting interface.
-            */
+             * You can use any model you like for the setting, but it needs to implement
+             * the \Rawilk\Settings\Contracts\Setting interface.
+             */
             'model' => \Rawilk\Settings\Models\Setting::class,
         ],
     ],
