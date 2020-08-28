@@ -11,8 +11,8 @@ As always, if you choose to bypass the provided methods for setting and removing
 each setting you manipulate manually. To determine the cache key for a setting key, you should use the `Rawilk\Settings\Support\KeyGenerator` to
 generate the md5 version of the setting's key:
 
-<x-code lang="php">
+```php
 (new KeyGenerator(new ContextSerializer))->generate($key, $context);
-</x-code>
+```
 
 You will also need to prefix it with the `cache_key_prefix` found in `config/settings.php`.

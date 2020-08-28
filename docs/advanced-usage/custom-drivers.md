@@ -7,7 +7,7 @@ You can easily extend settings to use your own drivers for storing and retrievin
 or xml file. To do so, you will need to add your driver's configuration in the `drivers` key in the `config/settings.php`
 config file, with the following minimum configuration:
 
-<x-code lang="php">
+```php
 'drivers' => [
     // ... other drivers
     'custom' => [
@@ -15,23 +15,23 @@ config file, with the following minimum configuration:
         // driver specific configuration
     ],
 ],
-</x-code>
+```
 
 <x-tip>Replace <strong>custom</strong> with your driver name.</x-tip>
 
 You will then need to tell settings about your custom driver in a service provider:
 
-<x-code lang="php">
+```php
 app('SettingsFactory')->extend('custom', fn ($app, $config) => new CustomDriver($config));
 
 // You can also set your custom driver as the default driver here, or in the config/settings.php config file:
 app('SettingsFactory')->setDefaultDriver('custom');
-</x-code>
+```
 
 Any custom drivers you make must implement the `Rawilk\Settings\Contracts\Driver` interface. Here is what
 the interface looks like:
 
-<x-code lang="php">
+```php
 namespace Rawilk\Settings\Contracts;
 
 interface Driver
@@ -44,6 +44,6 @@ interface Driver
 
     public function set(string $key, $value = null);
 }
-</x-code>
+```
 
 <x-tip><strong>Note:</strong> Your custom drivers <strong>do not need to handle encryption or caching</strong>; the settings service will handle that for you.</x-tip>

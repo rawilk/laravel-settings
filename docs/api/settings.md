@@ -4,7 +4,7 @@ sort: 1
 ---
 
 ### context
-<x-code lang="php">
+```php
 /**
  * Set the context for the current operation.
  * Omit or set $context to null to remove context.
@@ -13,10 +13,10 @@ sort: 1
  * @return \Rawilk\Settings\Settings
  */
 public function context(Context $context = null): self
-</x-code>
+```
 
 ### forget
-<x-code lang="php">
+```php
 /**
  * Remove a persisted setting from storage.
  *
@@ -24,10 +24,10 @@ public function context(Context $context = null): self
  * @return void
  */
 public function forget($key)
-</x-code>
+```
 
 ### get
-<x-code lang="php">
+```php
 /**
  * Retrieve a setting from storage.
  *
@@ -36,10 +36,10 @@ public function forget($key)
  * @return mixed
  */
 public function get(string $key, $default = null)
-</x-code>
+```
 
 ### has
-<x-code lang="php">
+```php
 /**
  * Determine if a setting has been persisted to storage.
  *
@@ -47,10 +47,10 @@ public function get(string $key, $default = null)
  * @return bool
  */
 public function has($key): bool
-</x-code>
+```
 
 ### set
-<x-code lang="php">
+```php
 /**
  * Persist a setting to storage.
  * Updates already persisted settings.
@@ -60,10 +60,10 @@ public function has($key): bool
  * @return void
  */
 public function set(string $key, $value = null)
-</x-code>
+```
 
 ### isFalse
-<x-code lang="php">
+```php
 /**
  * Determine if a setting is set to a false value.
  * Returns true if the value is false, '0', or 0.
@@ -73,10 +73,10 @@ public function set(string $key, $value = null)
  * @return bool
  */
 public function isFalse(string $key, $default = false): bool
-</x-code>
+```
 
 ### isTrue
-<x-code lang="php">
+```php
 /**
  * Determine if a setting is set to a truthy value.
  * Returns true if the value is true, '1', or 1.
@@ -86,4 +86,4 @@ public function isFalse(string $key, $default = false): bool
  * @return bool
  */
 public function isTrue(string $key, $default = true): bool
-</x-code>
+```

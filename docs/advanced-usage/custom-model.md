@@ -8,7 +8,7 @@ the package's model, or create your own. The only requirement is that it impleme
 
 Here is what the interface looks like:
 
-<x-code lang="php">
+```php
 namespace Rawilk\Settings\Contracts;
 
 interface Setting
@@ -21,15 +21,15 @@ interface Setting
 
     public static function set(string $key, $value = null);
 }
-</x-code>
+```
 
 Once you have your custom model created, you need to define it in the `eloquent` driver in `config/settings.php`.
 
-<x-code lang="php">
+```php
 'drivers' => [
     'eloquent' => [
         'driver' => 'eloquent',
         'model' => YourCustomModel::class,
     ],
 ],
-</x-code>
+```

@@ -7,12 +7,12 @@ A common scenario you may run into is overriding a config value from a setting v
 The best place to do this would be in the `boot()` method in a service provider, however you could also override the
 value before your application references the config value.
 
-<x-code lang="php">
+```php
 public function boot()
 {
     config(['app.timezone' => Settings::get('app.timezone', 'UTC')]);
 }
-</x-code>
+```
 
 You can store the settings you are using to override config values with any keys you want, but for clarity you should store
 them as the same key that is used in the config.
