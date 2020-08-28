@@ -16,7 +16,7 @@ passwords for a third-party service you need to be able to use later.
 To get and retrieve stored settings, you can do it easily with the `Settings` facade or by using the `settings()` helper
 function:
 
-<x-code lang="php">
+```php
 // Store
 Settings::set('foo', 'bar');
 settings()->set('foo', 'bar');
@@ -26,4 +26,4 @@ settings(['foo' => 'bar']);
 Settings::get('foo'); // 'bar
 settings()->get('foo');
 settings('foo');
-</x-code>
+```
