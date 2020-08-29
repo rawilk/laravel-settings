@@ -3,6 +3,8 @@ title: Settings Helper
 sort: 3
 ---
 
+## Introduction
+
 If you prefer to use a helper function, you can use the `settings()` helper function. If you pass nothing in to the function,
 it will return an instance of `Rawilk\Settings\Settings`, which you can then call any of its methods on as if you were using the
 `Settings` facade.

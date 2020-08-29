@@ -3,6 +3,8 @@ title: Basic Usage
 sort: 1
 ---
 
+## Introduction
+
 You can interact with settings via the `Settings` facade, or by using the `settings()` helper function, which returns an instance of `Rawilk\Settings\Settings`.
 
 ## Setting a value
