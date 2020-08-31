@@ -23,8 +23,7 @@ settings('foo');
 ```
 
 ## Documentation
-For more comprehensive documentation, please visit: https://docs.randallwilk.dev/laravel-settings
-
+For more comprehensive documentation, please visit: https://randallwilk.dev/docs/laravel-settings
 ## Installation
 
 You can install the package via composer:
