@@ -3,6 +3,7 @@
 namespace Rawilk\Settings;
 
 use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
@@ -80,9 +81,7 @@ class Settings implements Driver
         }
 
         if ($value !== null && $value !== $default) {
-            $value = $this->unserializeValue(
-                $this->encryptionIsEnabled() ? $this->encrypter->decrypt($value) : $value
-            );
+            $value = $this->unserializeValue($this->decryptValue($value));
         }
 
         $this->context();
@@ -239,5 +238,18 @@ class Settings implements Driver
     protected function encryptionIsEnabled(): bool
     {
         return $this->encryptionEnabled && $this->encrypter !== null;
+    }
+
+    protected function decryptValue($value)
+    {
+        if (! $this->encryptionIsEnabled()) {
+            return $value;
+        }
+
+        try {
+            return $this->encrypter->decrypt($value);
+        } catch (DecryptException $e) {
+            return $value;
+        }
     }
 }
