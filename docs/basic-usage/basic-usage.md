@@ -31,8 +31,8 @@ Settings::has('foo');
 ```
 
 ## Remove a setting from storage
-```
-phpSettings::forget('foo');
+```php
+Settings::forget('foo');
 ```
 
 ## Boolean settings
