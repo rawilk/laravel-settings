@@ -14,4 +14,9 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+
+    <issueHandlers>
+        <TooManyArguments errorLevel="suppress"/>
+        <UndefinedInterfaceMethod errorLevel="suppress"/>
+    </issueHandlers>
 </psalm>
