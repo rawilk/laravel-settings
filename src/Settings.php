@@ -183,9 +183,18 @@ class Settings implements Driver
             return true;
         }
 
+        // Prevent the context from being reset before we can save...
+        // See issue #3 (https://github.com/rawilk/laravel-settings/issues/3)
+        $currentContext = $this->context;
+
         $currentValue = $this->get($key);
 
-        return $currentValue !== $newValue || ! $this->has($key);
+        $shouldUpdate = $currentValue !== $newValue || ! $this->has($key);
+
+        // Now that we've made our calls, we can set our context back to what it was.
+        $this->context($currentContext);
+
+        return $shouldUpdate;
     }
 
     public function disableCache(): self
