@@ -26,6 +26,7 @@
     "require-dev": {
         "doctrine/dbal": "^2.12",
         "friendsofphp/php-cs-fixer": "^2.16",
+        "mockery/mockery": "^1.4",
         "orchestra/testbench": "^6.5",
         "phpunit/phpunit": "^9.4",
         "psalm/plugin-laravel": "^1.4",
