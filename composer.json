@@ -24,6 +24,7 @@
         "illuminate/support": "^8.0"
     },
     "require-dev": {
+        "doctrine/dbal": "^2.12",
         "friendsofphp/php-cs-fixer": "^2.16",
         "orchestra/testbench": "^6.5",
         "phpunit/phpunit": "^9.4",
