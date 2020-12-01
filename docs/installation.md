@@ -12,6 +12,7 @@ composer require rawilk/laravel-settings
 ```
 
 ## Migrations
+
 When using the `database` or `eloquent` drivers, you should publish the migration files. You can publish and run the migrations with:
 
 ```bash
@@ -20,6 +21,7 @@ php artisan migrate
 ```
 
 ## Configuration
+
 You can publish the configuration file with:
 
 ```bash
