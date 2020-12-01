@@ -28,7 +28,7 @@ class ContextSerializerTest extends TestCase
 
         self::assertEquals(
             serialize(null),
-            $serializer->serialize(null)
+            $serializer->serialize()
         );
     }
 }

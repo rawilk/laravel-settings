@@ -8,14 +8,7 @@ use Rawilk\Settings\Contracts\Driver;
 
 class DatabaseDriver implements Driver
 {
-    protected Connection $connection;
-    protected string $table;
-
-    public function __construct(Connection $connection, string $table)
-    {
-        $this->connection = $connection;
-        $this->table = $table;
-    }
+    public function __construct(protected Connection $connection, protected string $table) {}
 
     public function forget($key): void
     {
@@ -38,7 +31,7 @@ class DatabaseDriver implements Driver
     {
         try {
             $this->table()->insert(compact('key', 'value'));
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             $this->table()->where('key', $key)->update(compact('value'));
         }
     }

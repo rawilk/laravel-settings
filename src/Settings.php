@@ -7,6 +7,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use JetBrains\PhpStorm\Pure;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializer;
@@ -19,7 +20,6 @@ class Settings implements Driver
 
     protected ?Cache $cache = null;
     protected ?Context $context = null;
-    protected Driver $driver;
     protected ?Encrypter $encrypter = null;
     protected KeyGenerator $keyGenerator;
     protected ValueSerializer $valueSerializer;
@@ -27,10 +27,9 @@ class Settings implements Driver
     protected bool $cacheEnabled = false;
     protected bool $encryptionEnabled = false;
 
-    public function __construct(Driver $driver)
+    #[Pure]
+    public function __construct(protected Driver $driver)
     {
-        $this->driver = $driver;
-
         $this->keyGenerator = new KeyGenerator(new ContextSerializer);
         $this->valueSerializer = new ValueSerializer;
     }
@@ -74,10 +73,10 @@ class Settings implements Driver
         if ($this->cacheIsEnabled()) {
             $value = $this->cache->rememberForever(
                 $this->getCacheKey($generatedKey),
-                fn () => $this->driver->get($generatedKey, $default)
+                fn () => $this->driver->get(key: $generatedKey, default: $default)
             );
         } else {
-            $value = $this->driver->get($generatedKey, $default);
+            $value = $this->driver->get(key: $generatedKey, default: $default);
         }
 
         if ($value !== null && $value !== $default) {
@@ -106,7 +105,7 @@ class Settings implements Driver
 
         // We really only need to update the value if is has changed
         // to prevent the cache being reset on the key.
-        if (! $this->shouldSetNewValue($key, $value)) {
+        if (! $this->shouldSetNewValue(key: $key, newValue: $value)) {
             $this->context();
 
             return null;
@@ -131,22 +130,22 @@ class Settings implements Driver
 
     public function isFalse(string $key, $default = false): bool
     {
-        $value = $this->get($key, $default);
+        $value = $this->get(key: $key, default: $default);
 
         return $value === false || $value === '0' || $value === 1;
     }
 
     public function isTrue(string $key, $default = true): bool
     {
-        $value = $this->get($key, $default);
+        $value = $this->get(key: $key, default: $default);
 
         return $value === true || $value === '1' || $value === 1;
     }
 
     protected function normalizeKey(string $key): string
     {
-        if (Str::startsWith($key, 'file_')) {
-            $key = str_replace('file_', 'file.', $key);
+        if (Str::startsWith(haystack: $key, needles: 'file_')) {
+            return str_replace(search: 'file_', replace: 'file.', subject: $key);
         }
 
         return $key;
@@ -159,7 +158,7 @@ class Settings implements Driver
 
     protected function getKeyForStorage(string $key): string
     {
-        return $this->keyGenerator->generate($key, $this->context);
+        return $this->keyGenerator->generate(key: $key, context: $this->context);
     }
 
     protected function serializeValue($value): string
@@ -172,7 +171,7 @@ class Settings implements Driver
         // Attempt to unserialize the value, but return the original value if that fails.
         try {
             return $this->valueSerializer->unserialize($serialized);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return $serialized;
         }
     }
@@ -257,7 +256,7 @@ class Settings implements Driver
 
         try {
             return $this->encrypter->decrypt($value);
-        } catch (DecryptException $e) {
+        } catch (DecryptException) {
             return $value;
         }
     }

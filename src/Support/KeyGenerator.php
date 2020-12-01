@@ -4,11 +4,8 @@ namespace Rawilk\Settings\Support;
 
 class KeyGenerator
 {
-    protected ContextSerializer $serializer;
-
-    public function __construct(ContextSerializer $serializer)
+    public function __construct(protected ContextSerializer $serializer)
     {
-        $this->serializer = $serializer;
     }
 
     public function generate(string $key, Context $context = null): string

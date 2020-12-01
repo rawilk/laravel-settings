@@ -329,7 +329,7 @@ class SettingsTest extends TestCase
      * @param string|mixed $data
      * @return bool
      */
-    protected function isSerialized($data): bool
+    protected function isSerialized(mixed $data): bool
     {
         // If it isn't a string, it isn't serialized.
         if (! is_string($data)) {

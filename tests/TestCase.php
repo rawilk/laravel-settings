@@ -14,7 +14,7 @@ class TestCase extends Orchestra
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    public function getEnvironmentSetUp($app): void
     {
         include_once __DIR__ . '/../database/migrations/create_settings_table.php.stub';
         (new \CreateSettingsTable)->up();

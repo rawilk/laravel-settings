@@ -6,6 +6,7 @@ use Rawilk\Settings\Support\Context;
 if (! function_exists('settings')) {
     function settings($key = null, $default = null, $context = null)
     {
+        /** @var \Rawilk\Settings\Settings $settings */
         $settings = app(Settings::class);
 
         // If nothing is passed in to the function, simply return the settings instance.
@@ -20,7 +21,7 @@ if (! function_exists('settings')) {
                     $settings->context($context);
                 }
 
-                $settings->set($name, $value);
+                $settings->set(key: $name, value: $value);
             }
 
             return null;
@@ -30,6 +31,6 @@ if (! function_exists('settings')) {
             $settings->context($context);
         }
 
-        return $settings->get($key, $default);
+        return $settings->get(key: $key, default: $default);
     }
 }

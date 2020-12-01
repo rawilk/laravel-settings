@@ -3,6 +3,7 @@
 namespace Rawilk\Settings\Support;
 
 use Countable;
+use JetBrains\PhpStorm\Pure;
 use OutOfBoundsException;
 
 class Context implements Countable
@@ -12,7 +13,7 @@ class Context implements Countable
     public function __construct(array $arguments = [])
     {
         foreach ($arguments as $name => $value) {
-            $this->set($name, $value);
+            $this->set(name: $name, value: $value);
         }
     }
 
@@ -46,6 +47,7 @@ class Context implements Countable
         return $this;
     }
 
+    #[Pure]
     public function count(): int
     {
         return count($this->arguments);

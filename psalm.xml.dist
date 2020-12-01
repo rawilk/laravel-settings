@@ -18,5 +18,6 @@
     <issueHandlers>
         <TooManyArguments errorLevel="suppress"/>
         <UndefinedInterfaceMethod errorLevel="suppress"/>
+        <UndefinedAttributeClass errorLevel="suppress"/>
     </issueHandlers>
 </psalm>
