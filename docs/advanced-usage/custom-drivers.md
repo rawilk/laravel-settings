@@ -47,5 +47,4 @@ interface Driver
 }
 ```
 
-{.tip}
-> **Note:** Your custom drivers **do not need to handle encryption or caching**; the settings service will handle that for you.
+> {note} Your custom drivers **do not need to handle encryption or caching**; the settings service will handle that for you.
