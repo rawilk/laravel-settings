@@ -8,7 +8,9 @@ use Rawilk\Settings\Contracts\Driver;
 
 class DatabaseDriver implements Driver
 {
-    public function __construct(protected Connection $connection, protected string $table) {}
+    public function __construct(protected Connection $connection, protected string $table)
+    {
+    }
 
     public function forget($key): void
     {
