@@ -2,6 +2,11 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## 2.0.1 - 2022-02-23
+### Updated
+- Add support for Laravel 9.*
+- Add support for PHP 8.1
+
 ## 2.0.0 - 2020-12-01
 ### Breaking Changes
 - Drop support for Laravel v6 and v7
