@@ -329,8 +329,8 @@ function isSerialized(mixed $data): bool
             if (strpos($data, '"') === false) {
                 return false;
             }
-        // Or else fall through
-        // no break
+            // Or else fall through
+            // no break
         case 'a':
         case 'O':
             return (bool) preg_match("/^{$token}:[0-9]+:/s", $data);
