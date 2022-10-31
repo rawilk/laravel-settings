@@ -24,7 +24,7 @@
         "illuminate/support": "^8.0|^9.0"
     },
     "require-dev": {
-        "doctrine/dbal": "^2.12",
+        "doctrine/dbal": "^3.5",
         "laravel/pint": "^1.2",
         "mockery/mockery": "^1.4.2",
         "orchestra/testbench": "^6.5|^7.0",
