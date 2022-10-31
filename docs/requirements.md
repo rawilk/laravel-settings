@@ -5,8 +5,10 @@ sort: 2
 
 ## General Requirements
 
--   PHP **8.0** or greater
+-   PHP **8.1**<sup>1</sup> or greater
 -   Laravel **8.0** or greater
+
+<sup>1</sup> PHP 8.0 is not officially supported, however the package should still be able to run on that version.
 
 ## Version Matrix
 
