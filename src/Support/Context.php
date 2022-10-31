@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rawilk\Settings\Support;
 
 use Countable;
-use JetBrains\PhpStorm\Pure;
 use OutOfBoundsException;
 
 class Context implements Countable
@@ -47,7 +48,6 @@ class Context implements Countable
         return $this;
     }
 
-    #[Pure]
     public function count(): int
     {
         return count($this->arguments);

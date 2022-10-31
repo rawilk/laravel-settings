@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rawilk\Settings;
 
 use Rawilk\Settings\Contracts\Setting as SettingContract;

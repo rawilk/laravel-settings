@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rawilk\Settings\Drivers;
 
 use Rawilk\Settings\Contracts\Driver;

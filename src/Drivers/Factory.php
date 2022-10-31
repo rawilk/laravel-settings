@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rawilk\Settings\Drivers;
 
 use Closure;
@@ -9,6 +11,7 @@ use InvalidArgumentException;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\Setting as SettingContract;
 
+/** @internal */
 class Factory
 {
     protected array $drivers = [];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Rawilk\Settings\Settings;
 use Rawilk\Settings\Support\Context;
 

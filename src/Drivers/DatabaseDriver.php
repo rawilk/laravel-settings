@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rawilk\Settings\Drivers;
 
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
 use Rawilk\Settings\Contracts\Driver;
+use Throwable;
 
 class DatabaseDriver implements Driver
 {
@@ -33,7 +36,7 @@ class DatabaseDriver implements Driver
     {
         try {
             $this->table()->insert(compact('key', 'value'));
-        } catch (\Exception) {
+        } catch (Throwable) {
             $this->table()->where('key', $key)->update(compact('value'));
         }
     }

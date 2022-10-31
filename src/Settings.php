@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rawilk\Settings;
 
 use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-use JetBrains\PhpStorm\Pure;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializer;
@@ -32,7 +32,6 @@ class Settings implements Driver
 
     protected bool $encryptionEnabled = false;
 
-    #[Pure]
     public function __construct(protected Driver $driver)
     {
         $this->keyGenerator = new KeyGenerator(new ContextSerializer);
@@ -174,11 +173,7 @@ class Settings implements Driver
     protected function unserializeValue($serialized)
     {
         // Attempt to unserialize the value, but return the original value if that fails.
-        try {
-            return $this->valueSerializer->unserialize($serialized);
-        } catch (\Throwable) {
-            return $serialized;
-        }
+        return rescue(fn () => $this->valueSerializer->unserialize($serialized), $serialized);
     }
 
     protected function shouldSetNewValue(string $key, $newValue): bool
@@ -259,10 +254,6 @@ class Settings implements Driver
             return $value;
         }
 
-        try {
-            return $this->encrypter->decrypt($value);
-        } catch (DecryptException) {
-            return $value;
-        }
+        return rescue($this->encrypter->decrypt($value), $value);
     }
 }
