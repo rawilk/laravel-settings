@@ -2,42 +2,32 @@
 
 namespace Rawilk\Settings;
 
-use Illuminate\Support\ServiceProvider;
 use Rawilk\Settings\Contracts\Setting as SettingContract;
 use Rawilk\Settings\Drivers\Factory;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class SettingsServiceProvider extends ServiceProvider
+class SettingsServiceProvider extends PackageServiceProvider
 {
-    public function boot(): void
+    public function configurePackage(Package $package): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->bootForConsole();
-        }
-
-        $this->registerModelBindings();
+        $package
+            ->name('laravel-settings')
+            ->hasConfigFile()
+            ->hasMigration('create_settings_table');
     }
 
-    public function register(): void
+    public function packageBooted(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/settings.php', 'settings');
+        $this->bootModelBindings();
+    }
 
+    public function packageRegistered(): void
+    {
         $this->registerSettings();
     }
 
-    protected function bootForConsole(): void
-    {
-        $this->publishes([
-            __DIR__ . '/../config/settings.php' => config_path('settings.php'),
-        ], 'config');
-
-        if (! class_exists('CreateSettingsTable')) {
-            $this->publishes([
-                __DIR__ . '/../database/migrations/create_settings_table.php.stub' => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_settings_table.php'),
-            ], 'migrations');
-        }
-    }
-
-    protected function registerModelBindings(): void
+    protected function bootModelBindings(): void
     {
         $config = $this->app['config']['settings.drivers.eloquent'];
 
