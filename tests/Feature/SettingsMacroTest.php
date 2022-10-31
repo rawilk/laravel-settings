@@ -1,39 +1,29 @@
 <?php
 
-namespace Rawilk\Settings\Tests\Feature;
+declare(strict_types=1);
 
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Settings;
-use Rawilk\Settings\Tests\TestCase;
 
-class SettingsMacroTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function () {
+    config([
+        'settings.driver' => 'eloquent',
+        'settings.table' => 'settings',
+        'settings.cache' => false,
+        'settings.encryption' => false,
+    ]);
+});
 
-        config([
-            'settings.driver' => 'eloquent',
-            'settings.table' => 'settings',
-            'settings.cache' => false,
-            'settings.encryption' => false,
-        ]);
-    }
+test('custom functions can be added to settings', function () {
+    Settings::macro('myCustomFunction', function ($key) {
+        $value = $this->get($key);
 
-    /** @test */
-    public function custom_functions_can_be_added_to_settings(): void
-    {
-        Settings::macro('myCustomFunction', function ($key) {
-            /** @var \Rawilk\Settings\Settings $this */
-            $value = $this->get($key);
+        return strtoupper($value);
+    });
 
-            return strtoupper($value);
-        });
+    SettingsFacade::set('foo', 'bar');
 
-        SettingsFacade::set('foo', 'bar');
-
-        self::assertSame('BAR', SettingsFacade::myCustomFunction('foo'));
-        self::assertNotSame('bar', SettingsFacade::myCustomFunction('foo'));
-        self::assertSame('bar', SettingsFacade::get('foo'));
-    }
-}
+    expect(SettingsFacade::myCustomFunction('foo'))->toBe('BAR')
+        ->and(SettingsFacade::myCustomFunction('foo'))->not()->toBe('bar')
+        ->and(SettingsFacade::get('foo'))->toBe('bar');
+});

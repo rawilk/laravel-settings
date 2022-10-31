@@ -1,85 +1,66 @@
 <?php
 
-namespace Rawilk\Settings\Tests\Feature;
+declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Settings;
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Tests\TestCase;
 
-class SettingsHelperTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function () {
+    config([
+        'settings.driver' => 'eloquent',
+        'settings.table' => 'settings',
+        'settings.cache' => false,
+        'settings.encryption' => false,
+    ]);
+});
 
-        config([
-            'settings.driver' => 'eloquent',
-            'settings.table' => 'settings',
-            'settings.cache' => false,
-            'settings.encryption' => false,
-        ]);
-    }
+it('returns an instance of the settings class when no arguments are passed in', function () {
+    expect(settings())->toBeInstanceOf(Settings::class);
+});
 
-    /** @test */
-    public function it_returns_an_instance_of_the_settings_class_when_no_arguments_are_passed_in(): void
-    {
-        self::assertInstanceOf(Settings::class, settings());
-    }
+it('sets values if an array is passed in as the first argument', function () {
+    settings([
+        'foo' => 'bar',
+        'bar' => 'foo',
+    ]);
 
-    /** @test */
-    public function it_sets_values_if_an_array_is_passed_in_as_the_first_argument(): void
-    {
-        settings([
-            'foo' => 'bar',
-            'bar' => 'foo',
-        ]);
+    expect(DB::table('settings')->count())->toBe(2)
+        ->and(SettingsFacade::get('foo'))->toBe('bar')
+        ->and(SettingsFacade::get('bar'))->toBe('foo');
+});
 
-        self::assertCount(2, DB::table('settings')->get());
-        self::assertEquals('bar', SettingsFacade::get('foo'));
-        self::assertEquals('foo', SettingsFacade::get('bar'));
-    }
+it('sets the context if a context is passed in as the third argument', function () {
+    $context = new Context(['foo' => 'bar']);
+    settings(['foo' => 'bar']);
 
-    /** @test */
-    public function it_sets_the_context_if_a_context_is_passed_in_as_the_third_argument(): void
-    {
-        $context = new Context(['foo' => 'bar']);
-        settings(['foo' => 'bar']);
+    expect(SettingsFacade::context($context)->has('foo'))->toBeFalse();
 
-        self::assertFalse(SettingsFacade::context($context)->has('foo'));
+    settings(['foo' => 'context value'], null, $context);
 
-        settings(['foo' => 'context value'], null, $context);
+    expect(SettingsFacade::context($context)->has('foo'))->toBeTrue()
+        ->and(SettingsFacade::get('foo'))->toBe('bar')
+        ->and(SettingsFacade::context($context)->get('foo'))->toBe('context value');
+});
 
-        self::assertTrue(SettingsFacade::context($context)->has('foo'));
-        self::assertEquals('bar', SettingsFacade::get('foo'));
-        self::assertEquals('context value', SettingsFacade::context($context)->get('foo'));
-    }
+it('can retrieve values', function () {
+    settings()->set('foo', 'bar');
 
-    /** @test */
-    public function it_can_retrieve_values(): void
-    {
-        settings()->set('foo', 'bar');
+    expect(settings('foo'))->toBe('bar')
+        ->and(settings()->get('foo'))->toBe('bar');
+});
 
-        self::assertEquals('bar', settings('foo'));
-        self::assertEquals('bar', settings()->get('foo'));
-    }
+it('returns a default value if a setting is not persisted', function () {
+    expect(settings('foo', 'my default'))->toBe('my default');
+});
 
-    /** @test */
-    public function it_returns_a_default_value_if_a_setting_is_not_persisted(): void
-    {
-        self::assertEquals('my default', settings('foo', 'my default'));
-    }
+it('returns values based on context', function () {
+    $context = new Context(['foo' => 'bar']);
 
-    /** @test */
-    public function it_returns_values_based_on_context(): void
-    {
-        $context = new Context(['foo' => 'bar']);
+    settings()->set('foo', 'bar');
+    settings()->context($context)->set('foo', 'context foo');
 
-        settings()->set('foo', 'bar');
-        settings()->context($context)->set('foo', 'context foo');
-
-        self::assertEquals('bar', settings('foo'));
-        self::assertEquals('context foo', settings('foo', null, $context));
-    }
-}
+    expect(settings('foo'))->toBe('bar')
+        ->and(settings('foo', null, $context))->toBe('context foo');
+});

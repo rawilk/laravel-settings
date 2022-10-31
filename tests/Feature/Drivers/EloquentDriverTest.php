@@ -1,77 +1,57 @@
 <?php
 
-namespace Rawilk\Settings\Tests\Feature\Drivers;
+declare(strict_types=1);
 
-use Rawilk\Settings\Contracts\Setting;
 use Rawilk\Settings\Drivers\EloquentDriver;
-use Rawilk\Settings\Tests\TestCase;
+use Rawilk\Settings\Models\Setting;
 
-class EloquentDriverTest extends TestCase
-{
-    protected EloquentDriver $driver;
+beforeEach(function () {
+    $this->driver = new EloquentDriver(app(Setting::class));
+    $this->model = app(Setting::class);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+it('creates new entries', function () {
+    $this->driver->set('foo', 'bar');
 
-        $this->driver = new EloquentDriver(app(Setting::class));
-    }
+    expect($this->model::all())->count()->toBe(1)
+        ->and($this->model::first()->value)->toBe('bar');
+});
 
-    /** @test */
-    public function it_creates_new_entries(): void
-    {
-        $this->driver->set('foo', 'bar');
+it('updates existing entries', function () {
+    $this->driver->set('foo', 'bar');
 
-        self::assertCount(1, app(Setting::class)->all());
-        self::assertEquals('bar', app(Setting::class)->first()->value);
-    }
+    expect($this->model::first()->value)->toBe('bar');
 
-    /** @test */
-    public function it_updates_existing_entries(): void
-    {
-        $this->driver->set('foo', 'bar');
+    $this->driver->set('foo', 'updated value');
 
-        self::assertEquals('bar', app(Setting::class)->first()->value);
+    expect($this->model::count())->toBe(1)
+        ->and($this->model::first()->value)->toBe('updated value');
+});
 
-        $this->driver->set('foo', 'updated value');
+it('checks if a setting is persisted', function () {
+    expect($this->driver->has('foo'))->toBeFalse();
 
-        self::assertCount(1, app(Setting::class)->all());
-        self::assertEquals('updated value', app(Setting::class)->first()->value);
-    }
+    $this->driver->set('foo', 'bar');
 
-    /** @test */
-    public function it_checks_if_a_setting_is_persisted(): void
-    {
-        self::assertFalse($this->driver->has('foo'));
+    expect($this->driver->has('foo'))->toBeTrue();
+});
 
-        $this->driver->set('foo', 'bar');
+it('gets a persisted setting value', function () {
+    $this->driver->set('foo', 'bar');
 
-        self::assertTrue($this->driver->has('foo'));
-    }
+    expect($this->driver->get('foo'))->toBe('bar');
+});
 
-    /** @test */
-    public function it_gets_a_persisted_setting_value(): void
-    {
-        $this->driver->set('foo', 'bar');
+it('returns a default value for settings that are not persisted', function () {
+    expect($this->driver->get('foo', 'my default value'))->toBe('my default value');
+});
 
-        self::assertEquals('bar', $this->driver->get('foo'));
-    }
+it('removes persisted settings', function () {
+    $this->driver->set('foo', 'bar');
 
-    /** @test */
-    public function it_returns_a_default_value_for_settings_that_are_not_persisted(): void
-    {
-        self::assertEquals('my default value', $this->driver->get('foo', 'my default value'));
-    }
+    expect($this->driver->has('foo'))->toBeTrue();
 
-    /** @test */
-    public function it_removes_persisted_settings(): void
-    {
-        $this->driver->set('foo', 'bar');
+    $this->driver->forget('foo');
 
-        self::assertTrue($this->driver->has('foo'));
-
-        $this->driver->forget('foo');
-
-        self::assertFalse($this->driver->has('foo'));
-    }
-}
+    expect($this->driver->has('foo'))->toBeFalse();
+});
