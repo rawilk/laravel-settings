@@ -1,104 +1,77 @@
 <?php
 
-namespace Rawilk\Settings\Tests\Feature\Drivers;
+declare(strict_types=1);
 
-use InvalidArgumentException;
 use Rawilk\Settings\Drivers\DatabaseDriver;
 use Rawilk\Settings\Drivers\EloquentDriver;
 use Rawilk\Settings\Facades\Settings;
 use Rawilk\Settings\Tests\Support\Drivers\CustomDriver;
-use Rawilk\Settings\Tests\TestCase;
 
-class FactoryTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function () {
+    config([
+        'settings.driver' => 'eloquent',
+    ]);
+});
 
-        config([
-            'settings.driver' => 'eloquent',
-        ]);
-    }
+it('gets the default driver', function () {
+    $driver = app('SettingsFactory')->driver();
 
-    /** @test */
-    public function it_gets_the_default_driver(): void
-    {
-        $driver = app('SettingsFactory')->driver();
+    expect($driver)->toBeInstanceOf(EloquentDriver::class);
+});
 
-        self::assertInstanceOf(EloquentDriver::class, $driver);
-    }
+it('can set the default driver', function () {
+    app('SettingsFactory')->setDefaultDriver('database');
 
-    /** @test */
-    public function it_can_set_the_default_driver(): void
-    {
-        app('SettingsFactory')->setDefaultDriver('database');
+    expect(app('SettingsFactory')->driver())->toBeInstanceOf(DatabaseDriver::class);
+});
 
-        self::assertInstanceOf(DatabaseDriver::class, app('SettingsFactory')->driver());
-    }
+it('throws an exception for unsupported drivers', function () {
+    app('SettingsFactory')->setDefaultDriver('unknown');
 
-    /** @test */
-    public function it_throws_an_exception_for_unsupported_drivers(): void
-    {
-        app('SettingsFactory')->setDefaultDriver('unknown');
+    app('SettingsFactory')->driver();
+})->throws(InvalidArgumentException::class);
 
-        $this->expectException(InvalidArgumentException::class);
+it('can retrieve a known driver at runtime', function () {
+    // Default driver
+    expect(app('SettingsFactory')->driver())->toBeInstanceOf(EloquentDriver::class)
+        ->and(app('SettingsFactory')->driver('database'))->toBeInstanceOf(DatabaseDriver::class);
+});
 
-        app('SettingsFactory')->driver();
-    }
+it("throws an exception if a driver's config is missing", function () {
+    config([
+        'settings.drivers.database' => null,
+    ]);
 
-    /** @test */
-    public function it_can_retrieve_a_known_driver_at_runtime(): void
-    {
-        // default driver
-        self::assertInstanceOf(EloquentDriver::class, app('SettingsFactory')->driver());
+    app('SettingsFactory')->driver('database');
+})->expectException(InvalidArgumentException::class);
 
-        self::assertInstanceOf(DatabaseDriver::class, app('SettingsFactory')->driver('database'));
-    }
+test('custom drivers can be used', function () {
+    config([
+        'settings.drivers.custom' => [
+            'driver' => 'custom',
+        ],
+    ]);
 
-    /** @test */
-    public function it_throws_an_exception_if_a_drivers_config_is_missing(): void
-    {
-        config([
-            'settings.drivers.database' => null,
-        ]);
+    app('SettingsFactory')->extend('custom', function ($app, array $config) {
+        return new CustomDriver;
+    });
 
-        $this->expectException(InvalidArgumentException::class);
+    expect(app('SettingsFactory')->driver('custom'))->toBeInstanceOf(CustomDriver::class);
+});
 
-        app('SettingsFactory')->driver('database');
-    }
+test('a custom driver can be the default driver', function () {
+    config([
+        'settings.drivers.custom' => [
+            'driver' => 'custom',
+        ],
+    ]);
 
-    /** @test */
-    public function custom_drivers_can_be_used(): void
-    {
-        config([
-            'settings.drivers.custom' => [
-                'driver' => 'custom',
-            ],
-        ]);
+    app('SettingsFactory')->extend('custom', function ($app, array $config) {
+        return new CustomDriver;
+    });
 
-        app('SettingsFactory')->extend('custom', function ($app, array $config) {
-            return new CustomDriver;
-        });
+    app('SettingsFactory')->setDefaultDriver('custom');
 
-        self::assertInstanceOf(CustomDriver::class, app('SettingsFactory')->driver('custom'));
-    }
-
-    /** @test */
-    public function a_custom_driver_can_be_the_default_driver(): void
-    {
-        config([
-            'settings.drivers.custom' => [
-                'driver' => 'custom',
-            ],
-        ]);
-
-        app('SettingsFactory')->extend('custom', function ($app, array $config) {
-            return new CustomDriver;
-        });
-
-        app('SettingsFactory')->setDefaultDriver('custom');
-
-        self::assertInstanceOf(CustomDriver::class, app('SettingsFactory')->driver());
-        self::assertInstanceOf(CustomDriver::class, Settings::getDriver());
-    }
-}
+    expect(app('SettingsFactory')->driver())->toBeInstanceOf(CustomDriver::class)
+        ->and(Settings::getDriver())->toBeInstanceOf(CustomDriver::class);
+});

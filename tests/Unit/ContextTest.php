@@ -1,49 +1,36 @@
 <?php
 
-namespace Rawilk\Settings\Tests\Unit;
+declare(strict_types=1);
 
-use OutOfBoundsException;
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Tests\TestCase;
 
-class ContextTest extends TestCase
-{
-    /** @test */
-    public function it_serializes_values_when_created(): void
-    {
-        $context = new Context(['test' => 'value', 'a' => 'b']);
+it('serializes values when created', function () {
+    $context = new Context(['test' => 'value', 'a' => 'b']);
 
-        self::assertCount(2, $context);
-        self::assertEquals('value', $context->get('test'));
-        self::assertEquals('b', $context->get('a'));
-    }
+    expect($context)->count()->toBe(2)
+        ->and($context->get('test'))->toBe('value')
+        ->and($context->get('a'))->toBe('b');
+});
 
-    /** @test */
-    public function it_sets_and_removes_context_arguments(): void
-    {
-        $context = new Context;
+it('sets and removes context arguments', function () {
+    $context = new Context;
 
-        self::assertCount(0, $context);
-        self::assertFalse($context->has('test'));
+    expect($context)->count()->toBe(0)
+        ->and($context->has('test'))->toBeFalse();
 
-        $context->set('test', 'a');
+    $context->set('test', 'a');
 
-        self::assertCount(1, $context);
-        self::assertTrue($context->has('test'));
-        self::assertEquals('a', $context->get('test'));
+    expect($context)->count()->toBe(1)
+        ->and($context->has('test'))->toBeTrue()
+        ->and($context->get('test'))->toBe('a');
 
-        $context->remove('test');
+    $context->remove('test');
 
-        self::assertCount(0, $context);
-        self::assertFalse($context->has('test'));
-    }
+    expect($context)->count()->toBe(0)
+        ->and($context->has('test'))->toBeFalse();
+});
 
-    /** @test */
-    public function it_throws_an_exception_for_undefined_arguments(): void
-    {
-        $this->expectException(OutOfBoundsException::class);
-
-        $context = new Context;
-        $context->get('test');
-    }
-}
+it('throws an exception for undefined arguments', function () {
+    $context = new Context;
+    $context->get('test');
+})->throws(OutOfBoundsException::class);

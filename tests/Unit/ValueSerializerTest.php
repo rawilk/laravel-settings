@@ -1,55 +1,28 @@
 <?php
 
-namespace Rawilk\Settings\Tests\Unit;
+declare(strict_types=1);
 
 use Rawilk\Settings\Support\ValueSerializer;
-use Rawilk\Settings\Tests\TestCase;
 
-class ValueSerializerTest extends TestCase
-{
-    /**
-     * @test
-     *
-     * @param  mixed  $value
-     * @dataProvider valuesToTest
-     */
-    public function it_serializes_values(mixed $value): void
-    {
-        $serializer = new ValueSerializer;
+it('serializes values', function (mixed $value) {
+    $serializer = new ValueSerializer;
 
-        self::assertEquals(
-            serialize($value),
-            $serializer->serialize($value)
-        );
-    }
+    expect($serializer->serialize($value))->toBe(serialize($value));
+})->with('values');
 
-    /**
-     * @test
-     *
-     * @param  mixed  $value
-     * @dataProvider valuesToTest
-     */
-    public function it_unserializes_values(mixed $value): void
-    {
-        $serializer = new ValueSerializer;
+it('unserializes values', function (mixed $value) {
+    $serializer = new ValueSerializer;
 
-        $serialized = serialize($value);
+    $serialized = serialize($value);
 
-        self::assertEquals(
-            $value,
-            $serializer->unserialize($serialized)
-        );
-    }
+    expect($serializer->unserialize($serialized))->toEqual($value);
+})->with('values');
 
-    public function valuesToTest(): array
-    {
-        return [
-            [null],
-            [1],
-            [1.1],
-            ['string'],
-            [['array' => 'array']],
-            [(object) ['a' => 'b']],
-        ];
-    }
-}
+dataset('values', [
+    null,
+    1,
+    1.1,
+    'string',
+    ['array' => 'array'],
+    (object) ['a' => 'b'],
+]);

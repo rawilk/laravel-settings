@@ -173,7 +173,7 @@ class Settings implements Driver
     protected function unserializeValue($serialized)
     {
         // Attempt to unserialize the value, but return the original value if that fails.
-        return rescue(fn () => $this->valueSerializer->unserialize($serialized), $serialized);
+        return rescue(fn () => $this->valueSerializer->unserialize($serialized), fn () => $serialized);
     }
 
     protected function shouldSetNewValue(string $key, $newValue): bool
@@ -254,6 +254,6 @@ class Settings implements Driver
             return $value;
         }
 
-        return rescue($this->encrypter->decrypt($value), $value);
+        return rescue(fn () => $this->encrypter->decrypt($value), fn () => $value);
     }
 }

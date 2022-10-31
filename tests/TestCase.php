@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rawilk\Settings\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
@@ -16,7 +18,7 @@ class TestCase extends Orchestra
 
     public function getEnvironmentSetUp($app): void
     {
-        include_once __DIR__ . '/../database/migrations/create_settings_table.php.stub';
-        (new \CreateSettingsTable)->up();
+        $migration = include __DIR__ . '/../database/migrations/create_settings_table.php.stub';
+        $migration->up();
     }
 }

@@ -1,40 +1,24 @@
 <?php
 
-namespace Rawilk\Settings\Tests\Unit;
+declare(strict_types=1);
 
-use Mockery;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializer;
 use Rawilk\Settings\Support\KeyGenerator;
-use Rawilk\Settings\Tests\TestCase;
 
-class KeyGeneratorTest extends TestCase
-{
-    protected function tearDown(): void
-    {
-        Mockery::close();
+afterEach(function () {
+    Mockery::close();
+});
 
-        parent::tearDown();
-    }
+it('calls serializer when generating a key', function () {
+    $context = new Context;
 
-    /** @test */
-    public function it_calls_serializer_when_generating_a_key(): void
-    {
-        $context = new Context;
+    $serializer = Mockery::mock(ContextSerializer::class);
+    $serializer->shouldReceive('serialize')
+        ->with($context)
+        ->andReturn('serialized');
 
-        $serializer = $this->getContextSerializerMock();
-        $serializer
-            ->shouldReceive('serialize')
-            ->with($context)
-            ->andReturn('serialized');
+    $generator = new KeyGenerator($serializer);
 
-        $generator = new KeyGenerator($serializer);
-
-        self::assertEquals(md5('keyserialized'), $generator->generate('key', $context));
-    }
-
-    protected function getContextSerializerMock()
-    {
-        return Mockery::mock(ContextSerializer::class);
-    }
-}
+    expect($generator->generate('key', $context))->toBe(md5('keyserialized'));
+});
