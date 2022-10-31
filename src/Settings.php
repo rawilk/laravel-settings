@@ -19,12 +19,17 @@ class Settings implements Driver
     use Macroable;
 
     protected ?Cache $cache = null;
+
     protected ?Context $context = null;
+
     protected ?Encrypter $encrypter = null;
+
     protected KeyGenerator $keyGenerator;
+
     protected ValueSerializer $valueSerializer;
 
     protected bool $cacheEnabled = false;
+
     protected bool $encryptionEnabled = false;
 
     #[Pure]

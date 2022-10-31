@@ -9,7 +9,8 @@ class ValueSerializerTest extends TestCase
 {
     /**
      * @test
-     * @param mixed $value
+     *
+     * @param  mixed  $value
      * @dataProvider valuesToTest
      */
     public function it_serializes_values(mixed $value): void
@@ -24,7 +25,8 @@ class ValueSerializerTest extends TestCase
 
     /**
      * @test
-     * @param mixed $value
+     *
+     * @param  mixed  $value
      * @dataProvider valuesToTest
      */
     public function it_unserializes_values(mixed $value): void
