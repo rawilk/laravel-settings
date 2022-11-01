@@ -1,6 +1,6 @@
 ---
 title: Settings Helper
-sort: 3
+sort: 4
 ---
 
 ## Introduction
