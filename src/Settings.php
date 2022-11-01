@@ -44,7 +44,7 @@ class Settings implements Driver
         return $this->driver;
     }
 
-    public function context(Context $context = null): self
+    public function context(?Context $context = null): self
     {
         $this->context = $context;
 
