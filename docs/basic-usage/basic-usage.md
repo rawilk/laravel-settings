@@ -18,6 +18,7 @@ Settings::set('foo', 'updated value');
 ```
 
 ## Retrieving a value
+
 ```php
 Settings::get('foo');
 
@@ -26,16 +27,19 @@ Settings::get('not persisted', 'my default'); // 'my default'
 ```
 
 ## Check if a setting exists
+
 ```php
 Settings::has('foo');
 ```
 
 ## Remove a setting from storage
+
 ```php
 Settings::forget('foo');
 ```
 
 ## Boolean settings
+
 ```php
 Settings::set('app.debug', true);
 
