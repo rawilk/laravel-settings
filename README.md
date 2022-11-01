@@ -25,7 +25,9 @@ settings('foo');
 ```
 
 ## Documentation
+
 For documentation, please visit: https://randallwilk.dev/docs/laravel-settings
+
 ## Installation
 
 You can install the package via composer:
@@ -42,6 +44,7 @@ php artisan migrate
 ```
 
 You can publish the config file with:
+
 ```bash
 php artisan vendor:publish --tag="settings-config"
 ```
@@ -50,7 +53,7 @@ You can view the default configuration here: https://github.com/rawilk/laravel-s
 
 ## Testing
 
-``` bash
+```bash
 composer test
 ```
 
@@ -68,8 +71,8 @@ If you discover any security related issues, please email randall@randallwilk.de
 
 ## Credits
 
-- [Randall Wilk](https://github.com/rawilk)
-- [All Contributors](../../contributors)
+-   [Randall Wilk](https://github.com/rawilk)
+-   [All Contributors](../../contributors)
 
 ## License
 

@@ -16,6 +16,7 @@ settings()->context($context)->forget('foo');
 ```
 
 ## Retrieving values
+
 Passing in a key as your first argument will return a persisted setting value for that key. You can pass a default value in
 as the second argument and that will be returned if the setting is not persisted. If you need context, you can pass that in as
 the third argument.
@@ -33,6 +34,7 @@ settings()->context($context)->get('foo');
 ```
 
 ## Storing values
+
 You can store values by passing in an array of key/value pairs as the first argument. If you need context, you can pass that in
 as the third argument (pass in `null` as the second argument as it is ignored anyways in this case).
 
