@@ -5,7 +5,7 @@ sort: 3
 
 ## Introduction
 
-Starting with version `2.1.0`, models can easily have their own settings by using the `\Rawilk\Settings\Models\HasSettings` trait. This trait will automatically create a new `\Rawilk\Settings\Support\Context` object with properties that uniquely identify the model. See the [context](#context) section for more information.
+Starting with version `2.1.0`, models can easily have their own settings by using the `\Rawilk\Settings\Models\HasSettings` trait. This trait will automatically create a new `\Rawilk\Settings\Support\Context` object with properties that uniquely identify the model. See the [context](#user-content-context) section for more information.
 
 ## Usage
 
