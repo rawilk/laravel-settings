@@ -258,6 +258,10 @@ class Settings implements Driver
             return $value;
         }
 
+        if (! is_string($value)) {
+            return $value;
+        }
+
         return rescue(fn () => $this->encrypter->decrypt($value), fn () => $value);
     }
 }
