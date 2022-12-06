@@ -172,6 +172,10 @@ class Settings implements Driver
 
     protected function unserializeValue($serialized)
     {
+        if (! is_string($serialized)) {
+            return $serialized;
+        }
+
         // Attempt to unserialize the value, but return the original value if that fails.
         return rescue(fn () => $this->valueSerializer->unserialize($serialized), fn () => $serialized);
     }
