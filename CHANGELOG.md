@@ -2,6 +2,16 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v2.1.1 - 2022-12-06
+
+### What's Changed
+
+- Bump dependabot/fetch-metadata from 1.3.4 to 1.3.5 by @dependabot in https://github.com/rawilk/laravel-settings/pull/8
+- Bump actions/checkout from 2 to 3 by @dependabot in https://github.com/rawilk/laravel-settings/pull/9
+- Prevent non-strings from being unserialized or decrypted
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v2.1.0...v2.1.1
+
 ## v2.1.0 - 2022-11-01
 
 ### Added
