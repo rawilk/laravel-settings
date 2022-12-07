@@ -32,6 +32,9 @@ class Settings implements Driver
 
     protected bool $encryptionEnabled = false;
 
+    // Allows us to disable cache usage for a single call easily.
+    protected bool $temporarilyDisableCache = false;
+
     public function __construct(protected Driver $driver)
     {
         $this->keyGenerator = new KeyGenerator(new ContextSerializer);
@@ -64,6 +67,7 @@ class Settings implements Driver
         }
 
         $this->context();
+        $this->temporarilyDisableCache = false;
 
         return $driverResult;
     }
@@ -88,6 +92,7 @@ class Settings implements Driver
         }
 
         $this->context();
+        $this->temporarilyDisableCache = false;
 
         return $value ?? $default;
     }
@@ -99,6 +104,7 @@ class Settings implements Driver
         $has = $this->driver->has($this->getKeyForStorage($key));
 
         $this->context();
+        $this->temporarilyDisableCache = false;
 
         return $has;
     }
@@ -123,11 +129,12 @@ class Settings implements Driver
             $this->encryptionIsEnabled() ? $this->encrypter->encrypt($serializedValue) : $serializedValue
         );
 
-        if ($this->cacheIsEnabled()) {
+        if ($this->temporarilyDisableCache || $this->cacheIsEnabled()) {
             $this->cache->forget($this->getCacheKey($generatedKey));
         }
 
         $this->context();
+        $this->temporarilyDisableCache = false;
 
         return $driverResult;
     }
@@ -214,6 +221,13 @@ class Settings implements Driver
         return $this;
     }
 
+    public function temporarilyDisableCache(): self
+    {
+        $this->temporarilyDisableCache = true;
+
+        return $this;
+    }
+
     public function setCache(Cache $cache): self
     {
         $this->cache = $cache;
@@ -223,6 +237,10 @@ class Settings implements Driver
 
     protected function cacheIsEnabled(): bool
     {
+        if ($this->temporarilyDisableCache) {
+            return false;
+        }
+
         return $this->cacheEnabled && $this->cache !== null;
     }
 

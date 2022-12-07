@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static null|mixed set(string $key, null|mixed $value = null)
  * @method static self disableCache()
  * @method static self enableCache()
+ * @method static self temporarilyDisableCache()
  * @method static self disableEncryption()
  * @method static self enableEncryption()
  */
