@@ -62,7 +62,7 @@ class Settings implements Driver
 
         $driverResult = $this->driver->forget($generatedKey);
 
-        if ($this->cacheIsEnabled()) {
+        if ($this->temporarilyDisableCache || $this->cacheIsEnabled()) {
             $this->cache->forget($this->getCacheKey($generatedKey));
         }
 
