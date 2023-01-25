@@ -36,17 +36,17 @@ You can install the package via composer:
 composer require rawilk/laravel-settings
 ```
 
+You can publish the config file with:
+
+```bash
+php artisan vendor:publish --tag="settings-config"
+```
+
 You can publish and run the migrations with:
 
 ```bash
 php artisan vendor:publish --tag="settings-migrations"
 php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="settings-config"
 ```
 
 You can view the default configuration here: https://github.com/rawilk/laravel-settings/blob/main/config/breadcrumbs.php
