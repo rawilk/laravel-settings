@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v2.2.0 - 2022-12-07
+
+### What's Changed
+
+- Allow cache to be temporarily disabled (via `temporarilyDisableCache()`)
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v2.1.1...v2.2.0
+
 ## v2.1.1 - 2022-12-06
 
 ### What's Changed
