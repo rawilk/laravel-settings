@@ -2,6 +2,17 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v2.2.1 - 2023-02-07
+
+### What's Changed
+
+- Bump dependabot/fetch-metadata from 1.3.5 to 1.3.6 by @dependabot in https://github.com/rawilk/laravel-settings/pull/13
+- Bump aglipanci/laravel-pint-action from 1.0.0 to 2.1.0 by @dependabot in https://github.com/rawilk/laravel-settings/pull/10
+- Improve internal handling of the Context object on Settings service class
+- Prevent decryption errors when checking if a value should be persisted or not on `set()`
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v2.2.0...v2.2.1
+
 ## v2.2.0 - 2022-12-07
 
 ### What's Changed
