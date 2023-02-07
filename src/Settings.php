@@ -35,6 +35,10 @@ class Settings implements Driver
     // Allows us to disable cache usage for a single call easily.
     protected bool $temporarilyDisableCache = false;
 
+    // Instruct us to reset the context after a call (such as `get()`).
+    // Meant for internal use only.
+    protected bool $resetContext = true;
+
     public function __construct(protected Driver $driver)
     {
         $this->keyGenerator = new KeyGenerator(new ContextSerializer);
@@ -66,8 +70,12 @@ class Settings implements Driver
             $this->cache->forget($this->getCacheKey($generatedKey));
         }
 
-        $this->context();
+        if ($this->resetContext) {
+            $this->context();
+        }
+
         $this->temporarilyDisableCache = false;
+        $this->resetContext = true;
 
         return $driverResult;
     }
@@ -91,8 +99,12 @@ class Settings implements Driver
             $value = $this->unserializeValue($this->decryptValue($value));
         }
 
-        $this->context();
+        if ($this->resetContext) {
+            $this->context();
+        }
+
         $this->temporarilyDisableCache = false;
+        $this->resetContext = true;
 
         return $value ?? $default;
     }
@@ -103,8 +115,12 @@ class Settings implements Driver
 
         $has = $this->driver->has($this->getKeyForStorage($key));
 
-        $this->context();
+        if ($this->resetContext) {
+            $this->context();
+        }
+
         $this->temporarilyDisableCache = false;
+        $this->resetContext = true;
 
         return $has;
     }
@@ -193,18 +209,12 @@ class Settings implements Driver
             return true;
         }
 
-        // Prevent the context from being reset before we can save...
-        // See issue #3 (https://github.com/rawilk/laravel-settings/issues/3)
-        $currentContext = $this->context;
+        // To prevent decryption errors, we will check if we have a setting set for the current context and key.
+        if (! $this->doNotResetContext()->has($key)) {
+            return true;
+        }
 
-        $currentValue = $this->get($key);
-
-        $shouldUpdate = $currentValue !== $newValue || ! $this->has($key);
-
-        // Now that we've made our calls, we can set our context back to what it was.
-        $this->context($currentContext);
-
-        return $shouldUpdate;
+        return $newValue !== $this->doNotResetContext()->get($key);
     }
 
     public function disableCache(): self
@@ -281,5 +291,12 @@ class Settings implements Driver
         }
 
         return rescue(fn () => $this->encrypter->decrypt($value), fn () => $value);
+    }
+
+    protected function doNotResetContext(): self
+    {
+        $this->resetContext = false;
+
+        return $this;
     }
 }
