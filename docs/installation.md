@@ -28,4 +28,4 @@ You can publish the configuration file with:
 php artisan vendor:publish --tag="settings-config"
 ```
 
-You can view the default configuration here: https://github.com/rawilk/laravel-settings/blob/{branch}/config/breadcrumbs.php
+You can view the default configuration here: https://github.com/rawilk/laravel-settings/blob/{branch}/config/settings.php
