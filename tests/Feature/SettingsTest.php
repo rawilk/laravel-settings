@@ -326,8 +326,7 @@ class SettingsTest extends TestCase
      *
      * @see https://developer.wordpress.org/reference/functions/is_serialized/
      *
-     * @param string|mixed $data
-     * @return bool
+     * @param  string|mixed  $data
      */
     protected function isSerialized($data): bool
     {

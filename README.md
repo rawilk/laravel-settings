@@ -1,10 +1,14 @@
-# Laravel Settings
+# Settings for Laravel
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/rawilk/laravel-settings.svg?style=flat-square)](https://packagist.org/packages/rawilk/laravel-settings)
 ![Tests](https://github.com/rawilk/laravel-settings/workflows/Tests/badge.svg?style=flat-square)
 [![Total Downloads](https://img.shields.io/packagist/dt/rawilk/laravel-settings.svg?style=flat-square)](https://packagist.org/packages/rawilk/laravel-settings)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/rawilk/laravel-settings?style=flat-square)](https://packagist.org/packages/rawilk/laravel-settings)
+[![License](https://img.shields.io/github/license/rawilk/laravel-settings?style=flat-square)](https://github.com/rawilk/laravel-settings/blob/main/LICENSE.md)
 
-Laravel Settings allows you to store your application settings in the database. It works alongside of the built-in configuration system that Laravel offers. With this package, you can store application specific settings that wouldn't make sense to store in a configuration file, or that you want end-users to be able to update through your application's UI.
+![social image](https://banners.beyondco.de/Settings%20for%20Laravel.png?theme=light&packageManager=composer+require&packageName=rawilk%2Flaravel-settings&pattern=architect&style=style_1&description=Store+Laravel+application+settings+in+the+database.&md=1&showWatermark=0&fontSize=100px&images=cog)
+
+Settings for Laravel allows you to store your application settings in the database. It works alongside of the built-in configuration system that Laravel offers. With this package, you can store application specific settings that wouldn't make sense to store in a configuration file, or that you want end-users to be able to update through your application's UI.
 
 The package also offers caching on a per-setting basis out of the box, so no unnecessary extra queries are performed once a setting has been retrieved. The caching works no matter which driver you choose to use. The package can also encrypt your settings automatically for you as well if you need to store sensitive data such as passwords for a third-party service you need to be able to use later.
 
@@ -23,13 +27,14 @@ settings('foo');
 ```
 
 ## Documentation
-For documentation, please visit: https://randallwilk.dev/docs/laravel-settings
+For documentation, please visit: https://randallwilk.dev/docs/laravel-settings/v1
+
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require rawilk/laravel-settings
+composer require rawilk/laravel-settings:1.0
 ```
 
 You can publish and run the migrations with:
@@ -40,6 +45,7 @@ php artisan migrate
 ```
 
 You can publish the config file with:
+
 ```bash
 php artisan vendor:publish --provider="Rawilk\Settings\SettingsServiceProvider" --tag="config"
 ```
@@ -151,6 +157,10 @@ If you discover any security related issues, please email randall@randallwilk.de
 
 - [Randall Wilk](https://github.com/rawilk)
 - [All Contributors](../../contributors)
+
+## Disclaimer
+
+This package is not affiliated with, maintained, authorized, endorsed or sponsored by Laravel or any of its affiliates.
 
 ## License
 

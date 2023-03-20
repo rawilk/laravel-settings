@@ -14,6 +14,7 @@ class Factory
     protected Application $app;
 
     protected array $drivers = [];
+
     protected array $customCreators = [];
 
     public function __construct(Application $app)
@@ -86,7 +87,7 @@ class Factory
             return $this->callCustomCreator($driverConfig);
         }
 
-        $method = 'create' . ucfirst($driverConfig['driver']) . 'Driver';
+        $method = 'create'.ucfirst($driverConfig['driver']).'Driver';
         if (! method_exists($this, $method)) {
             throw new InvalidArgumentException(
                 "Unsupported settings driver: {$driverConfig['driver']}."

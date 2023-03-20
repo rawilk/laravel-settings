@@ -3,7 +3,7 @@ title: Introduction
 sort: 1
 ---
 
-Laravel Settings allows you to store your application's settings in the database. It works alongside of the built-in
+Settings for Laravel allows you to store your application's settings in the database. It works alongside of the built-in
 configuration system that Laravel offers. With this package, you can store application-specific settings that wouldn't
 make sense to store in a configuration file, or that you want end-users to be able to update through your application's
 UI.
@@ -27,3 +27,7 @@ Settings::get('foo'); // 'bar
 settings()->get('foo');
 settings('foo');
 ```
+
+## Disclaimer
+
+This package is not affiliated with, maintained, authorized, endorsed or sponsored by Laravel or any of its affiliates.

@@ -9,6 +9,7 @@ use Rawilk\Settings\Contracts\Driver;
 class DatabaseDriver implements Driver
 {
     protected Connection $connection;
+
     protected string $table;
 
     public function __construct(Connection $connection, string $table)

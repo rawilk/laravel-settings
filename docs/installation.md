@@ -8,7 +8,7 @@ sort: 3
 laravel-settings can be installed via composer:
 
 ```bash
-composer require rawilk/laravel-settings
+composer require rawilk/laravel-settings:1.0
 ```
 
 ## Migrations

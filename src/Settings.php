@@ -18,13 +18,19 @@ class Settings implements Driver
     use Macroable;
 
     protected ?Cache $cache = null;
+
     protected ?Context $context = null;
+
     protected Driver $driver;
+
     protected ?Encrypter $encrypter = null;
+
     protected KeyGenerator $keyGenerator;
+
     protected ValueSerializer $valueSerializer;
 
     protected bool $cacheEnabled = false;
+
     protected bool $encryptionEnabled = false;
 
     public function __construct(Driver $driver)
@@ -154,7 +160,7 @@ class Settings implements Driver
 
     protected function getCacheKey(string $key): string
     {
-        return config('settings.cache_key_prefix') . $key;
+        return config('settings.cache_key_prefix').$key;
     }
 
     protected function getKeyForStorage(string $key): string
