@@ -51,7 +51,7 @@ You can publish the config file with:
 php artisan vendor:publish --tag="settings-config"
 ```
 
-You can view the default configuration here: https://github.com/rawilk/laravel-settings/blob/main/config/breadcrumbs.php
+You can view the default configuration here: https://github.com/rawilk/laravel-settings/blob/main/config/settings.php
 
 ## Testing
 
