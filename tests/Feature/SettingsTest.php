@@ -13,6 +13,16 @@ beforeEach(function () {
         'settings.cache' => false,
         'settings.encryption' => false,
     ]);
+
+    // The Database driver doesn't seem to be using the same Sqlite connection the tests are using, so
+    // we'll force it to here. This should fix issues with the settings table not existing when the
+    // driver queries it.
+    $driver = Settings::getDriver();
+    $reflection = new ReflectionClass($driver);
+
+    $property = $reflection->getProperty('connection');
+    $property->setAccessible(true);
+    $property->setValue($driver, DB::connection());
 });
 
 it('can determine if a setting has been persisted', function () {
@@ -283,7 +293,6 @@ function resetQueryCount(): void
  * @see https://developer.wordpress.org/reference/functions/is_serialized/
  *
  * @param  string|mixed  $data
- * @return bool
  */
 function isSerialized(mixed $data): bool
 {
