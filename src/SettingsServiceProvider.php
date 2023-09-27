@@ -16,7 +16,10 @@ class SettingsServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-settings')
             ->hasConfigFile()
-            ->hasMigration('create_settings_table');
+            ->hasMigrations([
+                'create_settings_table',
+                'add_settings_team_field',
+            ]);
     }
 
     public function packageBooted(): void
@@ -47,10 +50,12 @@ class SettingsServiceProvider extends PackageServiceProvider
             fn ($app) => new Factory($app)
         );
 
-        $this->app->singleton(Settings::class, static function ($app) {
+        $this->app->singleton(Settings::class, function ($app) {
             $settings = new Settings(
                 $app['SettingsFactory']->driver()
             );
+
+            $settings->useCacheKeyPrefix($app['config']['settings.cache_key_prefix'] ?? '');
 
             $settings->setCache($app['cache.store']);
 
@@ -60,6 +65,7 @@ class SettingsServiceProvider extends PackageServiceProvider
 
             $app['config']['settings.cache'] ? $settings->enableCache() : $settings->disableCache();
             $app['config']['settings.encryption'] ? $settings->enableEncryption() : $settings->disableEncryption();
+            $app['config']['settings.teams'] ? $settings->enableTeams() : $settings->disableTeams();
 
             return $settings;
         });

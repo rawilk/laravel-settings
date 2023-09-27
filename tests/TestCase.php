@@ -18,7 +18,13 @@ class TestCase extends Orchestra
 
     public function getEnvironmentSetUp($app): void
     {
-        $migration = include __DIR__ . '/../database/migrations/create_settings_table.php.stub';
-        $migration->up();
+        $migrations = [
+            'create_settings_table.php.stub',
+        ];
+
+        foreach ($migrations as $migrationName) {
+            $migration = include __DIR__ . '/../database/migrations/' . $migrationName;
+            $migration->up();
+        }
     }
 }

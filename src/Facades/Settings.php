@@ -21,6 +21,11 @@ use Illuminate\Support\Facades\Facade;
  * @method static self temporarilyDisableCache()
  * @method static self disableEncryption()
  * @method static self enableEncryption()
+ * @method static null|mixed getTeamId()
+ * @method static self setTeamId(mixed $id)
+ * @method static self enableTeams()
+ * @method static self disableTeams()
+ * @method static bool teamsAreEnabled()
  */
 class Settings extends Facade
 {

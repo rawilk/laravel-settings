@@ -36,14 +36,17 @@ class Factory
     protected function createDatabaseDriver(array $config): DatabaseDriver
     {
         return new DatabaseDriver(
-            $this->app['db']->connection(Arr::get($config, 'connection')),
-            $this->app['config']['settings.table']
+            connection: $this->app['db']->connection(Arr::get($config, 'connection')),
+            table: $this->app['config']['settings.table'],
+            teamForeignKey: $this->app['config']['settings.team_foreign_key'] ?? null,
         );
     }
 
     protected function createEloquentDriver(): EloquentDriver
     {
-        return new EloquentDriver(app(SettingContract::class));
+        return new EloquentDriver(
+            model: app(SettingContract::class),
+        );
     }
 
     protected function getDefaultDriver(): string
