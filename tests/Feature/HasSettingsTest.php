@@ -9,8 +9,7 @@ use Rawilk\Settings\Tests\Support\Models\CustomUser;
 use Rawilk\Settings\Tests\Support\Models\User;
 
 beforeEach(function () {
-    $migration = include __DIR__ . '/../Support/database/migrations/create_test_tables.php';
-    $migration->up();
+    migrateTestTables();
 
     User::factory(2)->create();
 });

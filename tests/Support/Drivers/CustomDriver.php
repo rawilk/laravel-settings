@@ -6,24 +6,24 @@ namespace Rawilk\Settings\Tests\Support\Drivers;
 
 use Rawilk\Settings\Contracts\Driver;
 
-class CustomDriver implements Driver
+final class CustomDriver implements Driver
 {
-    public function forget($key): void
+    public function forget($key, $teamId = null): void
     {
         //
     }
 
-    public function get(string $key, $default = null)
+    public function get(string $key, $default = null, $teamId = null)
     {
         return $default;
     }
 
-    public function has($key): bool
+    public function has($key, $teamId = null): bool
     {
         return true;
     }
 
-    public function set(string $key, $value = null): void
+    public function set(string $key, $value = null, $teamId = null): void
     {
         //
     }

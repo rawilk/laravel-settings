@@ -13,23 +13,23 @@ class EloquentDriver implements Driver
     {
     }
 
-    public function forget($key): void
+    public function forget($key, $teamId = null): void
     {
-        $this->model::removeSetting($key);
+        $this->model::removeSetting($key, $teamId);
     }
 
-    public function get(string $key, $default = null)
+    public function get(string $key, $default = null, $teamId = null)
     {
-        return $this->model::getValue($key, $default);
+        return $this->model::getValue($key, $default, $teamId);
     }
 
-    public function has($key): bool
+    public function has($key, $teamId = null): bool
     {
-        return $this->model::has($key);
+        return $this->model::has($key, $teamId);
     }
 
-    public function set(string $key, $value = null): void
+    public function set(string $key, $value = null, $teamId = null): void
     {
-        $this->model::set($key, $value);
+        $this->model::set($key, $value, $teamId);
     }
 }
