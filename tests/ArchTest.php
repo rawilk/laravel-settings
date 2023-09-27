@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Facade;
+use Rawilk\Settings\Contracts\ContextSerializer;
 use Rawilk\Settings\Contracts\Driver;
+use Rawilk\Settings\Contracts\KeyGenerator;
 use Rawilk\Settings\Drivers\Factory;
 
 it('will not use debugging functions')
@@ -36,3 +38,19 @@ test('models are configured correctly and are extendable')
     ->classes()
     ->toExtend(Model::class)
     ->not->toBeFinal();
+
+test('context serializers are configured correctly')
+    ->expect('Rawilk\Settings\Support\ContextSerializers')
+    ->toBeClasses()
+    ->classes()
+    ->toImplement(ContextSerializer::class)
+    ->toExtendNothing()
+    ->toHaveSuffix('Serializer');
+
+test('key generators are configured correctly')
+    ->expect('Rawilk\Settings\Support\KeyGenerators')
+    ->toBeClasses()
+    ->classes()
+    ->toImplement(KeyGenerator::class)
+    ->toExtendNothing()
+    ->toHaveSuffix('Generator');
