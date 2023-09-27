@@ -10,7 +10,11 @@ use Rawilk\Settings\Contracts\Setting as SettingContract;
 
 class Setting extends Model implements SettingContract
 {
+    public $timestamps = false;
+
     protected ?string $teamForeignKey = null;
+
+    protected $guarded = ['id'];
 
     public function __construct(array $attributes = [])
     {
@@ -19,10 +23,6 @@ class Setting extends Model implements SettingContract
         $this->setTable(config('settings.table'));
         $this->teamForeignKey = config('settings.team_foreign_key');
     }
-
-    protected $guarded = ['id'];
-
-    public $timestamps = false;
 
     public static function getValue(string $key, $default = null, $teamId = null)
     {

@@ -340,7 +340,7 @@ function isSerialized(mixed $data): bool
         case 'd':
             $end = '';
 
-            return (bool) preg_match("/^{$token}:[0-9.E+-]+;$end/", $data);
+            return (bool) preg_match("/^{$token}:[0-9.E+-]+;{$end}/", $data);
     }
 
     return false;

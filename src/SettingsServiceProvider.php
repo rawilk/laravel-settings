@@ -32,6 +32,14 @@ class SettingsServiceProvider extends PackageServiceProvider
         $this->registerSettings();
     }
 
+    public function provides(): array
+    {
+        return [
+            Settings::class,
+            'SettingsFactory',
+        ];
+    }
+
     protected function bootModelBindings(): void
     {
         $config = $this->app['config']['settings.drivers.eloquent'];
@@ -69,13 +77,5 @@ class SettingsServiceProvider extends PackageServiceProvider
 
             return $settings;
         });
-    }
-
-    public function provides(): array
-    {
-        return [
-            Settings::class,
-            'SettingsFactory',
-        ];
     }
 }
