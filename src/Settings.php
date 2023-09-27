@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Rawilk\Settings\Contracts\Driver;
+use Rawilk\Settings\Contracts\KeyGenerator;
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Support\ContextSerializer;
-use Rawilk\Settings\Support\KeyGenerator;
 use Rawilk\Settings\Support\ValueSerializer;
 
 class Settings
@@ -24,8 +23,6 @@ class Settings
     protected ?Context $context = null;
 
     protected ?Encrypter $encrypter = null;
-
-    protected KeyGenerator $keyGenerator;
 
     protected ValueSerializer $valueSerializer;
 
@@ -47,9 +44,10 @@ class Settings
 
     protected string $cacheKeyPrefix = '';
 
-    public function __construct(protected Driver $driver)
-    {
-        $this->keyGenerator = new KeyGenerator(new ContextSerializer);
+    public function __construct(
+        protected Driver $driver,
+        protected KeyGenerator $keyGenerator,
+    ) {
         $this->valueSerializer = new ValueSerializer;
     }
 

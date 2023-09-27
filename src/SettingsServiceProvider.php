@@ -6,6 +6,8 @@ namespace Rawilk\Settings;
 
 use Rawilk\Settings\Contracts\Setting as SettingContract;
 use Rawilk\Settings\Drivers\Factory;
+use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
+use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -59,8 +61,14 @@ class SettingsServiceProvider extends PackageServiceProvider
         );
 
         $this->app->singleton(Settings::class, function ($app) {
+            $keyGenerator = $this->app->make($app['config']['settings.key_generator'] ?? Md5KeyGenerator::class);
+            $keyGenerator->setContextSerializer(
+                $this->app->make($app['config']['settings.context_serializer'] ?? ContextSerializer::class)
+            );
+
             $settings = new Settings(
-                $app['SettingsFactory']->driver()
+                $app['SettingsFactory']->driver(),
+                $keyGenerator,
             );
 
             $settings->useCacheKeyPrefix($app['config']['settings.cache_key_prefix'] ?? '');
