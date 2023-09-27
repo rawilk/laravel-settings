@@ -11,8 +11,8 @@ use Rawilk\Settings\Tests\Support\database\factories\UserFactory;
 
 class User extends Model
 {
-    use HasSettings;
     use HasFactory;
+    use HasSettings;
 
     protected static function newFactory(): UserFactory
     {

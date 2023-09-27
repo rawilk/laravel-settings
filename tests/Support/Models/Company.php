@@ -11,8 +11,8 @@ use Rawilk\Settings\Tests\Support\database\factories\CompanyFactory;
 
 class Company extends Model
 {
-    use HasSettings;
     use HasFactory;
+    use HasSettings;
 
     protected static function newFactory(): CompanyFactory
     {
