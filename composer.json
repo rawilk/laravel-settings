@@ -25,7 +25,6 @@
         "spatie/laravel-package-tools": "^1.13"
     },
     "require-dev": {
-        "doctrine/dbal": "^3.5",
         "laravel/pint": "^1.2",
         "mockery/mockery": "^1.4.2",
         "orchestra/testbench": "^8.0",
