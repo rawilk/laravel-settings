@@ -8,7 +8,7 @@ You are free to turn caching off, but you might notice a performance hit on larg
 on apps that are retrieving many settings on each page load.
 
 As always, if you choose to bypass the provided methods for setting and removing settings, you will need to flush the cache manually for
-each setting you manipulate manually. To determine the cache key for a setting key, you should use the `Rawilk\Settings\Support\KeyGenerator` to
+each setting you manipulate manually. To determine the cache key for a setting key, you should use the `Rawilk\Settings\Support\KeyGenerators\KeyGenerator` to
 generate the md5 version of the setting's key:
 
 ```php

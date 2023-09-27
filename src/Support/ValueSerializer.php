@@ -11,8 +11,8 @@ class ValueSerializer
         return serialize($value);
     }
 
-    public function unserialize(string $serialized)
+    public function unserialize(string $serialized): mixed
     {
-        return unserialize($serialized);
+        return unserialize($serialized, ['allowed_classes' => false]);
     }
 }

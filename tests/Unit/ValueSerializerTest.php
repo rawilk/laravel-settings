@@ -15,13 +15,19 @@ it('unserializes values', function (mixed $value) {
 
     $serialized = serialize($value);
 
-    expect($serializer->unserialize($serialized))->toEqual($value);
+    if (is_object($value)) {
+        expect($serializer->unserialize($serialized))->toBeObject();
+    } else {
+        expect($serializer->unserialize($serialized))->toEqual($value);
+    }
 })->with('values');
 
 dataset('values', [
     null,
     1,
     1.1,
+    true,
+    false,
     'string',
     ['array' => 'array'],
     (object) ['a' => 'b'],

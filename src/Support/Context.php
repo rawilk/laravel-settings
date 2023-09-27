@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Rawilk\Settings\Support;
 
 use Countable;
+use Illuminate\Contracts\Support\Arrayable;
 use OutOfBoundsException;
+use Rawilk\Settings\Exceptions\InvalidContextValue;
 
-class Context implements Countable
+class Context implements Arrayable, Countable
 {
     protected array $arguments = [];
 
@@ -43,6 +45,8 @@ class Context implements Countable
 
     public function set(string $name, $value): self
     {
+        $this->ensureValidValue($name, $value);
+
         $this->arguments[$name] = $value;
 
         return $this;
@@ -51,5 +55,18 @@ class Context implements Countable
     public function count(): int
     {
         return count($this->arguments);
+    }
+
+    public function toArray(): array
+    {
+        return $this->arguments;
+    }
+
+    protected function ensureValidValue(string $key, mixed $value): void
+    {
+        throw_unless(
+            is_string($value) || is_numeric($value) || is_bool($value) || is_null($value),
+            InvalidContextValue::forKey($key),
+        );
     }
 }

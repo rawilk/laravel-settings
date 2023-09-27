@@ -112,4 +112,40 @@ return [
     |
     */
     'team_foreign_key' => 'team_id',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Context Serializer
+    |--------------------------------------------------------------------------
+    |
+    | The context serializer is responsible for converting a Context object
+    | into a string, which gets appended to a setting key in the database.
+    |
+    | Any custom serializer you use must implement the
+    | \Rawilk\Settings\Contracts\ContextSerializer interface.
+    |
+    | Supported:
+    | - \Rawilk\Settings\Support\ContextSerializers\ContextSerializer (default)
+    | - \Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer
+    |
+    */
+    'context_serializer' => \Rawilk\Settings\Support\ContextSerializers\ContextSerializer::class,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Key Generator
+    |--------------------------------------------------------------------------
+    |
+    | The key generator is responsible for generating a suitable key for a
+    | setting.
+    |
+    | Any custom key generator you use must implement the
+    | \Rawilk\Settings\Contracts\KeyGenerator interface.
+    |
+    | Supported:
+    | - \Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator
+    | - \Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator (default)
+    |
+    */
+    'key_generator' => \Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator::class,
 ];

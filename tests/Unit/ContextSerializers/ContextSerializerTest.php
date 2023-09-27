@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Support\ContextSerializer;
+use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
 
 it('accepts a context argument', function () {
     $context = (new Context)->set('a', 'a');

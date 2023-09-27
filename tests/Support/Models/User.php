@@ -14,6 +14,11 @@ class User extends Model
     use HasFactory;
     use HasSettings;
 
+    public function getMorphClass(): string
+    {
+        return 'user';
+    }
+
     protected static function newFactory(): UserFactory
     {
         return new UserFactory;
