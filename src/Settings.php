@@ -213,6 +213,81 @@ class Settings
         return $value === true || $value === '1' || $value === 1;
     }
 
+    public function disableCache(): self
+    {
+        $this->cacheEnabled = false;
+
+        return $this;
+    }
+
+    public function enableCache(): self
+    {
+        $this->cacheEnabled = true;
+
+        return $this;
+    }
+
+    public function temporarilyDisableCache(): self
+    {
+        $this->temporarilyDisableCache = true;
+
+        return $this;
+    }
+
+    public function setCache(Cache $cache): self
+    {
+        $this->cache = $cache;
+
+        return $this;
+    }
+
+    public function disableEncryption(): self
+    {
+        $this->encryptionEnabled = false;
+
+        return $this;
+    }
+
+    public function enableEncryption(): self
+    {
+        $this->encryptionEnabled = true;
+
+        return $this;
+    }
+
+    public function setEncrypter(Encrypter $encrypter): self
+    {
+        $this->encrypter = $encrypter;
+
+        return $this;
+    }
+
+    public function enableTeams(): self
+    {
+        $this->teams = true;
+
+        return $this;
+    }
+
+    public function disableTeams(): self
+    {
+        $this->teams = false;
+
+        return $this;
+    }
+
+    public function teamsAreEnabled(): bool
+    {
+        return $this->teams;
+    }
+
+    public function useCacheKeyPrefix(string $prefix): self
+    {
+        $this->cacheKeyPrefix = $prefix;
+
+        return $this;
+    }
+
     protected function normalizeKey(string $key): string
     {
         if (Str::startsWith(haystack: $key, needles: 'file_')) {
@@ -269,34 +344,6 @@ class Settings
         return $newValue !== $this->doNotResetContext()->get($key);
     }
 
-    public function disableCache(): self
-    {
-        $this->cacheEnabled = false;
-
-        return $this;
-    }
-
-    public function enableCache(): self
-    {
-        $this->cacheEnabled = true;
-
-        return $this;
-    }
-
-    public function temporarilyDisableCache(): self
-    {
-        $this->temporarilyDisableCache = true;
-
-        return $this;
-    }
-
-    public function setCache(Cache $cache): self
-    {
-        $this->cache = $cache;
-
-        return $this;
-    }
-
     protected function cacheIsEnabled(): bool
     {
         if ($this->temporarilyDisableCache) {
@@ -306,56 +353,9 @@ class Settings
         return $this->cacheEnabled && $this->cache !== null;
     }
 
-    public function disableEncryption(): self
-    {
-        $this->encryptionEnabled = false;
-
-        return $this;
-    }
-
-    public function enableEncryption(): self
-    {
-        $this->encryptionEnabled = true;
-
-        return $this;
-    }
-
-    public function setEncrypter(Encrypter $encrypter): self
-    {
-        $this->encrypter = $encrypter;
-
-        return $this;
-    }
-
     protected function encryptionIsEnabled(): bool
     {
         return $this->encryptionEnabled && $this->encrypter !== null;
-    }
-
-    public function enableTeams(): self
-    {
-        $this->teams = true;
-
-        return $this;
-    }
-
-    public function disableTeams(): self
-    {
-        $this->teams = false;
-
-        return $this;
-    }
-
-    public function teamsAreEnabled(): bool
-    {
-        return $this->teams;
-    }
-
-    public function useCacheKeyPrefix(string $prefix): self
-    {
-        $this->cacheKeyPrefix = $prefix;
-
-        return $this;
     }
 
     protected function decryptValue($value)

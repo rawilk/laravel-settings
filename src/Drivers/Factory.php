@@ -33,6 +33,11 @@ class Factory
         return $this;
     }
 
+    public function setDefaultDriver(string $driver): void
+    {
+        $this->app['config']['settings.driver'] = $driver;
+    }
+
     protected function createDatabaseDriver(array $config): DatabaseDriver
     {
         return new DatabaseDriver(
@@ -52,11 +57,6 @@ class Factory
     protected function getDefaultDriver(): string
     {
         return $this->app['config']['settings.driver'];
-    }
-
-    public function setDefaultDriver(string $driver): void
-    {
-        $this->app['config']['settings.driver'] = $driver;
     }
 
     protected function getDriverConfig(string $driver): ?array

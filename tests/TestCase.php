@@ -9,13 +9,6 @@ use Rawilk\Settings\SettingsServiceProvider;
 
 class TestCase extends Orchestra
 {
-    protected function getPackageProviders($app): array
-    {
-        return [
-            SettingsServiceProvider::class,
-        ];
-    }
-
     public function getEnvironmentSetUp($app): void
     {
         $migrations = [
@@ -26,5 +19,12 @@ class TestCase extends Orchestra
             $migration = include __DIR__ . '/../database/migrations/' . $migrationName;
             $migration->up();
         }
+    }
+
+    protected function getPackageProviders($app): array
+    {
+        return [
+            SettingsServiceProvider::class,
+        ];
     }
 }
