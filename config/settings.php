@@ -148,4 +148,19 @@ return [
     |
     */
     'key_generator' => \Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator::class,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Value Serializer
+    |--------------------------------------------------------------------------
+    |
+    | By default, we use php's serialize() and unserialize() functions to
+    | prepare the setting values for storage. You may use the `JsonValueSerializer`
+    | instead if you want to store the values as json instead.
+    |
+    | Any custom value serializer you use must implement the
+    | \Rawilk\Settings\Contracts\ValueSerializer interface.
+    |
+    */
+    'value_serializer' => \Rawilk\Settings\Support\ValueSerializers\ValueSerializer::class,
 ];

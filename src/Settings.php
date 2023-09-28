@@ -11,8 +11,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\KeyGenerator;
+use Rawilk\Settings\Contracts\ValueSerializer;
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Support\ValueSerializer;
 
 class Settings
 {
@@ -23,8 +23,6 @@ class Settings
     protected ?Context $context = null;
 
     protected ?Encrypter $encrypter = null;
-
-    protected ValueSerializer $valueSerializer;
 
     protected bool $cacheEnabled = false;
 
@@ -47,8 +45,8 @@ class Settings
     public function __construct(
         protected Driver $driver,
         protected KeyGenerator $keyGenerator,
+        protected ValueSerializer $valueSerializer,
     ) {
-        $this->valueSerializer = new ValueSerializer;
     }
 
     // mainly for testing purposes

@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Rawilk\Settings\Support;
+namespace Rawilk\Settings\Support\ValueSerializers;
 
-class ValueSerializer
+use Rawilk\Settings\Contracts\ValueSerializer as ValueSerializerContract;
+
+class ValueSerializer implements ValueSerializerContract
 {
     public function serialize($value): string
     {
