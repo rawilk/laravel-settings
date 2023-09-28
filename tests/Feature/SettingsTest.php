@@ -3,8 +3,12 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Rawilk\Settings\Contracts\Setting;
 use Rawilk\Settings\Drivers\EloquentDriver;
+use Rawilk\Settings\Events\SettingsFlushed;
+use Rawilk\Settings\Events\SettingWasDeleted;
+use Rawilk\Settings\Events\SettingWasStored;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
@@ -429,6 +433,56 @@ it('can flush settings base on context', function () {
     $settings->context($context)->flush();
 
     $this->assertDatabaseCount('settings', 1);
+});
+
+it('dispatches an event when settings are flushed', function () {
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    Event::fake();
+
+    $settings->set('one', 'value 1');
+    $settings->set('two', 'value 2');
+
+    $settings->flush();
+
+    Event::assertDispatched(SettingsFlushed::class);
+});
+
+it('dispatches an event when a setting is deleted', function () {
+    Event::fake();
+
+    SettingsFacade::set('foo', 'bar');
+    SettingsFacade::forget('foo');
+
+    Event::assertDispatched(function (SettingWasDeleted $event) {
+        return $event->key === 'foo'
+            && $event->teamId === false
+            && is_null($event->context);
+    });
+});
+
+it('dispatches an event when a setting is saved', function () {
+    Event::fake();
+
+    SettingsFacade::set('foo', 'bar');
+
+    Event::assertDispatched(function (SettingWasStored $event) {
+        return $event->key === 'foo'
+            && $event->value === 'bar';
+    });
+});
+
+it('does not dispatch the stored event if the setting value has not changed', function () {
+    Event::fake();
+
+    // This only works when caching is enabled.
+    SettingsFacade::enableCache();
+
+    SettingsFacade::set('foo', 'bar');
+    SettingsFacade::set('foo', 'bar');
+
+    Event::assertDispatchedTimes(SettingWasStored::class, 1);
 });
 
 // Helpers...

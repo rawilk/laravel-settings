@@ -13,6 +13,9 @@ use Illuminate\Support\Traits\Macroable;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\KeyGenerator;
 use Rawilk\Settings\Contracts\ValueSerializer;
+use Rawilk\Settings\Events\SettingsFlushed;
+use Rawilk\Settings\Events\SettingWasDeleted;
+use Rawilk\Settings\Events\SettingWasStored;
 use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Support\Context;
@@ -114,6 +117,14 @@ class Settings
         $driverResult = $this->driver->forget(
             key: $generatedKey,
             teamId: $this->teams ? $this->teamId : false,
+        );
+
+        SettingWasDeleted::dispatch(
+            $key,
+            $generatedKey,
+            $this->getCacheKey($generatedKey),
+            $this->teams ? $this->teamId : false,
+            $this->context,
         );
 
         if ($this->temporarilyDisableCache || $this->cacheIsEnabled()) {
@@ -218,7 +229,7 @@ class Settings
         return $has;
     }
 
-    public function set(string $key, $value = null)
+    public function set(string $key, $value = null): mixed
     {
         $key = $this->normalizeKey($key);
 
@@ -237,6 +248,15 @@ class Settings
             key: $generatedKey,
             value: $this->encryptionIsEnabled() ? $this->encrypter->encrypt($serializedValue) : $serializedValue,
             teamId: $this->teams ? $this->teamId : false,
+        );
+
+        SettingWasStored::dispatch(
+            $key,
+            $generatedKey,
+            $this->getCacheKey($generatedKey),
+            $value,
+            $this->teams ? $this->teamId : false,
+            $this->context,
         );
 
         if ($this->temporarilyDisableCache || $this->cacheIsEnabled()) {
@@ -270,6 +290,12 @@ class Settings
         $driverResult = $this->driver->flush(
             teamId: $this->teams ? $this->teamId : false,
             keys: $keys,
+        );
+
+        SettingsFlushed::dispatch(
+            $keys,
+            $this->teams ? $this->teamId : false,
+            $this->context,
         );
 
         // Flush the cache for all deleted keys.
