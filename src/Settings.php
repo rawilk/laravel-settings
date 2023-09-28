@@ -199,7 +199,7 @@ class Settings
     {
         $value = $this->get(key: $key, default: $default);
 
-        return $value === false || $value === '0' || $value === 1;
+        return $value === false || $value === '0' || $value === 0;
     }
 
     public function isTrue(string $key, $default = true): bool
