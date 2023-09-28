@@ -18,4 +18,4 @@ $cacheKey = Settings::cacheKeyForSetting('foo');
 $cacheKey = Settings::context(new Context(['id' => 1]))->cacheKeyForSetting('foo');
 ```
 
-> {note} The `cacheKeyForSetting` method will take into account the current team id and context as well that is set on the settings service.
+> {tip} The `cacheKeyForSetting` method will take into account the current team id and context as well that is set on the settings service.
