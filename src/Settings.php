@@ -14,6 +14,7 @@ use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\KeyGenerator;
 use Rawilk\Settings\Contracts\ValueSerializer;
 use Rawilk\Settings\Events\SettingsFlushed;
+use Rawilk\Settings\Events\SettingWasDeleted;
 use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Support\Context;
@@ -115,6 +116,14 @@ class Settings
         $driverResult = $this->driver->forget(
             key: $generatedKey,
             teamId: $this->teams ? $this->teamId : false,
+        );
+
+        SettingWasDeleted::dispatch(
+            $key,
+            $generatedKey,
+            $this->getCacheKey($generatedKey),
+            $this->teams ? $this->teamId : false,
+            $this->context,
         );
 
         if ($this->temporarilyDisableCache || $this->cacheIsEnabled()) {

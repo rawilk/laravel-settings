@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Event;
 use Rawilk\Settings\Contracts\Setting;
 use Rawilk\Settings\Drivers\EloquentDriver;
 use Rawilk\Settings\Events\SettingsFlushed;
+use Rawilk\Settings\Events\SettingWasDeleted;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
@@ -445,6 +446,19 @@ it('dispatches an event when settings are flushed', function () {
     $settings->flush();
 
     Event::assertDispatched(SettingsFlushed::class);
+});
+
+it('dispatches an event when a setting is deleted', function () {
+    Event::fake();
+
+    SettingsFacade::set('foo', 'bar');
+    SettingsFacade::forget('foo');
+
+    Event::assertDispatched(function (SettingWasDeleted $event) {
+        return $event->key === 'foo'
+            && $event->teamId === false
+            && is_null($event->context);
+    });
 });
 
 // Helpers...
