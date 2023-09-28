@@ -130,6 +130,22 @@ it('can evaluate stored boolean settings', function () {
         ->and(SettingsFacade::isFalse('app.debug'))->toBeFalse();
 });
 
+it('can evaluate boolean stored settings using the json value serializer', function () {
+    $settings = settings();
+    (fn () => $this->valueSerializer = new JsonValueSerializer)->call($settings);
+
+    $settings->set('app.debug', '1');
+    expect($settings->isTrue('app.debug'))->toBeTrue();
+
+    $settings->set('app.debug', '0');
+    expect($settings->isTrue('app.debug'))->toBeFalse()
+        ->and($settings->isFalse('app.debug'))->toBeTrue();
+
+    $settings->set('app.debug', true);
+    expect($settings->isTrue('app.debug'))->toBeTrue()
+        ->and($settings->isFalse('app.debug'))->toBeFalse();
+});
+
 it('can cache values on retrieval', function () {
     enableSettingsCache();
 
