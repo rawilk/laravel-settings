@@ -13,7 +13,6 @@ use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Support\ValueSerializers\JsonValueSerializer;
-use Rawilk\Settings\Tests\Support\Models\Team;
 
 beforeEach(function () {
     config([
@@ -312,22 +311,8 @@ test('custom value serializers can be used', function () {
 });
 
 it('can get all persisted values', function () {
-    //    config([
-    //        'settings.teams' => true,
-    //    ]);
-    //
-    //    migrateTeams();
-    //    migrateTestTables();
-
     $settings = settings();
     (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
-
-    //    $team = Team::factory()->create();
-    //
-    //    $settings->enableTeams();
-    //    $settings->setTeamId($team->id);
-    //
-    //    $context = new Context(['id' => 'foo']);
 
     $settings->set('one', 'value 1');
     $settings->set('two', 'value 2');
@@ -392,6 +377,59 @@ it('throws an exception when doing a partial context lookup using the md5 key ge
 
     SettingsFacade::context(new Context(['id' => 1]))->all();
 })->throws(InvalidKeyGenerator::class);
+
+it('can flush all settings', function () {
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    $settings->set('one', 'value 1');
+    $settings->set('two', 'value 2');
+
+    $this->assertDatabaseCount('settings', 2);
+
+    $settings->flush();
+
+    $this->assertDatabaseCount('settings', 0);
+});
+
+it('can flush a subset of settings', function () {
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    $settings->set('one', 'value 1');
+    $settings->set('two', 'value 2');
+    $settings->set('three', 'value 3');
+
+    $this->assertDatabaseCount('settings', 3);
+
+    $settings->flush(['one', 'three']);
+
+    $this->assertDatabaseCount('settings', 1);
+
+    $this->assertDatabaseMissing('settings', [
+        'key' => 'one',
+    ]);
+
+    $this->assertDatabaseMissing('settings', [
+        'key' => 'three',
+    ]);
+});
+
+it('can flush settings base on context', function () {
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    $context = new Context(['id' => 'foo']);
+
+    $settings->set('one', 'value 1');
+    $settings->context($context)->set('one', 'context 1');
+
+    $this->assertDatabaseCount('settings', 2);
+
+    $settings->context($context)->flush();
+
+    $this->assertDatabaseCount('settings', 1);
+});
 
 // Helpers...
 

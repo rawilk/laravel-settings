@@ -263,6 +263,33 @@ class Settings
         return $value === true || $value === '1' || $value === 1;
     }
 
+    public function flush($keys = null): mixed
+    {
+        $keys = $this->normalizeBulkLookupKey($keys);
+
+        $driverResult = $this->driver->flush(
+            teamId: $this->teams ? $this->teamId : false,
+            keys: $keys,
+        );
+
+        // Flush the cache for all deleted keys.
+        // Note: Only works when a subset of keys is specified.
+        if ($keys instanceof Collection && ($this->temporarilyDisableCache || $this->cacheIsEnabled())) {
+            $keys->each(function (string $key) {
+                $this->cache->forget($this->getCacheKey($key));
+            });
+        }
+
+        if ($this->resetContext) {
+            $this->context();
+        }
+
+        $this->temporarilyDisableCache = false;
+        $this->resetContext = true;
+
+        return $driverResult;
+    }
+
     public function disableCache(): self
     {
         $this->cacheEnabled = false;

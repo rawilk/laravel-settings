@@ -202,3 +202,25 @@ test("all of a team's settings can be retrieved at once", function () {
     expect($nonContextSettings)->toHaveCount(2)
         ->and($nonContextSettings->pluck('value'))->not->toContain('team value context 1');
 });
+
+test("a team's settings can be flushed", function () {
+    $team = Team::first();
+
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    $settings->set('one', 'non-team value');
+
+    $settings->setTeamId($team);
+    $settings->set('one', 'team value');
+
+    $this->assertDatabaseCount('settings', 2);
+
+    $settings->flush();
+
+    $this->assertDatabaseCount('settings', 1);
+
+    $this->assertDatabaseMissing('settings', [
+        'team_id' => $team->id,
+    ]);
+});

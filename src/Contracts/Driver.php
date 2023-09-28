@@ -17,4 +17,6 @@ interface Driver
     public function has($key, $teamId = null): bool;
 
     public function set(string $key, $value = null, $teamId = null);
+
+    public function flush($teamId = null, $keys = null);
 }

@@ -196,3 +196,46 @@ it('can do partial lookups on all', function () {
         ->first()->value->toBe('value 1')
         ->and($settings[1]->value)->toBe('value 2');
 });
+
+it('can delete all settings', function () {
+    $this->driver->set('one', 'one', false);
+    $this->driver->set('two', 'two', false);
+
+    $this->assertDatabaseCount('settings', 2);
+
+    $this->driver->flush();
+
+    $this->assertDatabaseCount('settings', 0);
+});
+
+it('can delete all team settings', function () {
+    $this->driver->set('one', 'one', 1);
+    $this->driver->set('two', 'two', 1);
+    $this->driver->set('two', 'team two', 2);
+
+    $this->assertDatabaseCount('settings', 3);
+
+    $this->driver->flush(teamId: 1);
+
+    $this->assertDatabaseCount('settings', 1);
+});
+
+it('can flush a subset of settings', function () {
+    $this->driver->set('one', 'one', false);
+    $this->driver->set('two', 'two', false);
+    $this->driver->set('three', 'three', false);
+
+    $this->assertDatabaseCount('settings', 3);
+
+    $this->driver->flush(keys: ['one', 'three']);
+
+    $this->assertDatabaseCount('settings', 1);
+
+    $this->assertDatabaseMissing('settings', [
+        'key' => 'one',
+    ]);
+
+    $this->assertDatabaseMissing('settings', [
+        'key' => 'three',
+    ]);
+});

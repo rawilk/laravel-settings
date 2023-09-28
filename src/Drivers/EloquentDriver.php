@@ -38,4 +38,9 @@ class EloquentDriver implements Driver
     {
         $this->model::set($key, $value, $teamId);
     }
+
+    public function flush($teamId = null, $keys = null): void
+    {
+        $this->model::flush($teamId, $keys);
+    }
 }

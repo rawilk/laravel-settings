@@ -17,4 +17,6 @@ interface Setting
     public static function removeSetting($key, $teamId = null);
 
     public static function set(string $key, $value = null, $teamId = null);
+
+    public static function flush($teamId = null, $keys = null);
 }
