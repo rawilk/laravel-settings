@@ -199,3 +199,16 @@ this model, you may need to update your code to be compatible with the new model
 
 Several changes have been made to the underlying `Rawilk\Settings\Settings` service class. For most people there shouldn't be any action required,
 however if you are adding macros to the class, you may need to tweak them to be compatible with updated class.
+
+## Cache Keys
+
+If you were manually generating cache keys for settings for whatever reason, you will need to change how you do it now. Since the `KeyGenerator`
+class can be different based on configuration, you should use the new `cacheKeyForSetting` method on the `Settings` facade instead. This will
+take into account current team id and context as well.
+
+```php
+$cacheKey = Settings::cacheKeyForSetting('foo');
+
+// With context
+$cacheKey = Settings::context(new Context(['id' => 1]))->cacheKeyForSetting('foo');
+```
