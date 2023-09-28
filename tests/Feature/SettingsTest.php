@@ -8,6 +8,7 @@ use Rawilk\Settings\Contracts\Setting;
 use Rawilk\Settings\Drivers\EloquentDriver;
 use Rawilk\Settings\Events\SettingsFlushed;
 use Rawilk\Settings\Events\SettingWasDeleted;
+use Rawilk\Settings\Events\SettingWasStored;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
@@ -459,6 +460,29 @@ it('dispatches an event when a setting is deleted', function () {
             && $event->teamId === false
             && is_null($event->context);
     });
+});
+
+it('dispatches an event when a setting is saved', function () {
+    Event::fake();
+
+    SettingsFacade::set('foo', 'bar');
+
+    Event::assertDispatched(function (SettingWasStored $event) {
+        return $event->key === 'foo'
+            && $event->value === 'bar';
+    });
+});
+
+it('does not dispatch the stored event if the setting value has not changed', function () {
+    Event::fake();
+
+    // This only works when caching is enabled.
+    SettingsFacade::enableCache();
+
+    SettingsFacade::set('foo', 'bar');
+    SettingsFacade::set('foo', 'bar');
+
+    Event::assertDispatchedTimes(SettingWasStored::class, 1);
 });
 
 // Helpers...

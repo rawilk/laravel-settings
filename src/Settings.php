@@ -15,6 +15,7 @@ use Rawilk\Settings\Contracts\KeyGenerator;
 use Rawilk\Settings\Contracts\ValueSerializer;
 use Rawilk\Settings\Events\SettingsFlushed;
 use Rawilk\Settings\Events\SettingWasDeleted;
+use Rawilk\Settings\Events\SettingWasStored;
 use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Support\Context;
@@ -228,7 +229,7 @@ class Settings
         return $has;
     }
 
-    public function set(string $key, $value = null)
+    public function set(string $key, $value = null): mixed
     {
         $key = $this->normalizeKey($key);
 
@@ -247,6 +248,15 @@ class Settings
             key: $generatedKey,
             value: $this->encryptionIsEnabled() ? $this->encrypter->encrypt($serializedValue) : $serializedValue,
             teamId: $this->teams ? $this->teamId : false,
+        );
+
+        SettingWasStored::dispatch(
+            $key,
+            $generatedKey,
+            $this->getCacheKey($generatedKey),
+            $value,
+            $this->teams ? $this->teamId : false,
+            $this->context,
         );
 
         if ($this->temporarilyDisableCache || $this->cacheIsEnabled()) {
