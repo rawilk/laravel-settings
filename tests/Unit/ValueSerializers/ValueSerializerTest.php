@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Rawilk\Settings\Support\ValueSerializer;
+use Rawilk\Settings\Support\ValueSerializers\ValueSerializer;
 
 it('serializes values', function (mixed $value) {
     $serializer = new ValueSerializer;

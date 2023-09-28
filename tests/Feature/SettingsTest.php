@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\DB;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Support\ValueSerializers\JsonValueSerializer;
 
 beforeEach(function () {
     config([
@@ -127,6 +128,22 @@ it('can evaluate stored boolean settings', function () {
     SettingsFacade::set('app.debug', true);
     expect(SettingsFacade::isTrue('app.debug'))->toBeTrue()
         ->and(SettingsFacade::isFalse('app.debug'))->toBeFalse();
+});
+
+it('can evaluate boolean stored settings using the json value serializer', function () {
+    $settings = settings();
+    (fn () => $this->valueSerializer = new JsonValueSerializer)->call($settings);
+
+    $settings->set('app.debug', '1');
+    expect($settings->isTrue('app.debug'))->toBeTrue();
+
+    $settings->set('app.debug', '0');
+    expect($settings->isTrue('app.debug'))->toBeFalse()
+        ->and($settings->isFalse('app.debug'))->toBeTrue();
+
+    $settings->set('app.debug', true);
+    expect($settings->isTrue('app.debug'))->toBeTrue()
+        ->and($settings->isFalse('app.debug'))->toBeFalse();
 });
 
 it('can cache values on retrieval', function () {
@@ -262,6 +279,28 @@ it('does not try to decrypt if encryption is disabled', function () {
     expect($value)
         ->not->toBe('bar')
         ->not->toBe(serialize('bar'));
+});
+
+test('custom value serializers can be used', function () {
+    $settings = settings();
+    (fn () => $this->valueSerializer = new JsonValueSerializer)->call($settings);
+
+    $settings->disableEncryption();
+
+    $settings->set('foo', 'my value');
+    $settings->set('array-value', ['foo' => 'bar', 'bool' => true]);
+
+    $this->assertDatabaseHas('settings', [
+        'value' => '"my value"',
+    ]);
+
+    $this->assertDatabaseHas('settings', [
+        'value' => '{"foo":"bar","bool":true}',
+    ]);
+
+    expect($settings->get('foo'))->toBe('my value')
+        ->and($settings->get('array-value'))->toBeArray()
+        ->and($settings->get('array-value'))->toMatchArray(['foo' => 'bar', 'bool' => true]);
 });
 
 // Helpers...
