@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Facade;
 use Rawilk\Settings\Contracts\ContextSerializer;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\KeyGenerator;
+use Rawilk\Settings\Contracts\ValueSerializer;
 use Rawilk\Settings\Drivers\Factory;
 
 it('will not use debugging functions')
@@ -56,6 +57,14 @@ test('key generators are configured correctly')
     ->toImplement(KeyGenerator::class)
     ->toExtendNothing()
     ->toHaveSuffix('Generator');
+
+test('value serializers are configured correctly')
+    ->expect('Rawilk\Settings\Support\ValueSerializers')
+    ->toBeClasses()
+    ->classes()
+    ->toImplement(ValueSerializer::class)
+    ->toExtendNothing()
+    ->toHaveSuffix('Serializer');
 
 test('events are configured correctly')
     ->expect('Rawilk\Settings\Events')
