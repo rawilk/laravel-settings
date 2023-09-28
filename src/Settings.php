@@ -13,6 +13,7 @@ use Illuminate\Support\Traits\Macroable;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\KeyGenerator;
 use Rawilk\Settings\Contracts\ValueSerializer;
+use Rawilk\Settings\Events\SettingsFlushed;
 use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Support\Context;
@@ -270,6 +271,12 @@ class Settings
         $driverResult = $this->driver->flush(
             teamId: $this->teams ? $this->teamId : false,
             keys: $keys,
+        );
+
+        SettingsFlushed::dispatch(
+            $keys,
+            $this->teams ? $this->teamId : false,
+            $this->context,
         );
 
         // Flush the cache for all deleted keys.
