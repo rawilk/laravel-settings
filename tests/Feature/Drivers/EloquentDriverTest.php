@@ -149,3 +149,50 @@ it('removes persisted team values', function () {
         'team_id' => 1,
     ]);
 });
+
+it('can get all persisted settings', function () {
+    $this->driver->set('one', 'value 1', false);
+    $this->driver->set('two', 'value 2', false);
+
+    $settings = $this->driver->all();
+
+    expect($settings)->toHaveCount(2)
+        ->first()->value->toBe('value 1')
+        ->and($settings[1]->value)->toBe('value 2');
+});
+
+it('can get a subset of persisted settings', function () {
+    $this->driver->set('one', 'value 1', false);
+    $this->driver->set('two', 'value 2', false);
+    $this->driver->set('three', 'value 3', false);
+
+    $settings = $this->driver->all(keys: ['one', 'three']);
+
+    expect($settings)->toHaveCount(2)
+        ->first()->value->toBe('value 1')
+        ->and($settings[1]->value)->toBe('value 3');
+});
+
+it('can get all of a teams persisted settings', function () {
+    $this->driver->set('one', 'value 1', 1);
+    $this->driver->set('two', 'value 2', 1);
+    $this->driver->set('one', 'team 2 value 1', 2);
+
+    $settings = $this->driver->all(teamId: 1);
+
+    expect($settings)->toHaveCount(2)
+        ->first()->value->toBe('value 1')
+        ->and($settings[1]->value)->toBe('value 2');
+});
+
+it('can do partial lookups on all', function () {
+    $this->driver->set('one:1', 'value 1');
+    $this->driver->set('one:2', 'value 2_1');
+    $this->driver->set('two:1', 'value 2');
+
+    $settings = $this->driver->all(keys: ':1');
+
+    expect($settings)->toHaveCount(2)
+        ->first()->value->toBe('value 1')
+        ->and($settings[1]->value)->toBe('value 2');
+});

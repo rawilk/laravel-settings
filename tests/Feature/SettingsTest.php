@@ -3,9 +3,17 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
+use Rawilk\Settings\Contracts\Setting;
+use Rawilk\Settings\Drivers\EloquentDriver;
+use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
+use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
+use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
+use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Support\ValueSerializers\JsonValueSerializer;
+use Rawilk\Settings\Tests\Support\Models\Team;
 
 beforeEach(function () {
     config([
@@ -302,6 +310,88 @@ test('custom value serializers can be used', function () {
         ->and($settings->get('array-value'))->toBeArray()
         ->and($settings->get('array-value'))->toMatchArray(['foo' => 'bar', 'bool' => true]);
 });
+
+it('can get all persisted values', function () {
+    //    config([
+    //        'settings.teams' => true,
+    //    ]);
+    //
+    //    migrateTeams();
+    //    migrateTestTables();
+
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    //    $team = Team::factory()->create();
+    //
+    //    $settings->enableTeams();
+    //    $settings->setTeamId($team->id);
+    //
+    //    $context = new Context(['id' => 'foo']);
+
+    $settings->set('one', 'value 1');
+    $settings->set('two', 'value 2');
+
+    $storedSettings = $settings->all();
+
+    expect($storedSettings)->toHaveCount(2)
+        ->and($storedSettings[0]->key)->toBe('one')
+        ->and($storedSettings[0]->original_key)->toBe('one')
+        ->and($storedSettings[0]->value)->toBe('value 1')
+        ->and($storedSettings[1]->key)->toBe('two')
+        ->and($storedSettings[1]->original_key)->toBe('two')
+        ->and($storedSettings[1]->value)->toBe('value 2');
+});
+
+test('retrieving all settings works with the Eloquent driver', function () {
+    $settings = settings();
+    (fn () => $this->driver = new EloquentDriver(app(Setting::class)))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    $settings->set('one', 'value 1');
+    $settings->set('two', 'value 2');
+
+    $storedSettings = $settings->all();
+
+    expect($storedSettings)->toHaveCount(2)
+        ->and($storedSettings[0]->key)->toBe('one')
+        ->and($storedSettings[0]->original_key)->toBe('one')
+        ->and($storedSettings[0]->value)->toBe('value 1')
+        ->and($storedSettings[1]->key)->toBe('two')
+        ->and($storedSettings[1]->original_key)->toBe('two')
+        ->and($storedSettings[1]->value)->toBe('value 2');
+});
+
+it('can retrieve all settings for a given context', function () {
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    $context = new Context(['id' => 'foo']);
+    $contextTwo = new Context(['id' => 'foobar']);
+
+    $settings->set('one', 'no context value');
+    $settings->set('two', 'no context value 2');
+    $settings->context($context)->set('one', 'context one value 1');
+    $settings->context($context)->set('two', 'context one value 2');
+    $settings->context($contextTwo)->set('one', 'context two value 1');
+
+    $storedSettings = $settings->context($context)->all();
+
+    expect($storedSettings)->toHaveCount(2)
+        ->and($storedSettings[0]->key)->toBe('one')
+        ->and($storedSettings[0]->original_key)->toBe('one:c:::id:foo')
+        ->and($storedSettings[0]->value)->toBe('context one value 1')
+        ->and($storedSettings[1]->key)->toBe('two')
+        ->and($storedSettings[1]->original_key)->toBe('two:c:::id:foo')
+        ->and($storedSettings[1]->value)->toBe('context one value 2');
+});
+
+it('throws an exception when doing a partial context lookup using the md5 key generator', function () {
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new Md5KeyGenerator)->setContextSerializer(new ContextSerializer))->call($settings);
+
+    SettingsFacade::context(new Context(['id' => 1]))->all();
+})->throws(InvalidKeyGenerator::class);
 
 // Helpers...
 

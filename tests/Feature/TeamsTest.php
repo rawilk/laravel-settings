@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
+use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
+use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Tests\Support\Models\Team;
 
 beforeEach(function () {
@@ -162,4 +165,40 @@ test('the cache is scoped for teams', function () {
     SettingsFacade::setTeamId($team);
 
     expect(SettingsFacade::get('foo'))->toBe('team 1 value');
+});
+
+test("all of a team's settings can be retrieved at once", function () {
+    $team = Team::first();
+
+    $settings = settings();
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    $settings->set('one', 'non-team value');
+    $settings->context(new Context(['id' => 'foo']))->set('one', 'non-team value context 1');
+
+    $settings->setTeamId($team);
+
+    $settings->set('one', 'team value');
+    $settings->set('two', 'team value 2');
+    $settings->context(new Context(['id' => 'foo']))->set('one', 'team value context 1');
+
+    $storedSettings = $settings->all();
+
+    expect($storedSettings)->toHaveCount(3)
+        ->and($storedSettings[0]->key)->toBe('one')
+        ->and($storedSettings[0]->team_id)->toBe($team->id)
+        ->and($storedSettings[0]->value)->toBe('team value')
+        ->and($storedSettings[1]->key)->toBe('two')
+        ->and($storedSettings[1]->team_id)->toBe($team->id)
+        ->and($storedSettings[1]->value)->toBe('team value 2')
+        ->and($storedSettings[2]->key)->toBe('one')
+        ->and($storedSettings[2]->team_id)->toBe($team->id)
+        ->and($storedSettings[2]->value)->toBe('team value context 1')
+        ->and($storedSettings[2]->original_key)->toBe('one:c:::id:foo');
+
+    // Can get all team settings without context attached to them.
+    $nonContextSettings = $settings->context(false)->all();
+
+    expect($nonContextSettings)->toHaveCount(2)
+        ->and($nonContextSettings->pluck('value'))->not->toContain('team value context 1');
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Drivers;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\Setting;
 
@@ -21,6 +22,11 @@ class EloquentDriver implements Driver
     public function get(string $key, $default = null, $teamId = null)
     {
         return $this->model::getValue($key, $default, $teamId);
+    }
+
+    public function all($teamId = null, $keys = null): array|Arrayable
+    {
+        return $this->model::getAll($teamId, $keys);
     }
 
     public function has($key, $teamId = null): bool

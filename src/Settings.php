@@ -7,12 +7,16 @@ namespace Rawilk\Settings;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\KeyGenerator;
 use Rawilk\Settings\Contracts\ValueSerializer;
+use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
+use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 
 class Settings
 {
@@ -20,7 +24,7 @@ class Settings
 
     protected ?Cache $cache = null;
 
-    protected ?Context $context = null;
+    protected null|Context|bool $context = null;
 
     protected ?Encrypter $encrypter = null;
 
@@ -40,6 +44,8 @@ class Settings
     /** @var null|string|int */
     protected mixed $teamId = null;
 
+    protected ?string $teamForeignKey = null;
+
     protected string $cacheKeyPrefix = '';
 
     public function __construct(
@@ -55,7 +61,11 @@ class Settings
         return $this->driver;
     }
 
-    public function context(Context $context = null): self
+    /**
+     * Pass in `false` for context when calling `all()` to only return results
+     * that do not have context.
+     */
+    public function context(Context|bool $context = null): self
     {
         $this->context = $context;
 
@@ -79,6 +89,18 @@ class Settings
         }
 
         $this->teamId = $id;
+
+        return $this;
+    }
+
+    public function getTeamForeignKey(): ?string
+    {
+        return $this->teamForeignKey;
+    }
+
+    public function setTeamForeignKey(?string $foreignKey): self
+    {
+        $this->teamForeignKey = $foreignKey;
 
         return $this;
     }
@@ -143,6 +165,38 @@ class Settings
         $this->resetContext = true;
 
         return $value ?? $default;
+    }
+
+    public function all($keys = null): Collection
+    {
+        $keys = $this->normalizeBulkLookupKey($keys);
+
+        $values = collect($this->driver->all(
+            teamId: $this->teams ? $this->teamId : false,
+            keys: $keys,
+        ))->map(function (mixed $record): mixed {
+            $record = $this->normalizeBulkRetrievedValue($record);
+            $value = $record->value;
+
+            if ($value !== null) {
+                $value = $this->unserializeValue($this->decryptValue($value));
+            }
+
+            $record->value = $value;
+            $record->original_key = $record->key;
+            $record->key = $this->keyGenerator->removeContextFromKey($record->key);
+
+            return $record;
+        });
+
+        if ($this->resetContext) {
+            $this->context();
+        }
+
+        $this->temporarilyDisableCache = false;
+        $this->resetContext = true;
+
+        return $values;
     }
 
     public function has($key): bool
@@ -284,6 +338,11 @@ class Settings
         return $this;
     }
 
+    public function getKeyGenerator(): KeyGenerator
+    {
+        return $this->keyGenerator;
+    }
+
     protected function normalizeKey(string $key): string
     {
         if (Str::startsWith(haystack: $key, needles: 'file_')) {
@@ -372,5 +431,43 @@ class Settings
         $this->resetContext = false;
 
         return $this;
+    }
+
+    protected function normalizeBulkRetrievedValue(mixed $record): object
+    {
+        if (is_array($record)) {
+            $record = (object) $record;
+        }
+
+        throw_unless(
+            is_object($record) || $record instanceof Model,
+            InvalidBulkValueResult::notObject(),
+        );
+
+        throw_unless(
+            isset($record->key, $record->value),
+            InvalidBulkValueResult::missingValueOrKey(),
+        );
+
+        return $record;
+    }
+
+    protected function normalizeBulkLookupKey($key): string|Collection|bool
+    {
+        if (is_null($key) && $this->context !== null) {
+            throw_if(
+                $this->keyGenerator instanceof Md5KeyGenerator,
+                InvalidKeyGenerator::forPartialLookup($this->keyGenerator::class),
+            );
+
+            return is_bool($this->context)
+                ? $this->context
+                : $this->keyGenerator->generate('', $this->context);
+        }
+
+        return collect($key)
+            ->flatten()
+            ->filter()
+            ->map(fn (string $key): string => $this->getKeyForStorage($this->normalizeKey($key)));
     }
 }
