@@ -485,6 +485,20 @@ it('does not dispatch the stored event if the setting value has not changed', fu
     Event::assertDispatchedTimes(SettingWasStored::class, 1);
 });
 
+it('can generate the cache key for a given setting', function () {
+    $settings = settings();
+    $settings->useCacheKeyPrefix('settings.');
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+
+    expect(SettingsFacade::cacheKeyForSetting('foo'))->toBe('settings.foo')
+        ->and(SettingsFacade::context(new Context(['foo' => 'bar']))->cacheKeyForSetting('foo'))->toBe('settings.foo:c:::foo:bar');
+
+    SettingsFacade::enableTeams();
+    SettingsFacade::setTeamId(1);
+
+    expect(SettingsFacade::cacheKeyForSetting('foo'))->toBe('settings.foo::team:1');
+});
+
 // Helpers...
 
 function assertQueryCount(int $expected): void

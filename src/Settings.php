@@ -396,6 +396,27 @@ class Settings
         return $this->keyGenerator;
     }
 
+    /**
+     * Generate the key to use for caching a specific setting.
+     * This is meant for external usage.
+     */
+    public function cacheKeyForSetting(string $key): string
+    {
+        $storageKey = $this->getKeyForStorage(
+            $this->normalizeKey($key),
+        );
+
+        $cacheKey = $this->getCacheKey($storageKey);
+
+        if ($this->resetContext) {
+            $this->context();
+        }
+
+        $this->resetContext = true;
+
+        return $cacheKey;
+    }
+
     protected function normalizeKey(string $key): string
     {
         if (Str::startsWith(haystack: $key, needles: 'file_')) {
