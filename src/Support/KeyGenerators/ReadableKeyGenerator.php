@@ -18,17 +18,27 @@ class ReadableKeyGenerator implements KeyGeneratorContract
         $key = $this->normalizeKey($key);
 
         if ($context) {
-            $key .= ':c:::' . $this->serializer->serialize($context);
+            $key .= $this->contextPrefix() . $this->serializer->serialize($context);
         }
 
         return $key;
     }
 
-    public function setContextSerializer(ContextSerializer $serializer): KeyGeneratorContract
+    public function removeContextFromKey(string $key): string
+    {
+        return Str::before($key, $this->contextPrefix());
+    }
+
+    public function setContextSerializer(ContextSerializer $serializer): self
     {
         $this->serializer = $serializer;
 
         return $this;
+    }
+
+    public function contextPrefix(): string
+    {
+        return ':c:::';
     }
 
     protected function normalizeKey(string $key): string

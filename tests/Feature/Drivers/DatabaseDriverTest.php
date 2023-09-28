@@ -155,3 +155,93 @@ it('removes persisted team values', function () {
         'team_id' => 1,
     ]);
 });
+
+it('can get all persisted settings', function () {
+    $this->driver->set('one', 'value 1', false);
+    $this->driver->set('two', 'value 2', false);
+
+    $settings = $this->driver->all();
+
+    expect($settings)->toHaveCount(2)
+        ->first()->value->toBe('value 1')
+        ->and($settings[1]->value)->toBe('value 2');
+});
+
+it('can get a subset of persisted settings', function () {
+    $this->driver->set('one', 'value 1', false);
+    $this->driver->set('two', 'value 2', false);
+    $this->driver->set('three', 'value 3', false);
+
+    $settings = $this->driver->all(keys: ['one', 'three']);
+
+    expect($settings)->toHaveCount(2)
+        ->first()->value->toBe('value 1')
+        ->and($settings[1]->value)->toBe('value 3');
+});
+
+it('can get all of a teams persisted settings', function () {
+    $this->driver->set('one', 'value 1', 1);
+    $this->driver->set('two', 'value 2', 1);
+    $this->driver->set('one', 'team 2 value 1', 2);
+
+    $settings = $this->driver->all(teamId: 1);
+
+    expect($settings)->toHaveCount(2)
+        ->first()->value->toBe('value 1')
+        ->and($settings[1]->value)->toBe('value 2');
+});
+
+it('can do partial lookups on all', function () {
+    $this->driver->set('one:1', 'value 1');
+    $this->driver->set('one:2', 'value 2_1');
+    $this->driver->set('two:1', 'value 2');
+
+    $settings = $this->driver->all(keys: ':1');
+
+    expect($settings)->toHaveCount(2)
+        ->first()->value->toBe('value 1')
+        ->and($settings[1]->value)->toBe('value 2');
+});
+
+it('can delete all settings', function () {
+    $this->driver->set('one', 'one', false);
+    $this->driver->set('two', 'two', false);
+
+    $this->assertDatabaseCount('settings', 2);
+
+    $this->driver->flush();
+
+    $this->assertDatabaseCount('settings', 0);
+});
+
+it('can delete all team settings', function () {
+    $this->driver->set('one', 'one', 1);
+    $this->driver->set('two', 'two', 1);
+    $this->driver->set('two', 'team two', 2);
+
+    $this->assertDatabaseCount('settings', 3);
+
+    $this->driver->flush(teamId: 1);
+
+    $this->assertDatabaseCount('settings', 1);
+});
+
+it('can flush a subset of settings', function () {
+    $this->driver->set('one', 'one', false);
+    $this->driver->set('two', 'two', false);
+    $this->driver->set('three', 'three', false);
+
+    $this->assertDatabaseCount('settings', 3);
+
+    $this->driver->flush(keys: ['one', 'three']);
+
+    $this->assertDatabaseCount('settings', 1);
+
+    $this->assertDatabaseMissing('settings', [
+        'key' => 'one',
+    ]);
+
+    $this->assertDatabaseMissing('settings', [
+        'key' => 'three',
+    ]);
+});

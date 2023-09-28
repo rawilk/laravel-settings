@@ -29,7 +29,7 @@ if (! function_exists('settings')) {
             return null;
         }
 
-        if ($context instanceof Context) {
+        if ($context instanceof Context || is_bool($context)) {
             $settings->context($context);
         }
 

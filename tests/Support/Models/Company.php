@@ -14,6 +14,8 @@ final class Company extends Model
     use HasFactory;
     use HasSettings;
 
+    protected static bool $flushSettingsOnDelete = false;
+
     protected static function newFactory(): CompanyFactory
     {
         return new CompanyFactory;

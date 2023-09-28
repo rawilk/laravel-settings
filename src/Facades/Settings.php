@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Rawilk\Settings\Settings context(null|\Rawilk\Settings\Support\Context $context = null)
  * @method static null|mixed forget($key)
  * @method static mixed get(string $key, null|mixed $default = null)
+ * @method static \Illuminate\Support\Collection all($keys)
  * @method static bool isFalse(string $key, bool|int|string $default = false)
  * @method static bool isTrue(string $key, bool|int|string $default = true)
  * @method static bool has($key)
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static self enableTeams()
  * @method static self disableTeams()
  * @method static bool teamsAreEnabled()
+ * @method static \Rawilk\Settings\Contracts\KeyGenerator getKeyGenerator()
  */
 class Settings extends Facade
 {

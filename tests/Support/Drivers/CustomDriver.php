@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Tests\Support\Drivers;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Rawilk\Settings\Contracts\Driver;
 
 final class CustomDriver implements Driver
@@ -26,5 +27,14 @@ final class CustomDriver implements Driver
     public function set(string $key, $value = null, $teamId = null): void
     {
         //
+    }
+
+    public function all($teamId = null, $keys = null): array|Arrayable
+    {
+        return [];
+    }
+
+    public function flush($teamId = null, $keys = null): void
+    {
     }
 }
