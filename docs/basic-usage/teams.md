@@ -101,3 +101,29 @@ Settings::setTeamId($currentTeamId);
 ```
 
 > {tip} You can pass in an eloquent model to `setTeamId` instead of an id if you prefer.
+
+## Contextual Settings
+
+The `Context` object can be used in conjunction with teams for further scoping of settings. The most common scenario for this would be if you have a
+multi-tenant application, and you want to have user-specific settings for each tenant, you can use both teams and context.
+
+Let's say the user has a timezone configured differently for each tenant. In tenant 1, the timezone is set to 'UTC' for the user, but in tenant 2
+the timezone is set to 'America/Chicago' for the user. Here's how you can combine context and teams to get those different setting values.
+
+```php
+use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Facades\Settings;
+
+$userContext = new Context(['user_id' => 1]);
+
+Settings::setTeamId(1);
+
+Settings::context($userContext)->get('timezone'); // UTC
+
+Settings::setTeamId(2);
+
+Settings::contest($userContext)->get('timezone'); // America/Chicago
+```
+
+This will also work with [model settings](/docs/laravel-settings/{version}/basic-usage/model-settings) as well. For more information on the
+`Context` object, check out the [docs](/docs/laravel-settings/{version}/basic-usage/contextual-settings) here.
