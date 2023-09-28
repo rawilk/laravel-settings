@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Facade;
 use Rawilk\Settings\Contracts\ContextSerializer;
 use Rawilk\Settings\Contracts\Driver;
@@ -54,3 +56,14 @@ test('key generators are configured correctly')
     ->toImplement(KeyGenerator::class)
     ->toExtendNothing()
     ->toHaveSuffix('Generator');
+
+test('events are configured correctly')
+    ->expect('Rawilk\Settings\Events')
+    ->toBeClasses()
+    ->classes()
+    ->toExtendNothing()
+    ->toBeFinal()
+    ->toUse([
+        Dispatchable::class,
+        SerializesModels::class,
+    ]);
