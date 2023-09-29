@@ -11,7 +11,7 @@ By default, teams are disabled, however you can easily enable them by setting th
 ## Enabling the Teams Feature
 
 > {info} These configuration changes must be made **before** running the migrations when first installing the package or when upgrading from v2.
->
+> <br><br>
 > If you have already run the migrations and want to upgrade your implementation, you can add a migration and copy the contents of the `add_settings_team_field` migration from the package
 > after you make the configuration changes below.
 
