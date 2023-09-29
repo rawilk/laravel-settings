@@ -73,7 +73,9 @@ The collection of settings returned from this method will contain objects struct
 }
 ```
 
-> {info} The `original_key` property is set by settings to reflect the key that is used in the database.
+> {tip} The `original_key` property is set by settings to reflect the key that is used in the database.
+
+> {tip} If you'd like to retrieve all settings that do not have a context, you may provide a `false` value for a context: `settings()->context(false)->all()` 
 
 ## Flushing settings
 
