@@ -11,6 +11,12 @@ use Illuminate\Support\Collection;
 use Rawilk\Settings\Contracts\Setting as SettingContract;
 use Rawilk\Settings\Facades\Settings;
 
+/**
+ * @property int $id
+ * @property string $key
+ * @property mixed $value
+ * @property int|string|null $team_id
+ */
 class Setting extends Model implements SettingContract
 {
     public $timestamps = false;
