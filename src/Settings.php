@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings;
 
+use BackedEnum;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ use Rawilk\Settings\Events\SettingsFlushed;
 use Rawilk\Settings\Events\SettingWasDeleted;
 use Rawilk\Settings\Events\SettingWasStored;
 use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
+use Rawilk\Settings\Exceptions\InvalidEnumType;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
@@ -108,7 +110,7 @@ class Settings
         return $this;
     }
 
-    public function forget($key)
+    public function forget(string|BackedEnum $key)
     {
         $key = $this->normalizeKey($key);
 
@@ -141,7 +143,7 @@ class Settings
         return $driverResult;
     }
 
-    public function get(string $key, $default = null)
+    public function get(string|BackedEnum $key, $default = null)
     {
         $key = $this->normalizeKey($key);
 
@@ -210,7 +212,7 @@ class Settings
         return $values;
     }
 
-    public function has($key): bool
+    public function has(string|BackedEnum $key): bool
     {
         $key = $this->normalizeKey($key);
 
@@ -229,7 +231,7 @@ class Settings
         return $has;
     }
 
-    public function set(string $key, $value = null): mixed
+    public function set(string|BackedEnum $key, $value = null): mixed
     {
         $key = $this->normalizeKey($key);
 
@@ -269,14 +271,14 @@ class Settings
         return $driverResult;
     }
 
-    public function isFalse(string $key, $default = false): bool
+    public function isFalse(string|BackedEnum $key, $default = false): bool
     {
         $value = $this->get(key: $key, default: $default);
 
         return $value === false || $value === '0' || $value === 0;
     }
 
-    public function isTrue(string $key, $default = true): bool
+    public function isTrue(string|BackedEnum $key, $default = true): bool
     {
         $value = $this->get(key: $key, default: $default);
 
@@ -417,8 +419,17 @@ class Settings
         return $cacheKey;
     }
 
-    protected function normalizeKey(string $key): string
+    protected function normalizeKey(string|BackedEnum $key): string
     {
+        if ($key instanceof BackedEnum) {
+            throw_unless(
+                is_string($key->value),
+                InvalidEnumType::make($key::class)
+            );
+
+            $key = $key->value;
+        }
+
         if (Str::startsWith(haystack: $key, needles: 'file_')) {
             return str_replace(search: 'file_', replace: 'file.', subject: $key);
         }
@@ -542,6 +553,6 @@ class Settings
         return collect($key)
             ->flatten()
             ->filter()
-            ->map(fn (string $key): string => $this->getKeyForStorage($this->normalizeKey($key)));
+            ->map(fn (string|BackedEnum $key): string => $this->getKeyForStorage($this->normalizeKey($key)));
     }
 }
