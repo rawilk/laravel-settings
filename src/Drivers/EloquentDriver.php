@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Drivers;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Contracts\Setting;
 
@@ -13,23 +14,33 @@ class EloquentDriver implements Driver
     {
     }
 
-    public function forget($key): void
+    public function forget($key, $teamId = null): void
     {
-        $this->model::removeSetting($key);
+        $this->model::removeSetting($key, $teamId);
     }
 
-    public function get(string $key, $default = null)
+    public function get(string $key, $default = null, $teamId = null)
     {
-        return $this->model::getValue($key, $default);
+        return $this->model::getValue($key, $default, $teamId);
     }
 
-    public function has($key): bool
+    public function all($teamId = null, $keys = null): array|Arrayable
     {
-        return $this->model::has($key);
+        return $this->model::getAll($teamId, $keys);
     }
 
-    public function set(string $key, $value = null): void
+    public function has($key, $teamId = null): bool
     {
-        $this->model::set($key, $value);
+        return $this->model::has($key, $teamId);
+    }
+
+    public function set(string $key, $value = null, $teamId = null): void
+    {
+        $this->model::set($key, $value, $teamId);
+    }
+
+    public function flush($teamId = null, $keys = null): void
+    {
+        $this->model::flush($teamId, $keys);
     }
 }

@@ -1,34 +1,38 @@
 name: PHP Linting (Pint)
 
 on:
-  workflow_dispatch:
-  push:
-    branches-ignore:
-      - 'dependabot/npm_and_yarn/*'
+    workflow_dispatch:
+    push:
+        branches-ignore:
+            - 'dependabot/npm_and_yarn/*'
+
+permissions:
+    contents: write
 
 jobs:
-  phplint:
-    runs-on: ubuntu-latest
+    phplint:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+                with:
+                    fetch-depth: 2
+                    ref: ${{ github.head_ref }}
 
-      - name: Laravel pint
-        uses: aglipanci/laravel-pint-action@2.3.0
-        with:
-          preset: laravel
+            -   name: Laravel pint
+                uses: aglipanci/laravel-pint-action@2.3.0
+                with:
+                    preset: laravel
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
+            -   name: Extract branch name
+                shell: bash
+                run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+                id: extract_branch
 
-      - name: Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: PHP Linting (Pint)
-          branch: ${{ steps.extract_branch.outputs.branch }}
-          skip_fetch: true
+            -   name: Commit Changes
+                uses: stefanzweifel/git-auto-commit-action@v4
+                with:
+                    commit_message: PHP Linting (Pint)
+                    branch: ${{ steps.extract_branch.outputs.branch }}
+                    skip_fetch: true

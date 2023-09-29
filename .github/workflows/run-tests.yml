@@ -2,11 +2,11 @@ name: Tests
 
 on:
     push:
-        paths-ignore:
-            - '**.md'
-    pull_request:
-        paths-ignore:
-            - '**.md'
+        paths:
+            - '**.php'
+            - 'phpunit.xml.dist'
+            - '.github/workflows/run-tests.yml'
+            - 'composer.json'
 
 jobs:
     test:
@@ -14,23 +14,12 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                php: [8.2, 8.1]
-                laravel: [10.*, 9.*, 8.*,]
+                php: [8.3, 8.2, 8.1]
+                laravel: [10.*]
                 dependency-version: [prefer-lowest, prefer-stable]
                 include:
                     -   laravel: 10.*
                         testbench: 8.*
-                    -   laravel: 9.*
-                        testbench: 7.*
-                    -   laravel: 8.*
-                        testbench: ^6.23
-                exclude:
-                    -   laravel: 8.*
-                        php: 8.2
-                        dependency-version: prefer-lowest
-                    -   laravel: 9.*
-                        php: 8.2
-                        dependency-version: prefer-lowest
 
         name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
 
@@ -59,4 +48,4 @@ jobs:
                 run: composer show -D
 
             -   name: Execute tests
-                run: vendor/bin/pest -p
+                run: vendor/bin/pest --stop-on-failure --parallel --display-skipped

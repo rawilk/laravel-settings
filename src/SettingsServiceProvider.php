@@ -6,6 +6,9 @@ namespace Rawilk\Settings;
 
 use Rawilk\Settings\Contracts\Setting as SettingContract;
 use Rawilk\Settings\Drivers\Factory;
+use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
+use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
+use Rawilk\Settings\Support\ValueSerializers\ValueSerializer;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -16,7 +19,10 @@ class SettingsServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-settings')
             ->hasConfigFile()
-            ->hasMigration('create_settings_table');
+            ->hasMigrations([
+                'create_settings_table',
+                'add_settings_team_field',
+            ]);
     }
 
     public function packageBooted(): void
@@ -27,6 +33,14 @@ class SettingsServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         $this->registerSettings();
+    }
+
+    public function provides(): array
+    {
+        return [
+            Settings::class,
+            'SettingsFactory',
+        ];
     }
 
     protected function bootModelBindings(): void
@@ -47,10 +61,19 @@ class SettingsServiceProvider extends PackageServiceProvider
             fn ($app) => new Factory($app)
         );
 
-        $this->app->singleton(Settings::class, static function ($app) {
-            $settings = new Settings(
-                $app['SettingsFactory']->driver()
+        $this->app->singleton(Settings::class, function ($app) {
+            $keyGenerator = $app->make($app['config']['settings.key_generator'] ?? Md5KeyGenerator::class);
+            $keyGenerator->setContextSerializer(
+                $app->make($app['config']['settings.context_serializer'] ?? ContextSerializer::class)
             );
+
+            $settings = new Settings(
+                driver: $app['SettingsFactory']->driver(),
+                keyGenerator: $keyGenerator,
+                valueSerializer: $app->make($app['config']['settings.value_serializer'] ?? ValueSerializer::class),
+            );
+
+            $settings->useCacheKeyPrefix($app['config']['settings.cache_key_prefix'] ?? '');
 
             $settings->setCache($app['cache.store']);
 
@@ -60,16 +83,11 @@ class SettingsServiceProvider extends PackageServiceProvider
 
             $app['config']['settings.cache'] ? $settings->enableCache() : $settings->disableCache();
             $app['config']['settings.encryption'] ? $settings->enableEncryption() : $settings->disableEncryption();
+            $app['config']['settings.teams'] ? $settings->enableTeams() : $settings->disableTeams();
+
+            $settings->setTeamForeignKey($app['config']['settings.team_foreign_key'] ?? 'team_id');
 
             return $settings;
         });
-    }
-
-    public function provides(): array
-    {
-        return [
-            Settings::class,
-            'SettingsFactory',
-        ];
     }
 }

@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Rawilk\Settings\Models\HasSettings;
 use Rawilk\Settings\Tests\Support\database\factories\CompanyFactory;
 
-class Company extends Model
+final class Company extends Model
 {
     use HasFactory;
     use HasSettings;
+
+    protected static bool $flushSettingsOnDelete = false;
 
     protected static function newFactory(): CompanyFactory
     {

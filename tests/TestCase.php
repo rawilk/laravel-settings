@@ -9,16 +9,22 @@ use Rawilk\Settings\SettingsServiceProvider;
 
 class TestCase extends Orchestra
 {
+    public function getEnvironmentSetUp($app): void
+    {
+        $migrations = [
+            'create_settings_table.php.stub',
+        ];
+
+        foreach ($migrations as $migrationName) {
+            $migration = include __DIR__ . '/../database/migrations/' . $migrationName;
+            $migration->up();
+        }
+    }
+
     protected function getPackageProviders($app): array
     {
         return [
             SettingsServiceProvider::class,
         ];
-    }
-
-    public function getEnvironmentSetUp($app): void
-    {
-        $migration = include __DIR__ . '/../database/migrations/create_settings_table.php.stub';
-        $migration->up();
     }
 }
