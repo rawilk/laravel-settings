@@ -402,7 +402,7 @@ class Settings
      * Generate the key to use for caching a specific setting.
      * This is meant for external usage.
      */
-    public function cacheKeyForSetting(string $key): string
+    public function cacheKeyForSetting(string|BackedEnum $key): string
     {
         $storageKey = $this->getKeyForStorage(
             $this->normalizeKey($key),

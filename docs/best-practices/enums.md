@@ -9,7 +9,7 @@ PHP 8.1 introduced native enums, which can be a great way to define setting keys
 Using an enum instead of hard-coding your setting keys can be helpful for both keeping track of which
 settings are available to the application and for consistency.
 As of version `3.1.0` of the package, the settings service will support enums as setting keys in the `get()`,
-`set()`, `forget()`, and `has()` methods, as well as `isTrue()` and `isFalse()`.
+`set()`, `forget()`, and `has()` methods, as well as `isTrue()`, `isFalse()`, and `cacheKeyForSetting()`.
 
 To use an enum as a setting key, you must use a string backed enum, like the example below:
 
