@@ -49,3 +49,29 @@ protected function contextArguments(): array
     ];
 }
 ```
+
+## Deleting Models
+
+When a model is deleted, the trait registers an event listener for the model's `deleted` event, which will flush all settings for that model.
+If you wish to disable this behavior, you can simply set a static boolean `$flushSettingsOnDelete` property on your model to `false`.
+
+```php
+namespace App\Models;
+
+use Rawilk\Settings\Models\HasSettings;
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    use HasSettings;
+
+    protected static bool $flushSettingsOnDelete = false;
+}
+```
+
+If you are using soft-deletes on your model, you may need to disable this behavior as well, and manually flush the model's settings
+when you force delete it.
+
+> {note} This will only work when the `ReadableKeyGenerator` is used. 
+
+For more information on the key generators, see [Custom Generators](/docs/laravel-settings/{version}/advanced-usage/custom-generators).
