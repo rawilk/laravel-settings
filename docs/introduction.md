@@ -28,6 +28,10 @@ settings()->get('foo');
 settings('foo');
 ```
 
+## Alternatives
+
+- [spatie/laravel-settings](https://github.com/spatie/laravel-settings)
+
 ## Disclaimer
 
 This package is not affiliated with, maintained, authorized, endorsed or sponsored by Laravel or any of its affiliates.

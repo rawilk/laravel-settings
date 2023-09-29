@@ -76,6 +76,10 @@ If you discover any security related issues, please email randall@randallwilk.de
 -   [Randall Wilk](https://github.com/rawilk)
 -   [All Contributors](../../contributors)
 
+## Alternatives
+
+- [spatie/laravel-settings](https://github.com/spatie/laravel-settings)
+
 ## Disclaimer
 
 This package is not affiliated with, maintained, authorized, endorsed or sponsored by Laravel or any of its affiliates.
