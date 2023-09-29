@@ -22,10 +22,10 @@ public function context(Context $context = null): self
 /**
  * Remove a persisted setting from storage.
  *
- * @param string $key
+ * @param string|\BackedEnum $key
  * @return void
  */
-public function forget($key)
+public function forget(string|BackedEnum $key)
 ```
 
 ### get
@@ -34,11 +34,11 @@ public function forget($key)
 /**
  * Retrieve a setting from storage.
  *
- * @param string $key
+ * @param string|\BackedEnum $key
  * @param mixed $default
  * @return mixed
  */
-public function get(string $key, $default = null)
+public function get(string|BackedEnum $key, $default = null)
 ```
 
 ### all
@@ -59,10 +59,10 @@ public function all($keys = null): \Illuminate\Support\Collection
 /**
  * Determine if a setting has been persisted to storage.
  *
- * @param string $key
+ * @param string|\BackedEnum $key
  * @return bool
  */
-public function has($key): bool
+public function has(string|BackedEnum $key): bool
 ```
 
 ### set
@@ -86,11 +86,11 @@ public function set(string $key, $value = null)
  * Determine if a setting is set to a false value.
  * Returns true if the value is false, '0', or 0.
  *
- * @param string $key
+ * @param string|\BackedEnum $key
  * @param bool|int|string $default
  * @return bool
  */
-public function isFalse(string $key, $default = false): bool
+public function isFalse(string|BackedEnum $key, $default = false): bool
 ```
 
 ### isTrue
@@ -100,11 +100,11 @@ public function isFalse(string $key, $default = false): bool
  * Determine if a setting is set to a truthy value.
  * Returns true if the value is true, '1', or 1.
  *
- * @param string $key
+ * @param string|\BackedEnum $key
  * @param bool|int|string $default
  * @return bool
  */
-public function isTrue(string $key, $default = true): bool
+public function isTrue(string|BackedEnum $key, $default = true): bool
 ```
 
 ### flush
@@ -125,8 +125,8 @@ public function flush($keys = null): void
 /**
  * Get the correct cache key for a given setting.
  *
- * @param string $key
+ * @param string|\BackedEnum $key
  * @return string
  */
-public function cacheKeyForSetting(string $key): string
+public function cacheKeyForSetting(string|BackedEnum $key): string
 ```
