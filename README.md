@@ -78,7 +78,7 @@ If you discover any security related issues, please email randall@randallwilk.de
 
 ## Alternatives
 
-- [spatie/laravel-settings](https://github.com/spatie/laravel-settings)
+-   [spatie/laravel-settings](https://github.com/spatie/laravel-settings)
 
 ## Disclaimer
 

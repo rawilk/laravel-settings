@@ -11,7 +11,7 @@ By default, teams are disabled, however you can easily enable them by setting th
 ## Enabling the Teams Feature
 
 > {info} These configuration changes must be made **before** running the migrations when first installing the package or when upgrading from v2.
-> 
+>
 > If you have already run the migrations and want to upgrade your implementation, you can add a migration and copy the contents of the `add_settings_team_field` migration from the package
 > after you make the configuration changes below.
 
@@ -32,7 +32,7 @@ If you want to use a custom foreign key for teams, you can also set it in the co
 ## Working with Teams Settings
 
 After implementing a solution for selecting a team on the authentication process (for example, setting the `team_id`
-of the currently selected team  on the **session:** `session(['team_id' => $team->id]);`), we can set the global `team_id`
+of the currently selected team on the **session:** `session(['team_id' => $team->id]);`), we can set the global `team_id`
 from anywhere, but we recommend setting it in a middleware.
 
 Example Team Middleware:
@@ -47,9 +47,9 @@ class TeamMiddleware
     public function handle($request, Closure $next)
     {
         if (auth()->check()) {
-            Settings::setTeamId(session('team_id'));        
+            Settings::setTeamId(session('team_id'));
         }
-        
+
         // Other custom ways to get the team id
         /* if (! empty(auth('api')->user())) {
             // `getTeamIdFromToken()` example of custom method for getting the set team_id
@@ -57,7 +57,7 @@ class TeamMiddleware
                 auth('api')->user()->getTeamIdFromToken()
             );
         } */
-    
+
         return $next($request);
     }
 }

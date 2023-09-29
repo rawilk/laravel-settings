@@ -31,30 +31,30 @@ use Illuminate\Support\Str;
 class CustomKeyGenerator implements KeyGenerator
 {
     protected ContextSerializer $contextSerializer;
-    
+
     public function generate(string $key, Context $context = null): string
     {
         $key = strtoupper($key);
-        
+
         if ($context) {
             $key .= $this->contextPrefix() . $this->serializer->serialize($context);
         }
-        
-        return $key;    
+
+        return $key;
     }
-    
+
     public function removeContextFromKey(string $key): string
     {
         return Str::before($key, $this->contextPrefix());
     }
-    
+
     public function setContextSerializer(ContextSerializer $serializer): self
     {
         $this->serializer = $serializer;
-        
+
         return $this;
-    } 
-    
+    }
+
     /**
      * This prefix is how we will determine that a database record has a context when
      * flushing/retrieving all settings from the setting drivers.
@@ -93,8 +93,8 @@ class CustomContextSerializer implements ContextSerializer
     {
         if (is_null($context)) {
             return '';
-        }        
-        
+        }
+
         return json_encode($context->toArray());
     }
 }
@@ -124,7 +124,7 @@ class CustomValueSerializer implements ValueSerializer
     {
         return json_encode($value);
     }
-    
+
     public function unserialize(string $serialized): mixed
     {
         return json_decode($serialized, true);

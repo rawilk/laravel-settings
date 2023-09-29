@@ -30,7 +30,7 @@ settings('foo');
 
 ## Alternatives
 
-- [spatie/laravel-settings](https://github.com/spatie/laravel-settings)
+-   [spatie/laravel-settings](https://github.com/spatie/laravel-settings)
 
 ## Disclaimer
 

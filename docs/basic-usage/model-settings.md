@@ -72,6 +72,6 @@ class User extends Model
 If you are using soft-deletes on your model, you may need to disable this behavior as well, and manually flush the model's settings
 when you force delete it.
 
-> {note} This will only work when the `ReadableKeyGenerator` is used. 
+> {note} This will only work when the `ReadableKeyGenerator` is used.
 
 For more information on the key generators, see [Custom Generators](/docs/laravel-settings/{version}/advanced-usage/custom-generators).

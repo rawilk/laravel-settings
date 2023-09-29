@@ -46,7 +46,7 @@ public function get(string $key, $default = null)
 ```php
 /**
  * Retrieve all stored settings.
- * 
+ *
  * @param array|string|null $keys Only return a subset of settings.
  * @return \Illuminate\Support\Collection<int, object>
  */
@@ -123,7 +123,7 @@ public function flush($keys = null): void
 
 ```php
 /**
- * Get the correct cache key for a given setting. 
+ * Get the correct cache key for a given setting.
  *
  * @param string $key
  * @return string
