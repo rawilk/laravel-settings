@@ -514,7 +514,7 @@ class Settings
         }
 
         throw_unless(
-            is_object($record) || $record instanceof Model,
+            is_object($record),
             InvalidBulkValueResult::notObject(),
         );
 
