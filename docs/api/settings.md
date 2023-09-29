@@ -41,6 +41,18 @@ public function forget($key)
 public function get(string $key, $default = null)
 ```
 
+### all
+
+```php
+/**
+ * Retrieve all stored settings.
+ * 
+ * @param array|string|null $keys Only return a subset of settings.
+ * @return \Illuminate\Support\Collection<int, object>
+ */
+public function all($keys = null): \Illuminate\Support\Collection
+```
+
 ### has
 
 ```php
@@ -93,4 +105,28 @@ public function isFalse(string $key, $default = false): bool
  * @return bool
  */
 public function isTrue(string $key, $default = true): bool
+```
+
+### flush
+
+```php
+/**
+ * Flush all settings from storage.
+ *
+ * @param array|string|null $keys Only flush a subset of settings.
+ * @return void
+ */
+public function flush($keys = null): void
+```
+
+### cacheKeyForSetting
+
+```php
+/**
+ * Get the correct cache key for a given setting. 
+ *
+ * @param string $key
+ * @return string
+ */
+public function cacheKeyForSetting(string $key): string
 ```

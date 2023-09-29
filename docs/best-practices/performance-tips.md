@@ -8,11 +8,14 @@ You are free to turn caching off, but you might notice a performance hit on larg
 on apps that are retrieving many settings on each page load.
 
 As always, if you choose to bypass the provided methods for setting and removing settings, you will need to flush the cache manually for
-each setting you manipulate manually. To determine the cache key for a setting key, you should use the `Rawilk\Settings\Support\KeyGenerators\KeyGenerator` to
-generate the md5 version of the setting's key:
+each setting you manipulate manually. To determine the cache key for a setting key, you should use the `cacheKeyForSetting` method
+on the Settings facade to generate the correct cache key for the setting:
 
 ```php
-(new KeyGenerator(new ContextSerializer))->generate($key, $context);
+$cacheKey = Settings::cacheKeyForSetting('foo');
+
+// With context
+$cacheKey = Settings::context(new Context(['id' => 1]))->cacheKeyForSetting('foo');
 ```
 
-You will also need to prefix it with the `cache_key_prefix` found in `config/settings.php`.
+> {tip} The `cacheKeyForSetting` method will take into account the current team id and context as well that is set on the settings service.

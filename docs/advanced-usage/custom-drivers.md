@@ -32,17 +32,27 @@ Any custom drivers you make must implement the `Rawilk\Settings\Contracts\Driver
 the interface looks like:
 
 ```php
+<?php
+
+declare(strict_types=1);
+
 namespace Rawilk\Settings\Contracts;
+
+use Illuminate\Contracts\Support\Arrayable;
 
 interface Driver
 {
-    public function forget($key);
+    public function forget($key, $teamId = null);
 
-    public function get(string $key, $default = null);
+    public function get(string $key, $default = null, $teamId = null);
 
-    public function has($key): bool;
+    public function all($teamId = null, $keys = null): array|Arrayable;
 
-    public function set(string $key, $value = null);
+    public function has($key, $teamId = null): bool;
+
+    public function set(string $key, $value = null, $teamId = null);
+
+    public function flush($teamId = null, $keys = null);
 }
 ```
 

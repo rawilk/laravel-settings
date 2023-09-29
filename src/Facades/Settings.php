@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool isTrue(string $key, bool|int|string $default = true)
  * @method static bool has($key)
  * @method static null|mixed set(string $key, null|mixed $value = null)
+ * @method static void flush($keys)
  * @method static self disableCache()
  * @method static self enableCache()
  * @method static self temporarilyDisableCache()
