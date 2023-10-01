@@ -9,6 +9,7 @@ use Rawilk\Settings\Drivers\EloquentDriver;
 use Rawilk\Settings\Events\SettingsFlushed;
 use Rawilk\Settings\Events\SettingWasDeleted;
 use Rawilk\Settings\Events\SettingWasStored;
+use Rawilk\Settings\Exceptions\InvalidEnumType;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
@@ -17,6 +18,8 @@ use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Support\ValueSerializers\JsonValueSerializer;
+use Rawilk\Settings\Tests\Support\Enums\IntBackedEnum as InvalidEnumTypeEnum;
+use Rawilk\Settings\Tests\Support\Enums\SettingKey;
 
 beforeEach(function () {
     config([
@@ -498,6 +501,21 @@ it('can generate the cache key for a given setting', function () {
 
     expect(SettingsFacade::cacheKeyForSetting('foo'))->toBe('settings.foo::team:1');
 });
+
+it('accepts a backed enum for a key instead of a string', function () {
+    SettingsFacade::set(SettingKey::Timezone, 'foo');
+
+    expect(SettingsFacade::get(SettingKey::Timezone))->toBe('foo')
+        ->and(SettingsFacade::has(SettingKey::Timezone))->toBeTrue();
+
+    SettingsFacade::forget(SettingKey::Timezone);
+
+    expect(SettingsFacade::has(SettingKey::Timezone))->toBeFalse();
+});
+
+it('throws an exception when an int backed enum is used', function () {
+    SettingsFacade::get(InvalidEnumTypeEnum::Foo);
+})->throws(InvalidEnumType::class);
 
 // Helpers...
 
