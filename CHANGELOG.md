@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v3.1.0 - 2023-10-01
+
+### What's Changed
+
+- Enums as setting keys by @rawilk in https://github.com/rawilk/laravel-settings/pull/37
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v3.0.0...v3.1.0
+
 ## v3.0.0 - 2023-09-29
 
 ### What's Changed
