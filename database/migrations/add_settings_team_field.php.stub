@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unique([
                 'key',
                 config('settings.team_foreign_key'),
-            ]);
+            ], 'settings_key_team_id_unique');
         });
     }
 };
