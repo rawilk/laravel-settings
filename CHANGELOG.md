@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v3.1.1 - 2023-10-02
+
+### What's Changed
+
+- Give name `settings_key_team_id_unique` to unique index in team migration file - https://github.com/rawilk/laravel-settings/commit/1c44f29f6e8f78914876c629f1b0b3d1eff7f84c
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v3.1.0...v3.1.1
+
 ## v3.1.0 - 2023-10-01
 
 ### What's Changed
