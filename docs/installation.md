@@ -71,6 +71,6 @@ settings()->get('site.lang', 'en'); // 'en'
 settings()->get('site.lang', 'es'); // 'es'
 ```
 
-For more information on retrieving a value, see [Retrieving a value](/docs/laravel-settings/{version}/basic-usage#user-content-retrieving-a-value) in the docs.
+For more information on retrieving a value, see [Retrieving a value](/docs/laravel-settings/{version}/basic-usage/basic-usage#user-content-retrieving-a-value) in the docs.
 
 > {tip} This configuration value is set to `true` by default, however in future major versions of this package, it may be defaulted to `false`.
