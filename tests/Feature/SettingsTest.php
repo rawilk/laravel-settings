@@ -27,6 +27,7 @@ beforeEach(function () {
         'settings.table' => 'settings',
         'settings.cache' => false,
         'settings.encryption' => false,
+        'settings.cache_default_value' => true,
     ]);
 
     setDatabaseDriverConnection();
@@ -516,6 +517,20 @@ it('accepts a backed enum for a key instead of a string', function () {
 it('throws an exception when an int backed enum is used', function () {
     SettingsFacade::get(InvalidEnumTypeEnum::Foo);
 })->throws(InvalidEnumType::class);
+
+test('if configured to not cache default values, it does not cache the default value if the requested setting is not persisted', function () {
+    settings()->enableCache()->cacheDefaultValue(false);
+
+    expect(settings()->get('foo', 'default value 1'))->toBe('default value 1')
+        ->and(settings()->get('foo', 'default value 2'))->toBe('default value 2');
+});
+
+it('caches the default value if configured to', function () {
+    settings()->enableCache()->cacheDefaultValue(true);
+
+    expect(settings()->get('foo', 'default value 1'))->toBe('default value 1')
+        ->and(settings()->get('foo', 'default value 2'))->toBe('default value 1');
+});
 
 // Helpers...
 

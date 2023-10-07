@@ -163,4 +163,16 @@ return [
     |
     */
     'value_serializer' => \Rawilk\Settings\Support\ValueSerializers\ValueSerializer::class,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Default Value
+    |--------------------------------------------------------------------------
+    |
+    | When a setting is not persisted, we will cache the passed in default value
+    | if this is set to true. This may not always be desirable, so you can
+    | disable it here if needed.
+    |
+    */
+    'cache_default_value' => true,
 ];

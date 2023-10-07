@@ -44,6 +44,12 @@ class Settings
     // Meant for internal use only.
     protected bool $resetContext = true;
 
+    /**
+     * If true, we will cache the default value for a setting when it is not persisted
+     * when trying to retrieve it.
+     */
+    protected bool $cacheDefaultValue = true;
+
     protected bool $teams = false;
 
     /** @var null|string|int */
@@ -110,6 +116,13 @@ class Settings
         return $this;
     }
 
+    public function cacheDefaultValue(bool $cacheDefaultValue = true): self
+    {
+        $this->cacheDefaultValue = $cacheDefaultValue;
+
+        return $this;
+    }
+
     public function forget(string|BackedEnum $key)
     {
         $key = $this->normalizeKey($key);
@@ -154,7 +167,7 @@ class Settings
                 $this->getCacheKey($generatedKey),
                 fn () => $this->driver->get(
                     key: $generatedKey,
-                    default: $default,
+                    default: $this->cacheDefaultValue ? $default : null,
                     teamId: $this->teams ? $this->teamId : false,
                 )
             );

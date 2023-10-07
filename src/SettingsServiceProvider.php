@@ -77,6 +77,8 @@ class SettingsServiceProvider extends PackageServiceProvider
 
             $settings->setCache($app['cache.store']);
 
+            $settings->cacheDefaultValue($app['config']['settings.cache_default_value'] ?? false);
+
             if (config('app.key')) {
                 $settings->setEncrypter($app['encrypter']);
             }
