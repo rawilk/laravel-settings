@@ -26,6 +26,9 @@ Settings::get('foo');
 Settings::get('not persisted', 'my default'); // 'my default'
 ```
 
+> {note} By default, the default value passed into `get()` will be cached. This may not always be desirable, and can be
+> disabled by setting the `cache_default_value` config option to `false` in the `config/settings.php` file.
+
 ## Check if a setting exists
 
 ```php
