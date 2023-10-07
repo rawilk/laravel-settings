@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v3.1.2 - 2023-10-07
+
+### What's Changed
+- Disable caching of the default value if configured that way by @rawilk in https://github.com/rawilk/laravel-settings/pull/40
+- Update docs for new `cache_default_value` config option by @rawilk in https://github.com/rawilk/laravel-settings/pull/41
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v3.1.1...v3.1.2
+
 ## v3.1.1 - 2023-10-02
 
 ### What's Changed
