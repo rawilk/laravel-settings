@@ -49,7 +49,7 @@ allowing the package to search for settings easier by key, and partial searches 
 
 For more information on the key generators, see the [Custom Generators](/docs/laravel-settings/{version}/advanced-usage/custom-generators) documentation.
 
-#### Default Values
+### Default Values
 
 When caching is enabled, and you are attempting to retrieve a setting that is not persisted yet, the settings service will cache the default value provided to `get()`.
 This means that any subsequent calls to `get()` for that setting will return the original default value provided to it until the setting is persisted.
