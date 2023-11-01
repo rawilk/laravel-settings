@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static self enableTeams()
  * @method static self disableTeams()
  * @method static bool teamsAreEnabled()
+ * @method static self usingTeam(mixed $teamId)
+ * @method static self withoutTeams()
  * @method static \Rawilk\Settings\Contracts\KeyGenerator getKeyGenerator()
  * @method static string cacheKeyForSetting(string $key)
  */
