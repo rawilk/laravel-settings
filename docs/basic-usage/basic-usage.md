@@ -58,6 +58,11 @@ Settings::isFalse('app.debug'); // true
 Using `all`, you can retrieve all the stored settings, which will be returned as a collection. You may also retrieve a subset of settings
 by passing in an array of keys to retrieve.
 
+> {note} Either the `ReadableKeyGenerator` or a custom key generator must be configured to be used before this method can be used.
+> See [KeyGenerator docs](/docs/laravel-settings/{version}/advanced-usage/custom-generators#user-content-keygenerator) for more information.
+> 
+> In a future major release, the `ReadableKeyGenerator` may be set to be the default key generator.
+
 ```php
 Settings::all();
 

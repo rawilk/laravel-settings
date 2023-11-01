@@ -102,6 +102,17 @@ Settings::setTeamId($currentTeamId);
 
 > {tip} You can pass in an eloquent model to `setTeamId` instead of an id if you prefer.
 
+#### Temporary Team Switching
+
+As of `v3.2.0`, to make administering team settings easier, we've added the following convenience methods to `Settings`:
+
+- `usingTeam($teamId)`: Use this method to scope settings to a specific team on a single call.
+- `withoutTeams()`: Use this method to remove team scoping for a single call.
+
+```php
+settings()->usingTeam('my-team-id')->set('foo', 'bar');
+```
+
 ## Contextual Settings
 
 The `Context` object can be used in conjunction with teams for further scoping of settings. The most common scenario for this would be if you have a
