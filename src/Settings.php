@@ -57,6 +57,9 @@ class Settings
 
     protected ?string $teamForeignKey = null;
 
+    // Allows us to use a team id for a single call.
+    protected mixed $temporaryTeamId = false;
+
     protected string $cacheKeyPrefix = '';
 
     public function __construct(
@@ -100,6 +103,24 @@ class Settings
         }
 
         $this->teamId = $id;
+
+        return $this;
+    }
+
+    public function usingTeam(mixed $teamId): self
+    {
+        if ($teamId instanceof Model) {
+            $teamId = $teamId->getKey();
+        }
+
+        $this->temporaryTeamId = $teamId;
+
+        return $this;
+    }
+
+    public function withoutTeams(): self
+    {
+        $this->temporaryTeamId = null;
 
         return $this;
     }
@@ -156,7 +177,7 @@ class Settings
         return $driverResult;
     }
 
-    public function get(string|BackedEnum $key, $default = null)
+    public function get(string|BackedEnum $key, $default = null, bool $resetTempTeam = true)
     {
         $key = $this->normalizeKey($key);
 
@@ -168,14 +189,14 @@ class Settings
                 fn () => $this->driver->get(
                     key: $generatedKey,
                     default: $this->cacheDefaultValue ? $default : null,
-                    teamId: $this->teams ? $this->teamId : false,
+                    teamId: $this->teamIdForCall(),
                 )
             );
         } else {
             $value = $this->driver->get(
                 key: $generatedKey,
                 default: $default,
-                teamId: $this->teams ? $this->teamId : false,
+                teamId: $this->teamIdForCall(),
             );
         }
 
@@ -190,6 +211,10 @@ class Settings
         $this->temporarilyDisableCache = false;
         $this->resetContext = true;
 
+        if ($resetTempTeam) {
+            $this->temporaryTeamId = false;
+        }
+
         return $value ?? $default;
     }
 
@@ -198,7 +223,7 @@ class Settings
         $keys = $this->normalizeBulkLookupKey($keys);
 
         $values = collect($this->driver->all(
-            teamId: $this->teams ? $this->teamId : false,
+            teamId: $this->teamIdForCall(),
             keys: $keys,
         ))->map(function (mixed $record): mixed {
             $record = $this->normalizeBulkRetrievedValue($record);
@@ -221,17 +246,18 @@ class Settings
 
         $this->temporarilyDisableCache = false;
         $this->resetContext = true;
+        $this->temporaryTeamId = false;
 
         return $values;
     }
 
-    public function has(string|BackedEnum $key): bool
+    public function has(string|BackedEnum $key, bool $resetTempTeam = true): bool
     {
         $key = $this->normalizeKey($key);
 
         $has = $this->driver->has(
             key: $this->getKeyForStorage($key),
-            teamId: $this->teams ? $this->teamId : false,
+            teamId: $this->teamIdForCall(),
         );
 
         if ($this->resetContext) {
@@ -240,6 +266,10 @@ class Settings
 
         $this->temporarilyDisableCache = false;
         $this->resetContext = true;
+
+        if ($resetTempTeam) {
+            $this->temporaryTeamId = false;
+        }
 
         return $has;
     }
@@ -262,7 +292,7 @@ class Settings
         $driverResult = $this->driver->set(
             key: $generatedKey,
             value: $this->encryptionIsEnabled() ? $this->encrypter->encrypt($serializedValue) : $serializedValue,
-            teamId: $this->teams ? $this->teamId : false,
+            teamId: $this->teamIdForCall(),
         );
 
         SettingWasStored::dispatch(
@@ -270,7 +300,7 @@ class Settings
             $generatedKey,
             $this->getCacheKey($generatedKey),
             $value,
-            $this->teams ? $this->teamId : false,
+            $this->teamIdForCall(),
             $this->context,
         );
 
@@ -280,6 +310,7 @@ class Settings
 
         $this->context();
         $this->temporarilyDisableCache = false;
+        $this->temporaryTeamId = false;
 
         return $driverResult;
     }
@@ -303,13 +334,13 @@ class Settings
         $keys = $this->normalizeBulkLookupKey($keys);
 
         $driverResult = $this->driver->flush(
-            teamId: $this->teams ? $this->teamId : false,
+            teamId: $this->teamIdForCall(),
             keys: $keys,
         );
 
         SettingsFlushed::dispatch(
             $keys,
-            $this->teams ? $this->teamId : false,
+            $this->teamIdForCall(),
             $this->context,
         );
 
@@ -327,6 +358,7 @@ class Settings
 
         $this->temporarilyDisableCache = false;
         $this->resetContext = true;
+        $this->temporaryTeamId = false;
 
         return $driverResult;
     }
@@ -454,8 +486,9 @@ class Settings
     {
         $cacheKey = $this->cacheKeyPrefix . $key;
 
-        if ($this->teams) {
-            $teamId = $this->teamId ?? 'null';
+        $teamId = $this->teamIdForCall();
+        if ($teamId !== false) {
+            $teamId = is_null($teamId) ? 'null' : $teamId;
 
             $cacheKey .= "::team:{$teamId}";
         }
@@ -490,11 +523,11 @@ class Settings
         }
 
         // To prevent decryption errors, we will check if we have a setting set for the current context and key.
-        if (! $this->doNotResetContext()->has($key)) {
+        if (! $this->doNotResetContext()->has(key: $key, resetTempTeam: false)) {
             return true;
         }
 
-        return $newValue !== $this->doNotResetContext()->get($key);
+        return $newValue !== $this->doNotResetContext()->get(key: $key, resetTempTeam: false);
     }
 
     protected function cacheIsEnabled(): bool
@@ -509,6 +542,15 @@ class Settings
     protected function encryptionIsEnabled(): bool
     {
         return $this->encryptionEnabled && $this->encrypter !== null;
+    }
+
+    protected function teamIdForCall(): mixed
+    {
+        if ($this->temporaryTeamId !== false) {
+            return $this->temporaryTeamId;
+        }
+
+        return $this->teams ? $this->teamId : false;
     }
 
     protected function decryptValue($value)

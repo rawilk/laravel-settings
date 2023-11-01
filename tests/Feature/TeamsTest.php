@@ -224,3 +224,46 @@ test("a team's settings can be flushed", function () {
         'team_id' => $team->id,
     ]);
 });
+
+test('when a team is set, a different team can be used for a single call', function () {
+    $team = Team::first();
+    $otherTeam = Team::factory()->create();
+
+    SettingsFacade::setTeamId($team);
+    SettingsFacade::set('foo', 'team 1');
+
+    SettingsFacade::usingTeam($otherTeam)->set('foo', 'team 2');
+
+    $this->assertDatabaseCount('settings', 2);
+    expect(SettingsFacade::getTeamId())->toBe($team->id)
+        ->and(SettingsFacade::get('foo'))->toBe('team 1')
+        ->and(SettingsFacade::usingTeam($otherTeam)->get('foo'))->toBe('team 2');
+});
+
+test('when a team is set, team id can be set to null temporarily', function () {
+    $team = Team::first();
+
+    SettingsFacade::setTeamId($team);
+    SettingsFacade::set('foo', 'team 1');
+
+    SettingsFacade::withoutTeams()->set('foo', 'global');
+
+    $this->assertDatabaseCount('settings', 2);
+    expect(SettingsFacade::getTeamId())->toBe($team->id)
+        ->and(SettingsFacade::get('foo'))->toBe('team 1')
+        ->and(SettingsFacade::withoutTeams()->get('foo'))->toBe('global');
+});
+
+test('a team can be used temporarily when teams are not enabled', function () {
+    SettingsFacade::disableTeams();
+    SettingsFacade::set('foo', 'global');
+
+    $team = Team::first();
+    SettingsFacade::usingTeam($team)->set('foo', 'team 1');
+
+    $this->assertDatabaseCount('settings', 2);
+    expect(SettingsFacade::getTeamId())->toBeNull()
+        ->and(SettingsFacade::teamsAreEnabled())->toBeFalse()
+        ->and(SettingsFacade::get('foo'))->toBe('global')
+        ->and(SettingsFacade::usingTeam($team)->get('foo'))->toBe('team 1');
+});
