@@ -175,4 +175,23 @@ return [
     |
     */
     'cache_default_value' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Unserialize Safelist
+    |--------------------------------------------------------------------------
+    |
+    | When using the default value serializer class from this package, we
+    | will only unserialize objects that have their classes whitelisted here.
+    | Any other objects will be unserialized to something like:
+    | __PHP_Incomplete_Class(App\Models\User) {...}
+    |
+    | To prevent any objects from being unserialized, simply set this to
+    | an empty array.
+    */
+    'unserialize_safelist' => [
+        \Carbon\Carbon::class,
+        \Carbon\CarbonImmutable::class,
+        \Illuminate\Support\Carbon::class,
+    ],
 ];
