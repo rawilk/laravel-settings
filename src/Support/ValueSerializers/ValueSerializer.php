@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Support\ValueSerializers;
 
+use Illuminate\Support\Arr;
 use Rawilk\Settings\Contracts\ValueSerializer as ValueSerializerContract;
 
 class ValueSerializer implements ValueSerializerContract
@@ -15,6 +16,8 @@ class ValueSerializer implements ValueSerializerContract
 
     public function unserialize(string $serialized): mixed
     {
-        return unserialize($serialized, ['allowed_classes' => false]);
+        $safelistedClasses = Arr::wrap(config('settings.unserialize_safelist', []));
+
+        return unserialize($serialized, ['allowed_classes' => $safelistedClasses]);
     }
 }
