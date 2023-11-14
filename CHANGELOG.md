@@ -2,6 +2,15 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v3.3.0 - 2023-11-14
+
+### What's Changed
+
+- Add safelist for object unserialization by @rawilk in https://github.com/rawilk/laravel-settings/pull/47
+- Update docs by @rawilk in https://github.com/rawilk/laravel-settings/pull/48
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v3.2.0...v3.3.0
+
 ## v3.2.0 - 2023-11-01
 
 ### What's Changed
