@@ -192,5 +192,6 @@ return [
     'unserialize_safelist' => [
         \Carbon\Carbon::class,
         \Carbon\CarbonImmutable::class,
+        \Illuminate\Support\Carbon::class,
     ],
 ];
