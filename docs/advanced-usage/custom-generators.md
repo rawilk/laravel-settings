@@ -138,3 +138,31 @@ After defining your class, you need to add it the settings config file:
 // config/settings.php
 'value_serializer' => CustomValueSerializer::class,
 ```
+
+### Unserializing Objects
+
+When using the default `ValueSerializer`, we will use php's `unserialize` method to re-hydrate the value. However, we use the `allowed_classes` option to prevent
+objects from being unserialized back into their original form. This means that if you are storing something like an eloquent model as a setting, it will be unserialized
+into something like this:
+
+```php
+__PHP_Incomplete_Class(App\Models\User) {...}
+```
+
+Because of this, you will not have access to any kind of method or property on the model. As of `v3.3.0` of this package, you can now define a safelist of classes that
+should be allowed to be unserialized by settings. By default, we'll allow Carbon (date) classes to be unserialized. You can modify the safelist in the config to allow
+the user model from above to be unserialized as well:
+
+```php
+// config/settings.php
+'unserialize_safelist' => [
+    \Carbon\Carbon::class,
+    \Carbon\CarbonImmutable::class,
+    \Illuminate\Support\Carbon::class,
+    
+    // Add this line
+    App\Models\User::class,
+],
+```
+
+> {note} You will need to safelist each Eloquent model class that you wish to be unserialized. It is not enough to safelist the base class of Model::class.
