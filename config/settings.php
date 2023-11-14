@@ -182,7 +182,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | When using the default value serializer class from this package, we
-    | will only unserialize objects that have their classes whitelisted here.
+    | will only unserialize objects that have their classes safelisted here.
     | Any other objects will be unserialized to something like:
     | __PHP_Incomplete_Class(App\Models\User) {...}
     |
