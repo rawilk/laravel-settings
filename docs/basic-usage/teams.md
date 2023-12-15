@@ -133,7 +133,7 @@ Settings::context($userContext)->get('timezone'); // UTC
 
 Settings::setTeamId(2);
 
-Settings::contest($userContext)->get('timezone'); // America/Chicago
+Settings::context($userContext)->get('timezone'); // America/Chicago
 ```
 
 This will also work with [model settings](/docs/laravel-settings/{version}/basic-usage/model-settings) as well. For more information on the
