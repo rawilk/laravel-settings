@@ -2,6 +2,23 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v3.3.1 - 2024-03-10
+
+### What's Changed
+
+* Fix typo by @lakuapik in https://github.com/rawilk/laravel-settings/pull/51
+* Bump aglipanci/laravel-pint-action from 2.3.0 to 2.3.1 by @dependabot in https://github.com/rawilk/laravel-settings/pull/52
+* Added support for larvael 11.x by @demianottema in https://github.com/rawilk/laravel-settings/pull/58
+* Bump ramsey/composer-install from 2 to 3 by @dependabot in https://github.com/rawilk/laravel-settings/pull/59
+* Finish Laravel 11.x Compatibility Update by @rawilk in https://github.com/rawilk/laravel-settings/pull/60
+
+### New Contributors
+
+* @lakuapik made their first contribution in https://github.com/rawilk/laravel-settings/pull/51
+* @demianottema made their first contribution in https://github.com/rawilk/laravel-settings/pull/58
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v3.3.0...v3.3.1
+
 ## v3.3.0 - 2023-11-14
 
 ### What's Changed
