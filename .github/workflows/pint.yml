@@ -21,7 +21,7 @@ jobs:
                     ref: ${{ github.head_ref }}
 
             -   name: Laravel pint
-                uses: aglipanci/laravel-pint-action@2.3.1
+                uses: aglipanci/laravel-pint-action@2.4
                 with:
                     preset: laravel
 
