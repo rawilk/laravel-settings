@@ -10,9 +10,7 @@ use Rawilk\Settings\Contracts\Setting;
 
 class EloquentDriver implements Driver
 {
-    public function __construct(protected Setting $model)
-    {
-    }
+    public function __construct(protected Setting $model) {}
 
     public function forget($key, $teamId = null): void
     {

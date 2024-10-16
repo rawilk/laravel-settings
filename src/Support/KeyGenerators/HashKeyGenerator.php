@@ -13,7 +13,7 @@ class HashKeyGenerator implements KeyGeneratorContract
 {
     protected ContextSerializer $serializer;
 
-    public function generate(string $key, Context $context = null): string
+    public function generate(string $key, ?Context $context = null): string
     {
         return hash(
             config('settings.hash_algorithm', 'xxh128'),
