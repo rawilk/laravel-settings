@@ -17,8 +17,7 @@ class DatabaseDriver implements Driver
         protected Connection $connection,
         protected string $table,
         protected ?string $teamForeignKey = null,
-    ) {
-    }
+    ) {}
 
     public function forget($key, $teamId = null): void
     {

@@ -20,6 +20,5 @@ final class SettingWasStored
         public mixed $value,
         public mixed $teamId,
         public bool|Context|null $context,
-    ) {
-    }
+    ) {}
 }
