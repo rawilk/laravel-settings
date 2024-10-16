@@ -145,6 +145,7 @@ return [
     | Supported:
     | - \Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator
     | - \Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator (default)
+    | - \Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator
     |
     */
     'key_generator' => \Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator::class,
@@ -194,4 +195,14 @@ return [
         \Carbon\CarbonImmutable::class,
         \Illuminate\Support\Carbon::class,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hash Algorithm
+    |--------------------------------------------------------------------------
+    |
+    | The hashing algorithm to use for the HashKeyGenerator.
+    |
+    */
+    'hash_algorithm' => 'xxh128',
 ];
