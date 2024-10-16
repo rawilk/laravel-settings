@@ -53,6 +53,8 @@ public function get(string|BackedEnum $key, $default = null)
 public function all($keys = null): \Illuminate\Support\Collection
 ```
 
+> {note} The `DotNotationContextSerializer` context serializer must be used for this to work properly.
+
 ### has
 
 ```php
@@ -117,6 +119,44 @@ public function isTrue(string|BackedEnum $key, $default = true): bool
  * @return void
  */
 public function flush($keys = null): void
+```
+
+### getTeamId
+
+```php
+/**
+ * Retrieve the current team id for settings. 
+ */
+public function getTeamId(): mixed;
+```
+
+### setTeamId
+
+```php
+/**
+ * Set the current team id for teams/groups support.
+ * 
+ * @param Model|int|null|string $id
+ */
+public function setTeamId(mixed $id): Settings;
+```
+
+### usingTeam
+
+```php
+/**
+ * Use a team for a single call.   
+ */
+public function usingTeam(mixed $teamId): Settings;
+```
+
+### withoutTeams
+
+```php
+/**
+ * Perform a single settings call without a team context. 
+ */
+public function withoutTeams(): Settings;
 ```
 
 ### cacheKeyForSetting
