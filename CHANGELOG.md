@@ -2,6 +2,16 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v3.4.0 - 2024-10-16
+
+### What's Changed
+
+* Bump aglipanci/laravel-pint-action from 2.3.1 to 2.4 by @dependabot in https://github.com/rawilk/laravel-settings/pull/63
+* [Feature]: Hash key generator by @rawilk in https://github.com/rawilk/laravel-settings/pull/68
+* Bump dependabot/fetch-metadata from 1.6.0 to 2.2.0 by @dependabot in https://github.com/rawilk/laravel-settings/pull/66
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v3.3.1...v3.4.0
+
 ## v3.3.1 - 2024-03-10
 
 ### What's Changed
