@@ -66,8 +66,7 @@ class Settings
         protected Driver $driver,
         protected KeyGenerator $keyGenerator,
         protected ValueSerializer $valueSerializer,
-    ) {
-    }
+    ) {}
 
     // mainly for testing purposes
     public function getDriver(): Driver
@@ -79,7 +78,7 @@ class Settings
      * Pass in `false` for context when calling `all()` to only return results
      * that do not have context.
      */
-    public function context(Context|bool $context = null): self
+    public function context(Context|bool|null $context = null): self
     {
         $this->context = $context;
 
