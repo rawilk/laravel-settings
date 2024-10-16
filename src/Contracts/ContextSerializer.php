@@ -8,5 +8,5 @@ use Rawilk\Settings\Support\Context;
 
 interface ContextSerializer
 {
-    public function serialize(?Context $context = null): string;
+    public function serialize(Context $context = null): string;
 }

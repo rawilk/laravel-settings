@@ -8,7 +8,7 @@ use Rawilk\Settings\Support\Context;
 
 interface KeyGenerator
 {
-    public function generate(string $key, ?Context $context = null): string;
+    public function generate(string $key, Context $context = null): string;
 
     public function removeContextFromKey(string $key): string;
 
