@@ -21,6 +21,7 @@ use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
 use Rawilk\Settings\Exceptions\InvalidEnumType;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 
 class Settings
@@ -595,7 +596,7 @@ class Settings
     {
         if (is_null($key) && $this->context !== null) {
             throw_if(
-                $this->keyGenerator instanceof Md5KeyGenerator,
+                $this->keyGenerator instanceof Md5KeyGenerator || $this->keyGenerator instanceof HashKeyGenerator,
                 InvalidKeyGenerator::forPartialLookup($this->keyGenerator::class),
             );
 
