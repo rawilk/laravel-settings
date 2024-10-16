@@ -16,7 +16,7 @@ beforeEach(function () {
     ]);
 
     $this->driver = new EloquentDriver(app(Setting::class));
-    $this->model = app(Setting::class);
+    $this->model = Setting::class;
 
     migrateTeams();
 });
