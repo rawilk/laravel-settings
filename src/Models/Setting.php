@@ -7,6 +7,7 @@ namespace Rawilk\Settings\Models;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Rawilk\Settings\Contracts\Setting as SettingContract;
 use Rawilk\Settings\Facades\Settings;
@@ -15,13 +16,12 @@ use Rawilk\Settings\Facades\Settings;
  * @property int $id
  * @property string $key
  * @property mixed $value
- * @property int|string|null $team_id
+ * @property int|string|null $model_id
+ * @property int|string|null $model_type
  */
 class Setting extends Model implements SettingContract
 {
     public $timestamps = false;
-
-    protected ?string $teamForeignKey = null;
 
     protected $guarded = ['id'];
 
@@ -30,18 +30,24 @@ class Setting extends Model implements SettingContract
         parent::__construct($attributes);
 
         $this->setTable(config('settings.table'));
-        $this->teamForeignKey = config('settings.team_foreign_key');
     }
 
-    public static function getValue(string $key, $default = null, $teamId = null)
+    public static function getValue(string $key, $default = null, $morphId = null, $morphType = null)
     {
         $value = static::query()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
+                $morphId !== false,
                 fn (Builder $query) => $query->where(
-                    static::make()->getTable() . '.' . config('settings.team_foreign_key'),
-                    $teamId,
+                    static::make()->getTable() . '.' . config('settings.morph_name') . '_id',
+                    $morphId,
+                ),
+            )
+            ->when(
+                $morphType !== false,
+                fn (Builder $query) => $query->where(
+                    static::make()->getTable() . '.' . config('settings.morph_name') . '_type',
+                    $morphType,
                 ),
             )
             ->value('value');
@@ -49,56 +55,79 @@ class Setting extends Model implements SettingContract
         return $value ?? $default;
     }
 
-    public static function getAll($teamId = null, $keys = null): array|Arrayable
+    public static function getAll($morphId = null, $morphType = null, $keys = null): array|Arrayable
     {
-        return static::baseBulkQuery($teamId, $keys)->get();
+        return static::baseBulkQuery($morphId, $morphType, $keys)->get();
     }
 
-    public static function has($key, $teamId = null): bool
+    public static function has($key, $morphId = null, $morphType = null): bool
     {
         return static::query()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
+                $morphId !== false,
                 fn (Builder $query) => $query->where(
-                    static::make()->getTable() . '.' . config('settings.team_foreign_key'),
-                    $teamId,
+                    static::make()->getTable() . '.' . config('settings.morph_name') . '_id',
+                    $morphId,
+                ),
+            )
+            ->when(
+                $morphType !== false,
+                fn (Builder $query) => $query->where(
+                    static::make()->getTable() . '.' . config('settings.morph_name') . '_type',
+                    $morphType,
                 ),
             )
             ->exists();
     }
 
-    public static function removeSetting($key, $teamId = null): void
+    public static function removeSetting($key, $morphId = null, $morphType = null): void
     {
         static::query()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
+                $morphId !== false,
                 fn (Builder $query) => $query->where(
-                    static::make()->getTable() . '.' . config('settings.team_foreign_key'),
-                    $teamId,
+                    static::make()->getTable() . '.' . config('settings.morph_name') . '_id',
+                    $morphId,
+                ),
+            )
+            ->when(
+                $morphType !== false,
+                fn (Builder $query) => $query->where(
+                    static::make()->getTable() . '.' . config('settings.morph_name') . '_type',
+                    $morphType,
                 ),
             )
             ->delete();
     }
 
-    public static function set(string $key, $value = null, $teamId = null)
+    public static function set(string $key, $value = null, $morphId = null, $morphType = null)
     {
         $data = ['key' => $key];
 
-        if ($teamId !== false) {
-            $data[config('settings.team_foreign_key')] = $teamId;
+        if ($morphId !== false) {
+            $data[config('settings.morph_name') . '_id'] = $morphId;
+        }
+
+        if ($morphType !== false) {
+            $data[config('settings.morph_name') . '_type'] = $morphType;
         }
 
         return static::updateOrCreate($data, compact('value'));
     }
 
-    public static function flush($teamId = null, $keys = null): void
+    public static function flush($morphId = null, $morphType = null, $keys = null): void
     {
-        static::baseBulkQuery($teamId, $keys)->delete();
+        static::baseBulkQuery($morphId, $morphType, $keys)->delete();
     }
 
-    protected static function baseBulkQuery($teamId, $keys): Builder
+    public function model(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    protected static function baseBulkQuery($morphId, $morphType, $keys): Builder
     {
         $keys = static::normalizeKeys($keys);
 
@@ -118,12 +147,19 @@ class Setting extends Model implements SettingContract
                 fn (Builder $query) => $query->whereIn('key', $keys),
             )
             ->when(
-                $teamId !== false,
+                $morphId !== false,
                 fn (Builder $query) => $query->where(
-                    static::make()->getTable() . '.' . config('settings.team_foreign_key'),
-                    $teamId,
+                    static::make()->getTable() . '.' . config('settings.morph_name') . '_id',
+                    $morphId,
+                ),
+            )->when(
+                $morphType !== false,
+                fn (Builder $query) => $query->where(
+                    static::make()->getTable() . '.' . config('settings.morph_name') . '_type',
+                    $morphType,
                 ),
             );
+
     }
 
     protected static function normalizeKeys($keys): string|Collection|bool

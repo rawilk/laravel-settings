@@ -41,7 +41,7 @@ class Factory
         return new DatabaseDriver(
             connection: $this->app['db']->connection(Arr::get($config, 'connection')),
             table: $this->app['config']['settings.table'],
-            teamForeignKey: $this->app['config']['settings.team_foreign_key'] ?? null,
+            morphName: $this->app['config']['settings.morph_name'] ?? null,
         );
     }
 

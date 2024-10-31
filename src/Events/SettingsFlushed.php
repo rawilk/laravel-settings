@@ -16,7 +16,8 @@ final class SettingsFlushed
 
     public function __construct(
         public bool|Collection|string $keys,
-        public mixed $teamId,
+        public mixed $modelId,
+        public mixed $modelType,
         public bool|Context|null $context,
     ) {}
 }

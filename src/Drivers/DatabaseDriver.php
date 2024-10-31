@@ -16,65 +16,81 @@ class DatabaseDriver implements Driver
     public function __construct(
         protected Connection $connection,
         protected string $table,
-        protected ?string $teamForeignKey = null,
+        protected ?string $morphName = null,
     ) {}
 
-    public function forget($key, $teamId = null): void
+    public function forget($key, $morphId = null, $morphType = null): void
     {
         $this->db()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
-                fn (Builder $query) => $query->where("{$this->table}.{$this->teamForeignKey}", $teamId)
+                $morphId !== false,
+                fn (Builder $query) => $query->where("{$this->table}.{$this->morphName}_id", $morphId)
+            )
+            ->when(
+                $morphType !== false,
+                fn (Builder $query) => $query->where("{$this->table}.{$this->morphName}_type", $morphType)
             )
             ->delete();
     }
 
-    public function get(string $key, $default = null, $teamId = null)
+    public function get(string $key, $default = null, $morphId = null, $morphType = null)
     {
         $value = $this->db()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
-                fn (Builder $query) => $query->where("{$this->table}.{$this->teamForeignKey}", $teamId)
+                $morphId !== false,
+                fn (Builder $query) => $query->where("{$this->table}.{$this->morphName}_id", $morphId)
+            )
+            ->when(
+                $morphType !== false,
+                fn (Builder $query) => $query->where("{$this->table}.{$this->morphName}_type", $morphType)
             )
             ->value('value');
 
         return $value ?? $default;
     }
 
-    public function all($teamId = null, $keys = null): array|Arrayable
+    public function all($morphId = null, $morphType = null, $keys = null): array|Arrayable
     {
-        return $this->baseBulkQuery($teamId, $keys)->get();
+        return $this->baseBulkQuery($morphId, $morphType, $keys)->get();
     }
 
-    public function has($key, $teamId = null): bool
+    public function has($key, $morphId = null, $morphType = null): bool
     {
         return $this->db()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
-                fn (Builder $query) => $query->where("{$this->table}.{$this->teamForeignKey}", $teamId)
+                $morphId !== false,
+                fn (Builder $query) => $query->where("{$this->table}.{$this->morphName}_id", $morphId)
+            )
+            ->when(
+                $morphType !== false,
+                fn (Builder $query) => $query->where("{$this->table}.{$this->morphName}_type", $morphType)
             )
             ->exists();
     }
 
-    public function set(string $key, $value = null, $teamId = null): void
+    public function set(string $key, $value = null, $morphId = null, $morphType = null): void
     {
         $data = [
             'key' => $key,
         ];
 
-        if ($teamId !== false) {
-            $data[$this->teamForeignKey] = $teamId;
+        if ($morphId !== false) {
+            $data["{$this->morphName}_id"] = $morphId;
+        }
+
+        if ($morphType !== false) {
+            $data["{$this->morphName}_type"] = $morphType;
         }
 
         $this->db()->updateOrInsert($data, compact('value'));
     }
 
-    public function flush($teamId = null, $keys = null): void
+    public function flush($morphId = null, $keys = null, $morphType = null): void
     {
-        $this->baseBulkQuery($teamId, $keys)->delete();
+        $this->baseBulkQuery($morphId, $morphType, $keys)->delete();
     }
 
     protected function db(): Builder
@@ -95,7 +111,7 @@ class DatabaseDriver implements Driver
         return collect($keys)->flatten()->filter();
     }
 
-    private function baseBulkQuery($teamId, $keys): Builder
+    private function baseBulkQuery($morphId, $morphType, $keys): Builder
     {
         $keys = $this->normalizeKeys($keys);
 
@@ -115,8 +131,12 @@ class DatabaseDriver implements Driver
                 fn (Builder $query) => $query->whereIn('key', $keys),
             )
             ->when(
-                $teamId !== false,
-                fn (Builder $query) => $query->where("{$this->table}.{$this->teamForeignKey}", $teamId)
+                $morphId !== false,
+                fn (Builder $query) => $query->where("{$this->table}.{$this->morphName}_id", $morphId)
+            )
+            ->when(
+                $morphType !== false,
+                fn (Builder $query) => $query->where("{$this->table}.{$this->morphName}_type", $morphType)
             );
     }
 }

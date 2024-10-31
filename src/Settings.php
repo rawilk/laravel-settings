@@ -51,15 +51,21 @@ class Settings
      */
     protected bool $cacheDefaultValue = true;
 
-    protected bool $teams = false;
+    protected bool $morphs = false;
 
     /** @var null|string|int */
-    protected mixed $teamId = null;
+    protected mixed $morphId = null;
+
+    /** @var null|string|int */
+    protected mixed $morphType = null;
 
     protected ?string $teamForeignKey = null;
 
-    // Allows us to use a team id for a single call.
-    protected mixed $temporaryTeamId = false;
+    // Allows us to use a model id for a single call.
+    protected mixed $temporaryMorphId = false;
+
+    // Allows us to use a model type for a single call.
+    protected mixed $temporaryMorphType = false;
 
     protected string $cacheKeyPrefix = '';
 
@@ -86,53 +92,47 @@ class Settings
         return $this;
     }
 
-    public function getTeamId(): mixed
+    public function getMorphId(): mixed
     {
-        return $this->teamId;
+        return $this->morphId;
     }
 
     /**
      * Set the team id for teams/groups support. This id is used when querying settings.
      *
-     * @param  int|string|null|\Illuminate\Database\Eloquent\Model  $id
+     * @param  int|string|null|\Illuminate\Database\Eloquent\Model  $morphId
+     * @param  int|string|null  $morphType
      */
-    public function setTeamId(mixed $id): self
+    public function setMorphs(mixed $morphId, mixed $morphType = null): self
     {
-        if ($id instanceof Model) {
-            $id = $id->getKey();
+        if ($morphId instanceof Model) {
+            $morphType = $morphId->getMorphClass();
+            $morphId = $morphId->getKey();
         }
 
-        $this->teamId = $id;
+        $this->morphId = $morphId;
+        $this->morphType = $morphType;
 
         return $this;
     }
 
-    public function usingTeam(mixed $teamId): self
+    public function usingMorph(mixed $morphId, mixed $morphType = null): self
     {
-        if ($teamId instanceof Model) {
-            $teamId = $teamId->getKey();
+        if ($morphId instanceof Model) {
+            $morphType = $morphId->getMorphClass();
+            $morphId = $morphId->getKey();
         }
 
-        $this->temporaryTeamId = $teamId;
+        $this->temporaryMorphId = $morphId;
+        $this->temporaryMorphType = $morphType;
 
         return $this;
     }
 
-    public function withoutTeams(): self
+    public function withoutMorphs(): self
     {
-        $this->temporaryTeamId = null;
-
-        return $this;
-    }
-
-    public function getTeamForeignKey(): ?string
-    {
-        return $this->teamForeignKey;
-    }
-
-    public function setTeamForeignKey(?string $foreignKey): self
-    {
-        $this->teamForeignKey = $foreignKey;
+        $this->temporaryMorphId = null;
+        $this->temporaryMorphType = null;
 
         return $this;
     }
@@ -152,14 +152,16 @@ class Settings
 
         $driverResult = $this->driver->forget(
             key: $generatedKey,
-            teamId: $this->teams ? $this->teamId : false,
+            morphId: $this->morphs ? $this->morphId : false,
+            morphType: $this->morphs ? $this->morphType : false,
         );
 
         SettingWasDeleted::dispatch(
             $key,
             $generatedKey,
             $this->getCacheKey($generatedKey),
-            $this->teams ? $this->teamId : false,
+            $this->morphs ? $this->morphId : false,
+            $this->morphs ? $this->morphType : false,
             $this->context,
         );
 
@@ -177,7 +179,7 @@ class Settings
         return $driverResult;
     }
 
-    public function get(string|BackedEnum $key, $default = null, bool $resetTempTeam = true)
+    public function get(string|BackedEnum $key, $default = null, bool $resetTempMorph = true)
     {
         $key = $this->normalizeKey($key);
 
@@ -189,14 +191,16 @@ class Settings
                 fn () => $this->driver->get(
                     key: $generatedKey,
                     default: $this->cacheDefaultValue ? $default : null,
-                    teamId: $this->teamIdForCall(),
+                    morphId: $this->morphIdForCall(),
+                    morphType: $this->morphTypeForCall(),
                 )
             );
         } else {
             $value = $this->driver->get(
                 key: $generatedKey,
                 default: $default,
-                teamId: $this->teamIdForCall(),
+                morphId: $this->morphIdForCall(),
+                morphType: $this->morphTypeForCall(),
             );
         }
 
@@ -211,8 +215,9 @@ class Settings
         $this->temporarilyDisableCache = false;
         $this->resetContext = true;
 
-        if ($resetTempTeam) {
-            $this->temporaryTeamId = false;
+        if ($resetTempMorph) {
+            $this->temporaryMorphId = false;
+            $this->temporaryMorphType = false;
         }
 
         return $value ?? $default;
@@ -223,7 +228,8 @@ class Settings
         $keys = $this->normalizeBulkLookupKey($keys);
 
         $values = collect($this->driver->all(
-            teamId: $this->teamIdForCall(),
+            morphId: $this->morphIdForCall(),
+            morphType: $this->morphTypeForCall(),
             keys: $keys,
         ))->map(function (mixed $record): mixed {
             $record = $this->normalizeBulkRetrievedValue($record);
@@ -246,18 +252,20 @@ class Settings
 
         $this->temporarilyDisableCache = false;
         $this->resetContext = true;
-        $this->temporaryTeamId = false;
+        $this->temporaryMorphId = false;
+        $this->temporaryMorphType = false;
 
         return $values;
     }
 
-    public function has(string|BackedEnum $key, bool $resetTempTeam = true): bool
+    public function has(string|BackedEnum $key, bool $resetTempMorph = true): bool
     {
         $key = $this->normalizeKey($key);
 
         $has = $this->driver->has(
             key: $this->getKeyForStorage($key),
-            teamId: $this->teamIdForCall(),
+            morphId: $this->morphIdForCall(),
+            morphType: $this->morphTypeForCall(),
         );
 
         if ($this->resetContext) {
@@ -267,8 +275,9 @@ class Settings
         $this->temporarilyDisableCache = false;
         $this->resetContext = true;
 
-        if ($resetTempTeam) {
-            $this->temporaryTeamId = false;
+        if ($resetTempMorph) {
+            $this->temporaryMorphId = false;
+            $this->temporaryMorphType = false;
         }
 
         return $has;
@@ -292,7 +301,8 @@ class Settings
         $driverResult = $this->driver->set(
             key: $generatedKey,
             value: $this->encryptionIsEnabled() ? $this->encrypter->encrypt($serializedValue) : $serializedValue,
-            teamId: $this->teamIdForCall(),
+            morphId: $this->morphIdForCall(),
+            morphType: $this->morphTypeForCall(),
         );
 
         SettingWasStored::dispatch(
@@ -300,7 +310,7 @@ class Settings
             $generatedKey,
             $this->getCacheKey($generatedKey),
             $value,
-            $this->teamIdForCall(),
+            $this->morphIdForCall(),
             $this->context,
         );
 
@@ -310,7 +320,8 @@ class Settings
 
         $this->context();
         $this->temporarilyDisableCache = false;
-        $this->temporaryTeamId = false;
+        $this->temporaryMorphId = false;
+        $this->temporaryMorphType = false;
 
         return $driverResult;
     }
@@ -334,13 +345,15 @@ class Settings
         $keys = $this->normalizeBulkLookupKey($keys);
 
         $driverResult = $this->driver->flush(
-            teamId: $this->teamIdForCall(),
+            morphId: $this->morphIdForCall(),
             keys: $keys,
+            morphType: $this->morphTypeForCall(),
         );
 
         SettingsFlushed::dispatch(
             $keys,
-            $this->teamIdForCall(),
+            $this->morphIdForCall(),
+            $this->morphTypeForCall(),
             $this->context,
         );
 
@@ -358,7 +371,8 @@ class Settings
 
         $this->temporarilyDisableCache = false;
         $this->resetContext = true;
-        $this->temporaryTeamId = false;
+        $this->temporaryMorphId = false;
+        $this->temporaryMorphType = false;
 
         return $driverResult;
     }
@@ -412,23 +426,23 @@ class Settings
         return $this;
     }
 
-    public function enableTeams(): self
+    public function enableMorphs(): self
     {
-        $this->teams = true;
+        $this->morphs = true;
 
         return $this;
     }
 
-    public function disableTeams(): self
+    public function disableMorphs(): self
     {
-        $this->teams = false;
+        $this->morphs = false;
 
         return $this;
     }
 
-    public function teamsAreEnabled(): bool
+    public function morphsAreEnabled(): bool
     {
-        return $this->teams;
+        return $this->morphs;
     }
 
     public function useCacheKeyPrefix(string $prefix): self
@@ -486,11 +500,14 @@ class Settings
     {
         $cacheKey = $this->cacheKeyPrefix . $key;
 
-        $teamId = $this->teamIdForCall();
-        if ($teamId !== false) {
-            $teamId = is_null($teamId) ? 'null' : $teamId;
+        $morphId = $this->morphIdForCall();
+        $morphType = $this->morphTypeForCall();
 
-            $cacheKey .= "::team:{$teamId}";
+        if ($morphId !== false && $morphType !== false) {
+            $morphId = is_null($morphId) ? 'null' : $morphId;
+            $morphType = is_null($morphType) ? 'null' : $morphType;
+
+            $cacheKey .= "::morphId:{$morphId}:morphType:{$morphType}";
         }
 
         return $cacheKey;
@@ -523,11 +540,11 @@ class Settings
         }
 
         // To prevent decryption errors, we will check if we have a setting set for the current context and key.
-        if (! $this->doNotResetContext()->has(key: $key, resetTempTeam: false)) {
+        if (! $this->doNotResetContext()->has(key: $key, resetTempMorph: false)) {
             return true;
         }
 
-        return $newValue !== $this->doNotResetContext()->get(key: $key, resetTempTeam: false);
+        return $newValue !== $this->doNotResetContext()->get(key: $key, resetTempMorph: false);
     }
 
     protected function cacheIsEnabled(): bool
@@ -544,13 +561,22 @@ class Settings
         return $this->encryptionEnabled && $this->encrypter !== null;
     }
 
-    protected function teamIdForCall(): mixed
+    protected function morphIdForCall(): mixed
     {
-        if ($this->temporaryTeamId !== false) {
-            return $this->temporaryTeamId;
+        if ($this->temporaryMorphId !== false) {
+            return $this->temporaryMorphId;
         }
 
-        return $this->teams ? $this->teamId : false;
+        return $this->morphs ? $this->morphId : false;
+    }
+
+    protected function morphTypeForCall(): mixed
+    {
+        if ($this->temporaryMorphType !== false) {
+            return $this->temporaryMorphType;
+        }
+
+        return $this->morphs ? $this->morphType : false;
     }
 
     protected function decryptValue($value)

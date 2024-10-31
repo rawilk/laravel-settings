@@ -84,34 +84,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Teams
+    | Morphs
     |--------------------------------------------------------------------------
     |
-    | When set to true the package implements teams using the `team_foreign_key`.
+    | When set to true the package implements morphs on the settings`.
     |
-    | If you want the migrations to register the `team_foreign_key`, you must
+    | If you want the migrations to register the morphs, you must
     | set this to true before running the migration.
     |
     | If you already ran the migrations, then you must make a new migration to
-    | add the `team_foreign_key` column to the settings table, and update the
-    | unique constraint on the table. See the `add_settings_team_field` migration
+    | add the morphs columns to the settings table, and update the
+    | unique constraint on the table. See the `add_settings_morphs_fields` migration
     | for how to do this.
     |
     */
-    'teams' => false,
+    'morphs' => false,
 
     /*
     |--------------------------------------------------------------------------
-    | Team Foreign Key
+    | Morph name
     |--------------------------------------------------------------------------
     |
-    | When teams is set to true, our database/eloquent drivers will use this
-    | column as a team foreign key to scope queries to.
+    | When morphs is set to true, our database/eloquent drivers will use this
+    | name for columns to scope queries to.
     |
-    | The team id will also be included in a cache key when caching is enabled.
+    | The morphs will also be included in a cache key when caching is enabled.
     |
     */
-    'team_foreign_key' => 'team_id',
+    'morph_name' => 'model',
 
     /*
     |--------------------------------------------------------------------------

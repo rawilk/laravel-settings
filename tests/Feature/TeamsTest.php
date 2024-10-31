@@ -16,51 +16,51 @@ beforeEach(function () {
         'settings.cache' => false,
         'settings.cache_key_prefix' => 'settings.',
         'settings.encryption' => false,
-        'settings.teams' => true,
-        'settings.team_foreign_key' => 'team_id',
+        'settings.morphs' => true,
     ]);
 
     migrateTestTables();
-    migrateTeams();
+    migrateMorphs();
 
     setDatabaseDriverConnection();
 
     Team::factory()->create();
 });
 
-test('teams can be enabled and disabled', function () {
+test('morphs can be enabled and disabled', function () {
     // Should be enabled with the config value set to true
-    expect(SettingsFacade::teamsAreEnabled())->toBeTrue();
+    expect(SettingsFacade::morphsAreEnabled())->toBeTrue();
 
-    SettingsFacade::disableTeams();
-    expect(SettingsFacade::teamsAreEnabled())->toBeFalse();
+    SettingsFacade::disableMorphs();
+    expect(SettingsFacade::morphsAreEnabled())->toBeFalse();
 
-    SettingsFacade::enableTeams();
-    expect(SettingsFacade::teamsAreEnabled())->toBeTrue();
+    SettingsFacade::enableMorphs();
+    expect(SettingsFacade::morphsAreEnabled())->toBeTrue();
 });
 
 test('team id can be set', function () {
-    expect(SettingsFacade::getTeamId())->toBeNull();
+    expect(SettingsFacade::getMorphId())->toBeNull();
 
-    SettingsFacade::setTeamId(1);
+    SettingsFacade::setMorphs(1);
 
-    expect(SettingsFacade::getTeamId())->toBe(1);
+    expect(SettingsFacade::getMorphId())->toBe(1);
 });
 
 it('sets a team id when saving', function () {
     $team = Team::first();
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
 
     SettingsFacade::set('foo', 'bar');
 
     $setting = DB::table('settings')->first();
 
-    expect($setting->team_id)->toBe($team->id);
+    expect($setting->model_id)->toBe($team->id)
+        ->and($setting->model_type)->toBe($team->getMorphClass());
 });
 
 it('updates team settings', function () {
     $team = Team::first();
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
 
     SettingsFacade::set('foo', 'bar');
     SettingsFacade::set('foo', 'updated');
@@ -70,7 +70,8 @@ it('updates team settings', function () {
     $setting = DB::table('settings')->first();
     $value = unserialize($setting->value);
 
-    expect($setting)->team_id->toBe($team->id)
+    expect($setting)->model_id->toBe($team->id)
+        ->and($setting->model_type)->toBe($team->getMorphClass())
         ->and($value)->toBe('updated');
 });
 
@@ -78,20 +79,22 @@ test('two teams can have the same setting', function () {
     $team1 = Team::first();
     $team2 = Team::factory()->create();
 
-    SettingsFacade::setTeamId($team1);
+    SettingsFacade::setMorphs($team1);
     SettingsFacade::set('foo', 'team 1 value');
 
-    SettingsFacade::setTeamId($team2);
+    SettingsFacade::setMorphs($team2);
     SettingsFacade::set('foo', 'team 2 value');
 
     $this->assertDatabaseCount('settings', 2);
 
-    $setting1 = DB::table('settings')->where('team_id', $team1->id)->first();
-    $setting2 = DB::table('settings')->where('team_id', $team2->id)->first();
+    $setting1 = DB::table('settings')->where('model_id', $team1->id)->where('model_type', $team1->getMorphClass())->first();
+    $setting2 = DB::table('settings')->where('model_id', $team2->id)->where('model_type', $team2->getMorphClass())->first();
 
-    expect($setting1->team_id)->toBe($team1->id)
+    expect($setting1->model_id)->toBe($team1->id)
+        ->and($setting1->model_type)->toBe($team2->getMorphClass())
         ->and(unserialize($setting1->value))->toBe('team 1 value')
-        ->and($setting2->team_id)->toBe($team2->id)
+        ->and($setting2->model_id)->toBe($team2->id)
+        ->and($setting2->model_type)->toBe($team2->getMorphClass())
         ->and(unserialize($setting2->value))->toBe('team 2 value')
         ->and($setting1->key)->toBe($setting2->key);
 });
@@ -102,7 +105,7 @@ it('checks if a team has a setting', function () {
 
     $team = Team::first();
 
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
     expect(SettingsFacade::has('foo'))->toBeFalse();
 
     SettingsFacade::set('foo', 'team value');
@@ -114,15 +117,15 @@ it('gets a team setting value', function () {
     $team2 = Team::factory()->create();
 
     // Also verify that no team id can be used
-    SettingsFacade::setTeamId(null);
+    SettingsFacade::setMorphs(null);
     SettingsFacade::set('foo', 'no team value');
     expect(SettingsFacade::get('foo'))->toBe('no team value');
 
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
     SettingsFacade::set('foo', 'team value');
     expect(SettingsFacade::get('foo'))->toBe('team value');
 
-    SettingsFacade::setTeamId($team2);
+    SettingsFacade::setMorphs($team2);
     SettingsFacade::set('foo', 'team 2 value');
     expect(SettingsFacade::get('foo'))->toBe('team 2 value');
 });
@@ -132,7 +135,7 @@ it('forgets the settings for a team', function () {
 
     SettingsFacade::set('foo', 'no team value');
 
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
     SettingsFacade::set('foo', 'team value');
 
     $this->assertDatabaseCount('settings', 2);
@@ -141,10 +144,10 @@ it('forgets the settings for a team', function () {
 
     $this->assertDatabaseCount('settings', 1);
     $this->assertDatabaseMissing('settings', [
-        'team_id' => $team->id,
+        'model_id' => $team->id,
     ]);
     $this->assertDatabaseHas('settings', [
-        'team_id' => null,
+        'model_id' => null,
     ]);
 });
 
@@ -152,17 +155,17 @@ test('the cache is scoped for teams', function () {
     $team = Team::first();
     $team2 = Team::factory()->create();
 
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
     SettingsFacade::set('foo', 'team 1 value');
 
-    SettingsFacade::setTeamId($team2);
+    SettingsFacade::setMorphs($team2);
     SettingsFacade::set('foo', 'team 2 value');
 
     SettingsFacade::enableCache();
 
     expect(SettingsFacade::get('foo'))->toBe('team 2 value');
 
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
 
     expect(SettingsFacade::get('foo'))->toBe('team 1 value');
 });
@@ -176,7 +179,7 @@ test("all of a team's settings can be retrieved at once", function () {
     $settings->set('one', 'non-team value');
     $settings->context(new Context(['id' => 'foo']))->set('one', 'non-team value context 1');
 
-    $settings->setTeamId($team);
+    $settings->setMorphs($team);
 
     $settings->set('one', 'team value');
     $settings->set('two', 'team value 2');
@@ -186,13 +189,13 @@ test("all of a team's settings can be retrieved at once", function () {
 
     expect($storedSettings)->toHaveCount(3)
         ->and($storedSettings[0]->key)->toBe('one')
-        ->and($storedSettings[0]->team_id)->toBe($team->id)
+        ->and($storedSettings[0]->model_id)->toBe($team->id)
         ->and($storedSettings[0]->value)->toBe('team value')
         ->and($storedSettings[1]->key)->toBe('two')
-        ->and($storedSettings[1]->team_id)->toBe($team->id)
+        ->and($storedSettings[1]->model_id)->toBe($team->id)
         ->and($storedSettings[1]->value)->toBe('team value 2')
         ->and($storedSettings[2]->key)->toBe('one')
-        ->and($storedSettings[2]->team_id)->toBe($team->id)
+        ->and($storedSettings[2]->model_id)->toBe($team->id)
         ->and($storedSettings[2]->value)->toBe('team value context 1')
         ->and($storedSettings[2]->original_key)->toBe('one:c:::id:foo');
 
@@ -211,7 +214,7 @@ test("a team's settings can be flushed", function () {
 
     $settings->set('one', 'non-team value');
 
-    $settings->setTeamId($team);
+    $settings->setMorphs($team);
     $settings->set('one', 'team value');
 
     $this->assertDatabaseCount('settings', 2);
@@ -221,7 +224,7 @@ test("a team's settings can be flushed", function () {
     $this->assertDatabaseCount('settings', 1);
 
     $this->assertDatabaseMissing('settings', [
-        'team_id' => $team->id,
+        'model_id' => $team->id,
     ]);
 });
 
@@ -229,41 +232,41 @@ test('when a team is set, a different team can be used for a single call', funct
     $team = Team::first();
     $otherTeam = Team::factory()->create();
 
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
     SettingsFacade::set('foo', 'team 1');
 
-    SettingsFacade::usingTeam($otherTeam)->set('foo', 'team 2');
+    SettingsFacade::usingMorph($otherTeam)->set('foo', 'team 2');
 
     $this->assertDatabaseCount('settings', 2);
-    expect(SettingsFacade::getTeamId())->toBe($team->id)
+    expect(SettingsFacade::getMorphId())->toBe($team->id)
         ->and(SettingsFacade::get('foo'))->toBe('team 1')
-        ->and(SettingsFacade::usingTeam($otherTeam)->get('foo'))->toBe('team 2');
+        ->and(SettingsFacade::usingMorph($otherTeam)->get('foo'))->toBe('team 2');
 });
 
 test('when a team is set, team id can be set to null temporarily', function () {
     $team = Team::first();
 
-    SettingsFacade::setTeamId($team);
+    SettingsFacade::setMorphs($team);
     SettingsFacade::set('foo', 'team 1');
 
-    SettingsFacade::withoutTeams()->set('foo', 'global');
+    SettingsFacade::withoutMorphs()->set('foo', 'global');
 
     $this->assertDatabaseCount('settings', 2);
-    expect(SettingsFacade::getTeamId())->toBe($team->id)
+    expect(SettingsFacade::getMorphId())->toBe($team->id)
         ->and(SettingsFacade::get('foo'))->toBe('team 1')
-        ->and(SettingsFacade::withoutTeams()->get('foo'))->toBe('global');
+        ->and(SettingsFacade::withoutMorphs()->get('foo'))->toBe('global');
 });
 
 test('a team can be used temporarily when teams are not enabled', function () {
-    SettingsFacade::disableTeams();
+    SettingsFacade::disableMorphs();
     SettingsFacade::set('foo', 'global');
 
     $team = Team::first();
-    SettingsFacade::usingTeam($team)->set('foo', 'team 1');
+    SettingsFacade::usingMorph($team)->set('foo', 'team 1');
 
     $this->assertDatabaseCount('settings', 2);
-    expect(SettingsFacade::getTeamId())->toBeNull()
-        ->and(SettingsFacade::teamsAreEnabled())->toBeFalse()
+    expect(SettingsFacade::getMorphId())->toBeNull()
+        ->and(SettingsFacade::morphsAreEnabled())->toBeFalse()
         ->and(SettingsFacade::get('foo'))->toBe('global')
-        ->and(SettingsFacade::usingTeam($team)->get('foo'))->toBe('team 1');
+        ->and(SettingsFacade::usingMorph($team)->get('foo'))->toBe('team 1');
 });

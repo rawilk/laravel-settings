@@ -23,7 +23,7 @@ return new class extends Migration
         });
 
         Schema::create('teams', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->timestamps();
         });

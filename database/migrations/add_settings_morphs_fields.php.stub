@@ -10,19 +10,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (! config('settings.teams')) {
+        if (! config('settings.morphs')) {
             return;
         }
 
         Schema::table(config('settings.table'), function (Blueprint $table) {
-            $table->unsignedBigInteger(config('settings.team_foreign_key'))->nullable()->after('id');
-            $table->index(config('settings.team_foreign_key'), 'settings_team_id_index');
+            $table->nullableUuidMorphs(config('settings.morph_name'));
 
             $table->dropUnique('settings_key_unique');
 
             $table->unique([
                 'key',
-                config('settings.team_foreign_key'),
+                config('settings.morph_name') . '_id',
+                config('settings.morph_name') . '_type',
             ], 'settings_key_team_id_unique');
         });
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Tests\Support\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Rawilk\Settings\Tests\Support\database\factories\TeamFactory;
@@ -11,6 +12,7 @@ use Rawilk\Settings\Tests\Support\database\factories\TeamFactory;
 final class Team extends Model
 {
     use HasFactory;
+    use HasUuids;
 
     protected static function newFactory(): TeamFactory
     {

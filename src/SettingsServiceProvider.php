@@ -85,9 +85,7 @@ class SettingsServiceProvider extends PackageServiceProvider
 
             $app['config']['settings.cache'] ? $settings->enableCache() : $settings->disableCache();
             $app['config']['settings.encryption'] ? $settings->enableEncryption() : $settings->disableEncryption();
-            $app['config']['settings.teams'] ? $settings->enableTeams() : $settings->disableTeams();
-
-            $settings->setTeamForeignKey($app['config']['settings.team_foreign_key'] ?? 'team_id');
+            $app['config']['settings.morphs'] ? $settings->enableMorphs() : $settings->disableMorphs();
 
             return $settings;
         });

@@ -10,17 +10,17 @@ use Rawilk\Settings\Drivers\DatabaseDriver;
 beforeEach(function () {
     config([
         'settings.driver' => 'database',
-        'settings.teams' => true,
-        'settings.team_foreign_key' => 'team_id',
+        'settings.morphs' => true,
+        'settings.morph_name' => 'model',
     ]);
 
     $this->driver = new DatabaseDriver(
         connection: app('db')->connection(),
         table: 'settings',
-        teamForeignKey: 'team_id',
+        morphName: 'model',
     );
 
-    migrateTeams();
+    migrateMorphs();
     setDatabaseDriverConnection();
 });
 
@@ -32,7 +32,7 @@ it('creates new entries', function () {
     $this->assertDatabaseHas('settings', [
         'key' => 'foo',
         'value' => 'bar',
-        'team_id' => null,
+        'model_id' => null,
     ]);
 });
 
@@ -44,7 +44,7 @@ it('creates new entries for teams', function () {
     $this->assertDatabaseHas('settings', [
         'key' => 'foo',
         'value' => 'bar',
-        'team_id' => 1,
+        'model_id' => 1,
     ]);
 });
 
@@ -54,7 +54,7 @@ it('updates existing values', function () {
     $this->assertDatabaseHas('settings', [
         'key' => 'foo',
         'value' => 'bar',
-        'team_id' => null,
+        'model_id' => null,
     ]);
 
     $this->driver->set('foo', 'updated value', false);
@@ -64,7 +64,7 @@ it('updates existing values', function () {
     $this->assertDatabaseHas('settings', [
         'key' => 'foo',
         'value' => 'updated value',
-        'team_id' => null,
+        'model_id' => null,
     ]);
 });
 
@@ -81,13 +81,13 @@ it('updates team values', function () {
     $this->assertDatabaseHas('settings', [
         'key' => 'foo',
         'value' => 'no team value',
-        'team_id' => null,
+        'model_id' => null,
     ]);
 
     $this->assertDatabaseHas('settings', [
         'key' => 'foo',
         'value' => 'updated team value',
-        'team_id' => 1,
+        'model_id' => 1,
     ]);
 });
 
@@ -110,24 +110,24 @@ it('checks if a team setting is persisted', function () {
 it('gets a persisted setting value', function () {
     $this->driver->set('foo', 'some value', false);
 
-    expect($this->driver->get(key: 'foo', teamId: false))->toBe('some value');
+    expect($this->driver->get(key: 'foo', morphId: false))->toBe('some value');
 });
 
 it('returns a default value for settings that are not persisted', function () {
-    expect($this->driver->get(key: 'foo', default: 'my default value', teamId: false))->toBe('my default value');
+    expect($this->driver->get(key: 'foo', default: 'my default value', morphId: false))->toBe('my default value');
 });
 
 it('gets a persisted team value', function () {
     $this->driver->set('foo', 'no team value', null);
     $this->driver->set('foo', 'team value', 1);
 
-    expect($this->driver->get(key: 'foo', teamId: 1))->toBe('team value');
+    expect($this->driver->get(key: 'foo', morphId: 1))->toBe('team value');
 });
 
 it('gets a default value for a team', function () {
     $this->driver->set('foo', 'no team value', null);
 
-    expect($this->driver->get(key: 'foo', default: 'my default', teamId: 1))->toBe('my default');
+    expect($this->driver->get(key: 'foo', default: 'my default', morphId: 1))->toBe('my default');
 });
 
 it('removes persisted settings', function () {
@@ -152,7 +152,7 @@ it('removes persisted team values', function () {
 
     $this->assertDatabaseMissing('settings', [
         'key' => 'foo',
-        'team_id' => 1,
+        'model_id' => 1,
     ]);
 });
 
@@ -184,7 +184,7 @@ it('can get all of a teams persisted settings', function () {
     $this->driver->set('two', 'value 2', 1);
     $this->driver->set('one', 'team 2 value 1', 2);
 
-    $settings = $this->driver->all(teamId: 1);
+    $settings = $this->driver->all(morphId: 1);
 
     expect($settings)->toHaveCount(2)
         ->first()->value->toBe('value 1')
@@ -221,7 +221,7 @@ it('can delete all team settings', function () {
 
     $this->assertDatabaseCount('settings', 3);
 
-    $this->driver->flush(teamId: 1);
+    $this->driver->flush(morphId: 1);
 
     $this->assertDatabaseCount('settings', 1);
 });

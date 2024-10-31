@@ -17,7 +17,8 @@ final class SettingWasDeleted
         public string $key,
         public string $storageKey,
         public string $cacheKey,
-        public mixed $teamId,
+        public mixed $morphId,
+        public mixed $morphType,
         public bool|Context|null $context,
     ) {}
 }

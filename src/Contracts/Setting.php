@@ -8,15 +8,15 @@ use Illuminate\Contracts\Support\Arrayable;
 
 interface Setting
 {
-    public static function getValue(string $key, $default = null, $teamId = null);
+    public static function getValue(string $key, $default = null, $morphId = null, $morphType = null);
 
-    public static function getAll($teamId = null, $keys = null): array|Arrayable;
+    public static function getAll($morphId = null, $morphType = null, $keys = null): array|Arrayable;
 
-    public static function has($key, $teamId = null): bool;
+    public static function has($key, $morphId = null, $morphType = null): bool;
 
-    public static function removeSetting($key, $teamId = null);
+    public static function removeSetting($key, $morphId = null, $morphType = null): void;
 
-    public static function set(string $key, $value = null, $teamId = null);
+    public static function set(string $key, $value = null, $morphId = null, $morphType = null);
 
-    public static function flush($teamId = null, $keys = null);
+    public static function flush($morphId = null, $morphType = null, $keys = null);
 }

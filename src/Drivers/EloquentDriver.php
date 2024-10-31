@@ -12,33 +12,33 @@ class EloquentDriver implements Driver
 {
     public function __construct(protected Setting $model) {}
 
-    public function forget($key, $teamId = null): void
+    public function forget($key, $morphId = null, $morphType = null): void
     {
-        $this->model::removeSetting($key, $teamId);
+        $this->model::removeSetting($key, $morphId, $morphType);
     }
 
-    public function get(string $key, $default = null, $teamId = null)
+    public function get(string $key, $default = null, $morphId = null, $morphType = null)
     {
-        return $this->model::getValue($key, $default, $teamId);
+        return $this->model::getValue($key, $default, $morphId, $morphType);
     }
 
-    public function all($teamId = null, $keys = null): array|Arrayable
+    public function all($morphId = null, $morphType = null, $keys = null): array|Arrayable
     {
-        return $this->model::getAll($teamId, $keys);
+        return $this->model::getAll($morphId, $morphType, $keys);
     }
 
-    public function has($key, $teamId = null): bool
+    public function has($key, $morphId = null, $morphType = null): bool
     {
-        return $this->model::has($key, $teamId);
+        return $this->model::has($key, $morphId, $morphType);
     }
 
-    public function set(string $key, $value = null, $teamId = null): void
+    public function set(string $key, $value = null, $morphId = null, $morphType = null): void
     {
-        $this->model::set($key, $value, $teamId);
+        $this->model::set($key, $value, $morphId, $morphType);
     }
 
-    public function flush($teamId = null, $keys = null): void
+    public function flush($morphId = null, $keys = null, $morphType = null): void
     {
-        $this->model::flush($teamId, $keys);
+        $this->model::flush($morphId, $morphType, $keys);
     }
 }

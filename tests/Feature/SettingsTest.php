@@ -461,7 +461,8 @@ it('dispatches an event when a setting is deleted', function () {
 
     Event::assertDispatched(function (SettingWasDeleted $event) {
         return $event->key === 'foo'
-            && $event->teamId === false
+            && $event->morphId === false
+            && $event->morphType === false
             && is_null($event->context);
     });
 });
@@ -497,10 +498,10 @@ it('can generate the cache key for a given setting', function () {
     expect(SettingsFacade::cacheKeyForSetting('foo'))->toBe('settings.foo')
         ->and(SettingsFacade::context(new Context(['foo' => 'bar']))->cacheKeyForSetting('foo'))->toBe('settings.foo:c:::foo:bar');
 
-    SettingsFacade::enableTeams();
-    SettingsFacade::setTeamId(1);
+    SettingsFacade::enableMorphs();
+    SettingsFacade::setMorphs(1);
 
-    expect(SettingsFacade::cacheKeyForSetting('foo'))->toBe('settings.foo::team:1');
+    expect(SettingsFacade::cacheKeyForSetting('foo'))->toBe('settings.foo::morphId:1:morphType:null');
 });
 
 it('accepts a backed enum for a key instead of a string', function () {
