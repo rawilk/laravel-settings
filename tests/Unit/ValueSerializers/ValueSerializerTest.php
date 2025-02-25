@@ -63,6 +63,9 @@ dataset('values', [
     true,
     false,
     'string',
-    ['array' => 'array'],
+    // The array key must match our dataset parameter name,
+    // otherwise nunomaduro/collision will throw a fatal
+    // error right now...
+    ['value' => 'array'],
     (object) ['a' => 'b'],
 ]);
