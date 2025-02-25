@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v3.4.1 - 2025-02-25
+
+### What's Changed
+
+* Bump dependabot/fetch-metadata from 2.2.0 to 2.3.0 by @dependabot in https://github.com/rawilk/laravel-settings/pull/75
+* Bump aglipanci/laravel-pint-action from 2.4 to 2.5 by @dependabot in https://github.com/rawilk/laravel-settings/pull/77
+* [Chore]: Remove Larastan by @rawilk in https://github.com/rawilk/laravel-settings/pull/78
+* Add Laravel 12.x support by @rawilk in https://github.com/rawilk/laravel-settings/pull/79
+* Add php 8.4 support by @rawilk in https://github.com/rawilk/laravel-settings/pull/80
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v3.4.0...v3.4.1
+
 ## v3.4.0 - 2024-10-16
 
 ### What's Changed
