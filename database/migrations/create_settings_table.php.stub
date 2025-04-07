@@ -14,4 +14,9 @@ return new class extends Migration
             $table->longText('value')->nullable();
         });
     }
+
+    public function down(): void
+    {
+        Schema::dropIfExists(config('settings.table'));
+    }
 };
