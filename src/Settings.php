@@ -94,7 +94,7 @@ class Settings
     /**
      * Set the team id for teams/groups support. This id is used when querying settings.
      *
-     * @param  int|string|null|\Illuminate\Database\Eloquent\Model  $id
+     * @param  int|string|null|Model  $id
      */
     public function setTeamId(mixed $id): self
     {
