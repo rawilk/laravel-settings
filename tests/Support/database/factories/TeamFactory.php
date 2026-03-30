@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Rawilk\Settings\Tests\Support\Models\Team;
 
 /**
- * @extends Factory<\Rawilk\Settings\Tests\Support\Models\Team>
+ * @extends Factory<Team>
  */
 final class TeamFactory extends Factory
 {

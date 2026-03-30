@@ -8,7 +8,7 @@ use Rawilk\Settings\Support\Context;
 if (! function_exists('settings')) {
     function settings($key = null, $default = null, $context = null)
     {
-        /** @var \Rawilk\Settings\Settings $settings */
+        /** @var Settings $settings */
         $settings = app(Settings::class);
 
         // If nothing is passed in to the function, simply return the settings instance.
