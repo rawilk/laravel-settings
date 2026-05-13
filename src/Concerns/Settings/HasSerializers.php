@@ -35,4 +35,19 @@ trait HasSerializers
 
         return $this;
     }
+
+    protected function serializeValue(mixed $value): string
+    {
+        return $this->getValueSerializer()->serialize($value);
+    }
+
+    protected function unserializeValue(mixed $serialized): mixed
+    {
+        if (! is_string($serialized)) {
+            return $serialized;
+        }
+
+        // Attempt to unserialize the value but return the original value if that fails.
+        return rescue(fn () => $this->getValueSerializer()->unserialize($serialized), fn () => $serialized);
+    }
 }

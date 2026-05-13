@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Rawilk\Settings;
 
 use BackedEnum;
-use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Contracts\Encryption\Encrypter;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
@@ -20,41 +17,17 @@ use Rawilk\Settings\Events\SettingWasStored;
 use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
 use Rawilk\Settings\Exceptions\InvalidEnumType;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
-use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 
 class Settings
 {
+    use Concerns\Settings\EncryptsSettings;
+    use Concerns\Settings\HasContext;
     use Concerns\Settings\HasSerializers;
+    use Concerns\Settings\HasTeams;
     use Concerns\Settings\InteractsWithCache;
     use Macroable;
-
-    protected null|Context|bool $context = null;
-
-    protected ?Encrypter $encrypter = null;
-
-    protected bool $encryptionEnabled = false;
-
-    // Instruct us to reset the context after a call (such as `get()`).
-    // Meant for internal use only.
-    protected bool $resetContext = true;
-
-    /**
-     * If true, we will cache the default value for a setting when it is not persisted
-     * when trying to retrieve it.
-     */
-    protected bool $cacheDefaultValue = true;
-
-    protected bool $teams = false;
-
-    /** @var null|string|int */
-    protected mixed $teamId = null;
-
-    protected ?string $teamForeignKey = null;
-
-    // Allows us to use a team id for a single call.
-    protected mixed $temporaryTeamId = false;
 
     public function __construct(
         protected Driver $driver,
@@ -66,68 +39,6 @@ class Settings
     public function getDriver(): Driver
     {
         return $this->driver;
-    }
-
-    /**
-     * Pass in `false` for context when calling `all()` to only return results
-     * that do not have context.
-     */
-    public function context(Context|bool|null $context = null): self
-    {
-        $this->context = $context;
-
-        return $this;
-    }
-
-    public function getTeamId(): mixed
-    {
-        return $this->teamId;
-    }
-
-    /**
-     * Set the team id for teams/groups support. This id is used when querying settings.
-     *
-     * @param  int|string|null|Model  $id
-     */
-    public function setTeamId(mixed $id): self
-    {
-        if ($id instanceof Model) {
-            $id = $id->getKey();
-        }
-
-        $this->teamId = $id;
-
-        return $this;
-    }
-
-    public function usingTeam(mixed $teamId): self
-    {
-        if ($teamId instanceof Model) {
-            $teamId = $teamId->getKey();
-        }
-
-        $this->temporaryTeamId = $teamId;
-
-        return $this;
-    }
-
-    public function withoutTeams(): self
-    {
-        $this->temporaryTeamId = null;
-
-        return $this;
-    }
-
-    public function getTeamForeignKey(): ?string
-    {
-        return $this->teamForeignKey;
-    }
-
-    public function setTeamForeignKey(?string $foreignKey): self
-    {
-        $this->teamForeignKey = $foreignKey;
-
-        return $this;
     }
 
     public function forget(string|BackedEnum $key)
@@ -349,46 +260,6 @@ class Settings
         return $driverResult;
     }
 
-    public function disableEncryption(): self
-    {
-        $this->encryptionEnabled = false;
-
-        return $this;
-    }
-
-    public function enableEncryption(): self
-    {
-        $this->encryptionEnabled = true;
-
-        return $this;
-    }
-
-    public function setEncrypter(Encrypter $encrypter): self
-    {
-        $this->encrypter = $encrypter;
-
-        return $this;
-    }
-
-    public function enableTeams(): self
-    {
-        $this->teams = true;
-
-        return $this;
-    }
-
-    public function disableTeams(): self
-    {
-        $this->teams = false;
-
-        return $this;
-    }
-
-    public function teamsAreEnabled(): bool
-    {
-        return $this->teams;
-    }
-
     protected function normalizeKey(string|BackedEnum $key): string
     {
         if ($key instanceof BackedEnum) {
@@ -412,21 +283,6 @@ class Settings
         return $this->getKeyGenerator()->generate(key: $key, context: $this->context);
     }
 
-    protected function serializeValue($value): string
-    {
-        return $this->getValueSerializer()->serialize($value);
-    }
-
-    protected function unserializeValue($serialized)
-    {
-        if (! is_string($serialized)) {
-            return $serialized;
-        }
-
-        // Attempt to unserialize the value but return the original value if that fails.
-        return rescue(fn () => $this->getValueSerializer()->unserialize($serialized), fn () => $serialized);
-    }
-
     protected function shouldSetNewValue(string $key, $newValue): bool
     {
         if (! $this->cacheIsEnabled()) {
@@ -439,40 +295,6 @@ class Settings
         }
 
         return $newValue !== $this->doNotResetContext()->get(key: $key, resetTempTeam: false);
-    }
-
-    protected function encryptionIsEnabled(): bool
-    {
-        return $this->encryptionEnabled && $this->encrypter !== null;
-    }
-
-    protected function teamIdForCall(): mixed
-    {
-        if ($this->temporaryTeamId !== false) {
-            return $this->temporaryTeamId;
-        }
-
-        return $this->teams ? $this->teamId : false;
-    }
-
-    protected function decryptValue($value)
-    {
-        if (! $this->encryptionIsEnabled()) {
-            return $value;
-        }
-
-        if (! is_string($value)) {
-            return $value;
-        }
-
-        return rescue(fn () => $this->encrypter->decrypt($value), fn () => $value);
-    }
-
-    protected function doNotResetContext(): self
-    {
-        $this->resetContext = false;
-
-        return $this;
     }
 
     protected function normalizeBulkRetrievedValue(mixed $record): object

@@ -21,42 +21,48 @@ trait InteractsWithCache
 
     protected string $cacheKeyPrefix = '';
 
-    public function cacheDefaultValue(bool $cacheDefaultValue = true): self
+    /**
+     * If true, we will cache the default value for a setting when it is not persisted
+     * when trying to retrieve it.
+     */
+    protected bool $cacheDefaultValue = true;
+
+    public function cacheDefaultValue(bool $cacheDefaultValue = true): static
     {
         $this->cacheDefaultValue = $cacheDefaultValue;
 
         return $this;
     }
 
-    public function disableCache(): self
+    public function disableCache(): static
     {
         $this->cacheEnabled = false;
 
         return $this;
     }
 
-    public function enableCache(): self
+    public function enableCache(): static
     {
         $this->cacheEnabled = true;
 
         return $this;
     }
 
-    public function temporarilyDisableCache(): self
+    public function temporarilyDisableCache(): static
     {
         $this->temporarilyDisableCache = true;
 
         return $this;
     }
 
-    public function setCache(Cache $cache): self
+    public function setCache(Cache $cache): static
     {
         $this->cache = $cache;
 
         return $this;
     }
 
-    public function useCacheKeyPrefix(string $prefix): self
+    public function useCacheKeyPrefix(string $prefix): static
     {
         $this->cacheKeyPrefix = $prefix;
 
