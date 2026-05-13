@@ -127,11 +127,11 @@ return [
     | Rawilk\Settings\Contracts\ContextSerializer interface.
     |
     | Supported:
-    | - Rawilk\Settings\Support\ContextSerializers\ContextSerializer (default)
-    | - Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer
+    | - Rawilk\Settings\Support\ContextSerializers\ContextSerializer
+    | - Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer (default)
     |
     */
-    'context_serializer' => Settings\Support\ContextSerializers\ContextSerializer::class,
+    'context_serializer' => Settings\Support\ContextSerializers\KeyValueContextSerializer::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -145,12 +145,12 @@ return [
     | Rawilk\Settings\Contracts\KeyGenerator interface.
     |
     | Supported:
-    | - Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator
-    | - Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator (default)
+    | - Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator (default)
+    | - Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator
     | - Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator
     |
     */
-    'key_generator' => Settings\Support\KeyGenerators\Md5KeyGenerator::class,
+    'key_generator' => Settings\Support\KeyGenerators\ReadableKeyGenerator::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -159,13 +159,13 @@ return [
     |
     | By default, we use php's serialize() and unserialize() functions to
     | prepare the setting values for storage. You may use the `JsonValueSerializer`
-    | instead if you want to store the values as json instead.
+    | instead if you want to store the values as JSON instead.
     |
     | Any custom value serializer you use must implement the
     | Rawilk\Settings\Contracts\ValueSerializer interface.
     |
     */
-    'value_serializer' => Settings\Support\ValueSerializers\ValueSerializer::class,
+    'value_serializer' => Settings\Support\ValueSerializers\JsonValueSerializer::class,
 
     /*
     |--------------------------------------------------------------------------
