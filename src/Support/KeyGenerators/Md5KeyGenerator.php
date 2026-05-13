@@ -9,6 +9,10 @@ use Rawilk\Settings\Contracts\KeyGenerator as KeyGeneratorContract;
 use Rawilk\Settings\Support\Context;
 use RuntimeException;
 
+/**
+ * @deprecated This key generator will be removed in v5. You should implement your own version of this if
+ * your application relies on it.
+ */
 class Md5KeyGenerator implements KeyGeneratorContract
 {
     protected ContextSerializer $serializer;
