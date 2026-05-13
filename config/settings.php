@@ -1,12 +1,8 @@
 <?php
 
 declare(strict_types=1);
-use Carbon\Carbon;
-use Carbon\CarbonImmutable;
-use Rawilk\Settings\Models\Setting;
-use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
-use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
-use Rawilk\Settings\Support\ValueSerializers\ValueSerializer;
+
+use Rawilk\Settings;
 
 return [
     /*
@@ -69,7 +65,7 @@ return [
     | is used by your application. A default configuration has been added
     | for each back-end shipped with this package. You are free to add more.
     |
-    | Each driver you add must implement the \Rawilk\Settings\Contracts\Driver interface.
+    | Each driver you add must implement the Rawilk\Settings\Contracts\Driver interface.
     |
     */
     'drivers' => [
@@ -82,9 +78,9 @@ return [
 
             /*
              * You can use any model you like for the setting, but it needs to implement
-             * the \Rawilk\Settings\Contracts\Setting interface.
+             * the Rawilk\Settings\Contracts\Setting interface.
              */
-            'model' => Setting::class,
+            'model' => Settings\Models\Setting::class,
         ],
     ],
 
@@ -128,14 +124,14 @@ return [
     | into a string, which gets appended to a setting key in the database.
     |
     | Any custom serializer you use must implement the
-    | \Rawilk\Settings\Contracts\ContextSerializer interface.
+    | Rawilk\Settings\Contracts\ContextSerializer interface.
     |
     | Supported:
-    | - \Rawilk\Settings\Support\ContextSerializers\ContextSerializer (default)
-    | - \Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer
+    | - Rawilk\Settings\Support\ContextSerializers\ContextSerializer (default)
+    | - Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer
     |
     */
-    'context_serializer' => ContextSerializer::class,
+    'context_serializer' => Settings\Support\ContextSerializers\ContextSerializer::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -146,15 +142,15 @@ return [
     | setting.
     |
     | Any custom key generator you use must implement the
-    | \Rawilk\Settings\Contracts\KeyGenerator interface.
+    | Rawilk\Settings\Contracts\KeyGenerator interface.
     |
     | Supported:
-    | - \Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator
-    | - \Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator (default)
-    | - \Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator
+    | - Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator
+    | - Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator (default)
+    | - Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator
     |
     */
-    'key_generator' => Md5KeyGenerator::class,
+    'key_generator' => Settings\Support\KeyGenerators\Md5KeyGenerator::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -166,10 +162,10 @@ return [
     | instead if you want to store the values as json instead.
     |
     | Any custom value serializer you use must implement the
-    | \Rawilk\Settings\Contracts\ValueSerializer interface.
+    | Rawilk\Settings\Contracts\ValueSerializer interface.
     |
     */
-    'value_serializer' => ValueSerializer::class,
+    'value_serializer' => Settings\Support\ValueSerializers\ValueSerializer::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -197,8 +193,8 @@ return [
     | an empty array.
     */
     'unserialize_safelist' => [
-        Carbon::class,
-        CarbonImmutable::class,
+        Carbon\Carbon::class,
+        Carbon\CarbonImmutable::class,
         Illuminate\Support\Carbon::class,
     ],
 
