@@ -18,6 +18,7 @@ use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Support\ValueSerializers\JsonValueSerializer;
+use Rawilk\Settings\Support\ValueSerializers\ValueSerializer;
 use Rawilk\Settings\Tests\Support\Enums\IntBackedEnum as InvalidEnumTypeEnum;
 use Rawilk\Settings\Tests\Support\Enums\SettingKey;
 
@@ -255,7 +256,7 @@ it('can encrypt values', function () {
     SettingsFacade::set('foo', 'bar');
 
     $storedSetting = DB::table('settings')->first();
-    $unEncrypted = unserialize(decrypt($storedSetting->value));
+    $unEncrypted = json_decode(decrypt($storedSetting->value));
 
     expect($unEncrypted)->toBe('bar');
 });
@@ -273,6 +274,19 @@ it('can decrypt values', function () {
 });
 
 it('does not encrypt if encryption is disabled', function () {
+    SettingsFacade::disableEncryption();
+
+    SettingsFacade::set('foo', 'bar');
+
+    $storedSetting = DB::table('settings')->first();
+
+    expect($storedSetting->value)->toBeJson()
+        ->and(json_decode($storedSetting->value))->toBe('bar');
+});
+
+it('does not encrypt if encryption is disabled with the regular value serializer', function () {
+    SettingsFacade::setValueSerializer(app(ValueSerializer::class));
+
     SettingsFacade::disableEncryption();
 
     SettingsFacade::set('foo', 'bar');
