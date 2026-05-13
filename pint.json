@@ -13,6 +13,24 @@
         "declare_strict_types": true,
         "explicit_string_variable": true,
         "single_trait_insert_per_statement": true,
+        "fully_qualified_strict_types": true,
+        "new_with_parentheses": {
+            "anonymous_class": false,
+            "named_class": false
+        },
+        "no_useless_else": true,
+        "protected_to_private": true,
+        "single_line_empty_body": false,
+        "no_extra_blank_lines": {
+            "tokens": [
+                "continue",
+                "extra",
+                "return",
+                "throw",
+                "curly_brace_block",
+                "use"
+            ]
+        },
         "ordered_class_elements": {
             "order": [
                 "use_trait",
@@ -38,5 +56,8 @@
             ],
             "sort_algorithm": "none"
         }
-    }
+    },
+    "exclude": [
+        "vendor"
+    ]
 }
