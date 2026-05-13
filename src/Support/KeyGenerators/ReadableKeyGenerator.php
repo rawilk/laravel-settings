@@ -43,7 +43,7 @@ class ReadableKeyGenerator implements KeyGeneratorContract
 
     protected function normalizeKey(string $key): string
     {
-        // We want to preserve period characters in the key, however everything else is fair game
+        // We want to preserve period characters in the key; however, everything else is fair game
         // to convert to a slug.
         return Str::of($key)
             ->replace('.', '-dot-')
