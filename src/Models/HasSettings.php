@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Settings;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 
 /**
- * @mixin \Illuminate\Database\Eloquent\Model
+ * @mixin Model
  */
 trait HasSettings
 {

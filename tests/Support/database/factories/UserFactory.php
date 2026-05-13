@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Rawilk\Settings\Tests\Support\Models\User;
 
 /**
- * @extends Factory<\Rawilk\Settings\Tests\Support\Models\User>
+ * @extends Factory<User>
  */
 final class UserFactory extends Factory
 {
