@@ -1,69 +1,69 @@
 name: Tests
 
 on:
-    push:
-        paths:
-            - '**.php'
-            - 'phpunit.xml.dist'
-            - '.github/workflows/run-tests.yml'
-            - 'composer.json'
-    pull_request:
-        branches:
-            - main
+  push:
+    paths:
+      - '**.php'
+      - 'phpunit.xml.dist'
+      - '.github/workflows/run-tests.yml'
+      - 'composer.json'
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        strategy:
-            fail-fast: true
-            matrix:
-                php: [8.4, 8.3, 8.2, 8.1]
-                laravel: [13.*, 12.*, 11.*, 10.*]
-                dependency-version: [prefer-lowest, prefer-stable]
-                include:
-                    -   laravel: 13.*
-                        testbench: 11.*
-                    -   laravel: 12.*
-                        testbench: 10.*
-                    -   laravel: 10.*
-                        testbench: 8.*
-                    -   laravel: 11.*
-                        testbench: 9.*
-                exclude:
-                    -   laravel: 13.*
-                        php: 8.1
-                    -   laravel: 13.*
-                        php: 8.2
-                    -   laravel: 12.*
-                        php: 8.1
-                    -   laravel: 11.*
-                        php: 8.1
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.4, 8.3, 8.2, 8.1]
+        laravel: [13.*, 12.*, 11.*, 10.*]
+        dependency-version: [prefer-lowest, prefer-stable]
+        include:
+          - laravel: 13.*
+            testbench: 11.*
+          - laravel: 12.*
+            testbench: 10.*
+          - laravel: 10.*
+            testbench: 8.*
+          - laravel: 11.*
+            testbench: 9.*
+        exclude:
+          - laravel: 13.*
+            php: 8.1
+          - laravel: 13.*
+            php: 8.2
+          - laravel: 12.*
+            php: 8.1
+          - laravel: 11.*
+            php: 8.1
 
-        name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
 
-        steps:
-            -   name: Checkout code
-                uses: actions/checkout@v6
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
 
-            -   name: Setup PHP
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: ${{ matrix.php }}
-                    extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
-                    coverage: none
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+          coverage: none
 
-            -   name: Setup problem matchers
-                run: |
-                    echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-                    echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+      - name: Setup problem matchers
+        run: |
+          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-            -   name: Install dependencies
-                run: |
-                    composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update --ignore-platform-reqs
-                    composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --ignore-platform-reqs
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update --ignore-platform-reqs
+          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --ignore-platform-reqs
 
-            -   name: List Installed Dependencies
-                run: composer show -D
+      - name: List Installed Dependencies
+        run: composer show -D
 
-            -   name: Execute tests
-                run: vendor/bin/pest --stop-on-failure --parallel --display-skipped
+      - name: Execute tests
+        run: vendor/bin/pest --stop-on-failure --parallel --display-skipped
