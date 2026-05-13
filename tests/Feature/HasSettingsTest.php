@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Rawilk\Settings\Facades\Settings;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
+use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Tests\Support\Models\Company;
 use Rawilk\Settings\Tests\Support\Models\CustomUser;
@@ -117,6 +118,8 @@ test('a model can be configured to not flush settings on delete', function () {
 });
 
 test("a model's settings will not be flushed if the md5 key generator is being used", function () {
+    config()->set('settings.key_generator', Md5KeyGenerator::class);
+
     $user = User::first();
 
     $user->settings()->set('foo', 'bar');
