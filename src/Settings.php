@@ -26,20 +26,15 @@ use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 
 class Settings
 {
+    use Concerns\Settings\HasSerializers;
+    use Concerns\Settings\InteractsWithCache;
     use Macroable;
-
-    protected ?Cache $cache = null;
 
     protected null|Context|bool $context = null;
 
     protected ?Encrypter $encrypter = null;
 
-    protected bool $cacheEnabled = false;
-
     protected bool $encryptionEnabled = false;
-
-    // Allows us to disable cache usage for a single call easily.
-    protected bool $temporarilyDisableCache = false;
 
     // Instruct us to reset the context after a call (such as `get()`).
     // Meant for internal use only.
@@ -61,8 +56,6 @@ class Settings
     // Allows us to use a team id for a single call.
     protected mixed $temporaryTeamId = false;
 
-    protected string $cacheKeyPrefix = '';
-
     public function __construct(
         protected Driver $driver,
         protected KeyGenerator $keyGenerator,
@@ -70,7 +63,6 @@ class Settings
     ) {
     }
 
-    // mainly for testing purposes
     public function getDriver(): Driver
     {
         return $this->driver;
@@ -134,13 +126,6 @@ class Settings
     public function setTeamForeignKey(?string $foreignKey): self
     {
         $this->teamForeignKey = $foreignKey;
-
-        return $this;
-    }
-
-    public function cacheDefaultValue(bool $cacheDefaultValue = true): self
-    {
-        $this->cacheDefaultValue = $cacheDefaultValue;
 
         return $this;
     }
@@ -236,7 +221,7 @@ class Settings
 
             $record->value = $value;
             $record->original_key = $record->key;
-            $record->key = $this->keyGenerator->removeContextFromKey($record->key);
+            $record->key = $this->getKeyGenerator()->removeContextFromKey($record->key);
 
             return $record;
         });
@@ -364,34 +349,6 @@ class Settings
         return $driverResult;
     }
 
-    public function disableCache(): self
-    {
-        $this->cacheEnabled = false;
-
-        return $this;
-    }
-
-    public function enableCache(): self
-    {
-        $this->cacheEnabled = true;
-
-        return $this;
-    }
-
-    public function temporarilyDisableCache(): self
-    {
-        $this->temporarilyDisableCache = true;
-
-        return $this;
-    }
-
-    public function setCache(Cache $cache): self
-    {
-        $this->cache = $cache;
-
-        return $this;
-    }
-
     public function disableEncryption(): self
     {
         $this->encryptionEnabled = false;
@@ -432,39 +389,6 @@ class Settings
         return $this->teams;
     }
 
-    public function useCacheKeyPrefix(string $prefix): self
-    {
-        $this->cacheKeyPrefix = $prefix;
-
-        return $this;
-    }
-
-    public function getKeyGenerator(): KeyGenerator
-    {
-        return $this->keyGenerator;
-    }
-
-    /**
-     * Generate the key to use for caching a specific setting.
-     * This is meant for external usage.
-     */
-    public function cacheKeyForSetting(string|BackedEnum $key): string
-    {
-        $storageKey = $this->getKeyForStorage(
-            $this->normalizeKey($key),
-        );
-
-        $cacheKey = $this->getCacheKey($storageKey);
-
-        if ($this->resetContext) {
-            $this->context();
-        }
-
-        $this->resetContext = true;
-
-        return $cacheKey;
-    }
-
     protected function normalizeKey(string|BackedEnum $key): string
     {
         if ($key instanceof BackedEnum) {
@@ -483,28 +407,14 @@ class Settings
         return $key;
     }
 
-    protected function getCacheKey(string $key): string
-    {
-        $cacheKey = $this->cacheKeyPrefix . $key;
-
-        $teamId = $this->teamIdForCall();
-        if ($teamId !== false) {
-            $teamId = is_null($teamId) ? 'null' : $teamId;
-
-            $cacheKey .= "::team:{$teamId}";
-        }
-
-        return $cacheKey;
-    }
-
     protected function getKeyForStorage(string $key): string
     {
-        return $this->keyGenerator->generate(key: $key, context: $this->context);
+        return $this->getKeyGenerator()->generate(key: $key, context: $this->context);
     }
 
     protected function serializeValue($value): string
     {
-        return $this->valueSerializer->serialize($value);
+        return $this->getValueSerializer()->serialize($value);
     }
 
     protected function unserializeValue($serialized)
@@ -513,8 +423,8 @@ class Settings
             return $serialized;
         }
 
-        // Attempt to unserialize the value, but return the original value if that fails.
-        return rescue(fn () => $this->valueSerializer->unserialize($serialized), fn () => $serialized);
+        // Attempt to unserialize the value but return the original value if that fails.
+        return rescue(fn () => $this->getValueSerializer()->unserialize($serialized), fn () => $serialized);
     }
 
     protected function shouldSetNewValue(string $key, $newValue): bool
@@ -529,15 +439,6 @@ class Settings
         }
 
         return $newValue !== $this->doNotResetContext()->get(key: $key, resetTempTeam: false);
-    }
-
-    protected function cacheIsEnabled(): bool
-    {
-        if ($this->temporarilyDisableCache) {
-            return false;
-        }
-
-        return $this->cacheEnabled && $this->cache !== null;
     }
 
     protected function encryptionIsEnabled(): bool
