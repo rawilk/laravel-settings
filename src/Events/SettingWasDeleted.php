@@ -19,5 +19,6 @@ final class SettingWasDeleted
         public string $cacheKey,
         public mixed $teamId,
         public bool|Context|null $context,
-    ) {}
+    ) {
+    }
 }

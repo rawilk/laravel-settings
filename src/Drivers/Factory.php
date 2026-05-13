@@ -17,7 +17,9 @@ class Factory
 
     protected array $customCreators = [];
 
-    public function __construct(protected Application $app) {}
+    public function __construct(protected Application $app)
+    {
+    }
 
     public function driver(?string $driver = null): Driver
     {

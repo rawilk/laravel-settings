@@ -34,5 +34,7 @@ final class CustomDriver implements Driver
         return [];
     }
 
-    public function flush($teamId = null, $keys = null): void {}
+    public function flush($teamId = null, $keys = null): void
+    {
+    }
 }

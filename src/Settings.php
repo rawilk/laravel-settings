@@ -67,7 +67,8 @@ class Settings
         protected Driver $driver,
         protected KeyGenerator $keyGenerator,
         protected ValueSerializer $valueSerializer,
-    ) {}
+    ) {
+    }
 
     // mainly for testing purposes
     public function getDriver(): Driver

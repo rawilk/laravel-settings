@@ -18,5 +18,6 @@ final class SettingsFlushed
         public bool|Collection|string $keys,
         public mixed $teamId,
         public bool|Context|null $context,
-    ) {}
+    ) {
+    }
 }
