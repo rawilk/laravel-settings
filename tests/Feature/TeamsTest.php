@@ -7,6 +7,7 @@ use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
+use Rawilk\Settings\Support\ValueSerializers\JsonValueSerializer;
 use Rawilk\Settings\Tests\Support\Models\Team;
 
 beforeEach(function () {
@@ -18,6 +19,8 @@ beforeEach(function () {
         'settings.encryption' => false,
         'settings.teams' => true,
         'settings.team_foreign_key' => 'team_id',
+        'settings.value_serializer' => JsonValueSerializer::class,
+        'settings.key_generator' => ReadableKeyGenerator::class,
     ]);
 
     migrateTestTables();
@@ -68,7 +71,7 @@ it('updates team settings', function () {
     $this->assertDatabaseCount('settings', 1);
 
     $setting = DB::table('settings')->first();
-    $value = unserialize($setting->value);
+    $value = json_decode($setting->value);
 
     expect($setting)->team_id->toBe($team->id)
         ->and($value)->toBe('updated');
@@ -90,9 +93,9 @@ test('two teams can have the same setting', function () {
     $setting2 = DB::table('settings')->where('team_id', $team2->id)->first();
 
     expect($setting1->team_id)->toBe($team1->id)
-        ->and(unserialize($setting1->value))->toBe('team 1 value')
+        ->and(json_decode($setting1->value))->toBe('team 1 value')
         ->and($setting2->team_id)->toBe($team2->id)
-        ->and(unserialize($setting2->value))->toBe('team 2 value')
+        ->and(json_decode($setting2->value))->toBe('team 2 value')
         ->and($setting1->key)->toBe($setting2->key);
 });
 
