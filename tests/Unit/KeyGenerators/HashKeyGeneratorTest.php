@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
-use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
+use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator;
 
 beforeEach(function () {
@@ -31,7 +31,7 @@ it('generates a hash of a key and context object', function () {
 });
 
 it('works with other context serializers', function () {
-    $this->keyGenerator->setContextSerializer(new DotNotationContextSerializer);
+    $this->keyGenerator->setContextSerializer(new KeyValueContextSerializer);
 
     $context = new Context([
         'id' => 123,

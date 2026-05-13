@@ -7,7 +7,7 @@ namespace Rawilk\Settings\Support\ContextSerializers;
 use Rawilk\Settings\Contracts\ContextSerializer as ContextSerializerContract;
 use Rawilk\Settings\Support\Context;
 
-class DotNotationContextSerializer implements ContextSerializerContract
+class KeyValueContextSerializer implements ContextSerializerContract
 {
     public function serialize(?Context $context = null): string
     {

@@ -132,7 +132,7 @@ return [
     |
     | Supported:
     | - \Rawilk\Settings\Support\ContextSerializers\ContextSerializer (default)
-    | - \Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer
+    | - \Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer
     |
     */
     'context_serializer' => ContextSerializer::class,

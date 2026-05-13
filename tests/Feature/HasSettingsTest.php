@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Rawilk\Settings\Facades\Settings;
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
+use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Tests\Support\Models\Company;
 use Rawilk\Settings\Tests\Support\Models\CustomUser;
@@ -81,7 +81,7 @@ test('models can have their own settings', function () {
 
 test("a model's settings are flushed when the model is deleted", function () {
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $user1 = User::first();
     $user2 = User::where('id', '>', $user1->getKey())->first();
@@ -104,7 +104,7 @@ test("a model's settings are flushed when the model is deleted", function () {
 
 test('a model can be configured to not flush settings on delete', function () {
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $company = Company::factory()->create();
     $company->settings()->set('foo', 'bar');

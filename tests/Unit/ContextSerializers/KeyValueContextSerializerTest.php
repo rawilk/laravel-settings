@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
+use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
 use Rawilk\Settings\Tests\Support\Models\User;
 
 beforeEach(function () {
-    $this->serializer = new DotNotationContextSerializer;
+    $this->serializer = new KeyValueContextSerializer;
 });
 
 it('serializes a context object to dot notation', function () {

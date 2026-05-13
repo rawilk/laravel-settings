@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\DB;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
+use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Tests\Support\Models\Team;
 
@@ -171,7 +171,7 @@ test("all of a team's settings can be retrieved at once", function () {
     $team = Team::first();
 
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $settings->set('one', 'non-team value');
     $settings->context(new Context(['id' => 'foo']))->set('one', 'non-team value context 1');
@@ -207,7 +207,7 @@ test("a team's settings can be flushed", function () {
     $team = Team::first();
 
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $settings->set('one', 'non-team value');
 

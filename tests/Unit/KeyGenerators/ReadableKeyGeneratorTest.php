@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
-use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
+use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Tests\Support\Models\User;
 
 beforeEach(function () {
     $this->keyGenerator = (new ReadableKeyGenerator)
-        ->setContextSerializer(new DotNotationContextSerializer);
+        ->setContextSerializer(new KeyValueContextSerializer);
 });
 
 it('generates a key without context', function (string $key, string $expectedKey) {

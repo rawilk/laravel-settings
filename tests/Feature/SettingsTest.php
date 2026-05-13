@@ -14,7 +14,7 @@ use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
-use Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer;
+use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
 use Rawilk\Settings\Support\ValueSerializers\JsonValueSerializer;
@@ -320,7 +320,7 @@ test('custom value serializers can be used', function () {
 
 it('can get all persisted values', function () {
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $settings->set('one', 'value 1');
     $settings->set('two', 'value 2');
@@ -339,7 +339,7 @@ it('can get all persisted values', function () {
 test('retrieving all settings works with the Eloquent driver', function () {
     $settings = settings();
     (fn () => $this->driver = new EloquentDriver(app(Setting::class)))->call($settings);
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $settings->set('one', 'value 1');
     $settings->set('two', 'value 2');
@@ -357,7 +357,7 @@ test('retrieving all settings works with the Eloquent driver', function () {
 
 it('can retrieve all settings for a given context', function () {
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $context = new Context(['id' => 'foo']);
     $contextTwo = new Context(['id' => 'foobar']);
@@ -388,7 +388,7 @@ it('throws an exception when doing a partial context lookup using the md5 key ge
 
 it('can flush all settings', function () {
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $settings->set('one', 'value 1');
     $settings->set('two', 'value 2');
@@ -402,7 +402,7 @@ it('can flush all settings', function () {
 
 it('can flush a subset of settings', function () {
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $settings->set('one', 'value 1');
     $settings->set('two', 'value 2');
@@ -425,7 +425,7 @@ it('can flush a subset of settings', function () {
 
 it('can flush settings base on context', function () {
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     $context = new Context(['id' => 'foo']);
 
@@ -441,7 +441,7 @@ it('can flush settings base on context', function () {
 
 it('dispatches an event when settings are flushed', function () {
     $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     Event::fake();
 
@@ -492,7 +492,7 @@ it('does not dispatch the stored event if the setting value has not changed', fu
 it('can generate the cache key for a given setting', function () {
     $settings = settings();
     $settings->useCacheKeyPrefix('settings.');
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new DotNotationContextSerializer))->call($settings);
+    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
 
     expect(SettingsFacade::cacheKeyForSetting('foo'))->toBe('settings.foo')
         ->and(SettingsFacade::context(new Context(['foo' => 'bar']))->cacheKeyForSetting('foo'))->toBe('settings.foo:c:::foo:bar');
