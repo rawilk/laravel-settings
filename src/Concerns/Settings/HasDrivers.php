@@ -30,6 +30,22 @@ trait HasDrivers
     }
 
     /**
+     * Use a specific driver for a single callback.
+     */
+    public function usingDriver(Driver|string|UnitEnum $driver, callable $callback): mixed
+    {
+        $previous = $this->driver;
+
+        $this->setDriver($driver instanceof Driver ? $driver : $this->driver($driver));
+
+        try {
+            return $callback($this);
+        } finally {
+            $this->setDriver($previous);
+        }
+    }
+
+    /**
      * Register a custom driver creator Closure.
      */
     public function extend(string $driver, Closure $callback): static
