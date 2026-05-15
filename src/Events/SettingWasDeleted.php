@@ -7,6 +7,7 @@ namespace Rawilk\Settings\Events;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Rawilk\Settings\Support\Context;
+use UnitEnum;
 
 final class SettingWasDeleted
 {
@@ -14,7 +15,7 @@ final class SettingWasDeleted
     use SerializesModels;
 
     public function __construct(
-        public string $key,
+        public string|UnitEnum $key,
         public string $storageKey,
         public string $cacheKey,
         public mixed $teamId,
