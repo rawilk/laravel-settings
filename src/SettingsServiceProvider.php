@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings;
 
-use Rawilk\Settings\Contracts\Setting as SettingContract;
 use Rawilk\Settings\Drivers\Factory;
-use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
-use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
-use Rawilk\Settings\Support\ValueSerializers\ValueSerializer;
+use Rawilk\Settings\Support\CacheStatus;
+use Rawilk\Settings\Support\EncryptionStatus;
+use Rawilk\Settings\Support\TeamResolver;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -25,12 +24,7 @@ class SettingsServiceProvider extends PackageServiceProvider
             ]);
     }
 
-    public function packageBooted(): void
-    {
-        $this->bootModelBindings();
-    }
-
-    public function packageRegistered(): void
+    public function registeringPackage(): void
     {
         $this->registerSettings();
     }
@@ -39,57 +33,19 @@ class SettingsServiceProvider extends PackageServiceProvider
     {
         return [
             Settings::class,
-            'SettingsFactory',
         ];
-    }
-
-    protected function bootModelBindings(): void
-    {
-        $config = $this->app['config']['settings.drivers.eloquent'];
-
-        if (! $config) {
-            return;
-        }
-
-        $this->app->bind(SettingContract::class, $config['model']);
     }
 
     protected function registerSettings(): void
     {
-        $this->app->singleton(
-            'SettingsFactory',
-            fn ($app) => new Factory($app)
-        );
+        $this->app->scoped(Factory::class);
 
-        $this->app->singleton(Settings::class, function ($app) {
-            $keyGenerator = $app->make($app['config']['settings.key_generator'] ?? ReadableKeyGenerator::class);
-            $keyGenerator->setContextSerializer(
-                $app->make($app['config']['settings.context_serializer'] ?? ContextSerializer::class)
-            );
+        $this->app->bind(Settings::class);
 
-            $settings = new Settings(
-                driver: $app['SettingsFactory']->driver(),
-                keyGenerator: $keyGenerator,
-                valueSerializer: $app->make($app['config']['settings.value_serializer'] ?? ValueSerializer::class),
-            );
+        $this->app->scoped(CacheStatus::class);
 
-            $settings->useCacheKeyPrefix($app['config']['settings.cache_key_prefix'] ?? '');
+        $this->app->scoped(EncryptionStatus::class);
 
-            $settings->setCache($app['cache.store']);
-
-            $settings->cacheDefaultValue($app['config']['settings.cache_default_value'] ?? false);
-
-            if (config('app.key')) {
-                $settings->setEncrypter($app['encrypter']);
-            }
-
-            $app['config']['settings.cache'] ? $settings->enableCache() : $settings->disableCache();
-            $app['config']['settings.encryption'] ? $settings->enableEncryption() : $settings->disableEncryption();
-            $app['config']['settings.teams'] ? $settings->enableTeams() : $settings->disableTeams();
-
-            $settings->setTeamForeignKey($app['config']['settings.team_foreign_key'] ?? 'team_id');
-
-            return $settings;
-        });
+        $this->app->scoped(TeamResolver::class);
     }
 }

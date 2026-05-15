@@ -4,46 +4,56 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Concerns\Settings;
 
-use Illuminate\Contracts\Encryption\Encrypter;
+use Closure;
+use Illuminate\Support\Facades\Crypt;
+use Rawilk\Settings\Support\EncryptionStatus;
 
 /**
  * @mixin \Rawilk\Settings\Settings
  */
 trait EncryptsSettings
 {
-    protected ?Encrypter $encrypter = null;
-
-    protected bool $encryptionEnabled = false;
+    protected EncryptionStatus $encryptionStatus;
 
     public function disableEncryption(): static
     {
-        $this->encryptionEnabled = false;
+        $this->encryptionStatus->disable();
 
         return $this;
     }
 
     public function enableEncryption(): static
     {
-        $this->encryptionEnabled = true;
+        $this->encryptionStatus->enable();
 
         return $this;
     }
 
-    public function setEncrypter(Encrypter $encrypter): static
+    public function withoutEncryption(Closure $callback): mixed
     {
-        $this->encrypter = $encrypter;
+        if ($this->encryptionStatus->disabled()) {
+            return $callback();
+        }
 
-        return $this;
+        $this->encryptionStatus->disable();
+
+        try {
+            return $callback();
+        } finally {
+            $this->encryptionStatus->enable();
+        }
     }
 
-    protected function encryptionIsEnabled(): bool
+    public function setEncryptionStatus(EncryptionStatus $encryptionStatus): static
     {
-        return $this->encryptionEnabled && $this->encrypter !== null;
+        $this->encryptionStatus = $encryptionStatus;
+
+        return $this;
     }
 
     protected function decryptValue(mixed $value): mixed
     {
-        if (! $this->encryptionIsEnabled()) {
+        if ($this->encryptionStatus->disabled()) {
             return $value;
         }
 
@@ -51,6 +61,6 @@ trait EncryptsSettings
             return $value;
         }
 
-        return rescue(fn () => $this->encrypter->decrypt($value), fn () => $value);
+        return rescue(fn () => Crypt::decrypt($value), fn () => $value);
     }
 }

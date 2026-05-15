@@ -4,99 +4,66 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Concerns\Settings;
 
-use Illuminate\Database\Eloquent\Model;
+use Closure;
 
 /**
  * @mixin \Rawilk\Settings\Settings
  */
 trait HasTeams
 {
-    protected bool $teams = false;
-
-    /** @var null|string|int */
-    protected mixed $teamId = null;
-
-    protected ?string $teamForeignKey = null;
-
-    // Allows us to use a team id for a single call.
-    protected mixed $temporaryTeamId = false;
-
-    public function getTeamId(): mixed
-    {
-        return $this->teamId;
-    }
-
     /**
-     * Set the team id for teams/groups support. This id is used when querying settings.
-     *
-     * @param  int|string|null|Model  $id
+     * Allows caller to set a team for a single call/instance via `usingTeam()`.
      */
-    public function setTeamId(mixed $id): static
-    {
-        if ($id instanceof Model) {
-            $id = $id->getKey();
-        }
+    protected mixed $temporaryTeam = false;
 
-        $this->teamId = $id;
+    public function disableTeams(): static
+    {
+        $this->teamResolver->disable();
 
         return $this;
     }
 
-    public function usingTeam(mixed $teamId): static
+    public function enableTeams(): static
     {
-        if ($teamId instanceof Model) {
-            $teamId = $teamId->getKey();
-        }
-
-        $this->temporaryTeamId = $teamId;
-
-        return $this;
-    }
-
-    public function withoutTeams(): static
-    {
-        $this->temporaryTeamId = null;
-
-        return $this;
-    }
-
-    public function getTeamForeignKey(): ?string
-    {
-        return $this->teamForeignKey;
-    }
-
-    public function setTeamForeignKey(?string $foreignKey): static
-    {
-        $this->teamForeignKey = $foreignKey;
-
-        return $this;
-    }
-
-    public function enableTeams(): self
-    {
-        $this->teams = true;
-
-        return $this;
-    }
-
-    public function disableTeams(): self
-    {
-        $this->teams = false;
+        $this->teamResolver->enable();
 
         return $this;
     }
 
     public function teamsAreEnabled(): bool
     {
-        return $this->teams;
+        return ! $this->teamResolver->disabled();
     }
 
-    protected function teamIdForCall(): mixed
+    /**
+     * Override the team temporarily for a single call/instance.
+     */
+    public function usingTeam(mixed $team, ?Closure $callback = null): mixed
     {
-        if ($this->temporaryTeamId !== false) {
-            return $this->temporaryTeamId;
+        if ($callback) {
+            return $this->teamResolver->withTeam($team, $callback);
         }
 
-        return $this->teams ? $this->teamId : false;
+        $this->temporaryTeam = $team;
+
+        return $this;
+    }
+
+    public function noTeam(?Closure $callback = null): mixed
+    {
+        return $this->usingTeam(null, $callback);
+    }
+
+    protected function getTeamId(): mixed
+    {
+        if ($this->teamResolver->disabled()) {
+            return false;
+        }
+
+        if ($this->temporaryTeam !== false) {
+            return $this->teamResolver->getTeamId($this->temporaryTeam);
+        }
+
+        return $this->teamResolver->resolve();
     }
 }

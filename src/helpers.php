@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Rawilk\Settings\Settings;
 use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Support\PendingSettings;
 
 if (! function_exists('settings')) {
-    function settings($key = null, $default = null, $context = null)
+    function settings($key = null, $default = null, $context = null): mixed
     {
-        /** @var Settings $settings */
-        $settings = app(Settings::class);
+        /** @var PendingSettings $settings */
+        $settings = app(PendingSettings::class);
 
         // If nothing is passed in to the function, simply return the settings instance.
         if ($key === null) {
@@ -34,5 +34,29 @@ if (! function_exists('settings')) {
         }
 
         return $settings->get(key: $key, default: $default);
+    }
+}
+
+if (! function_exists('settings_enum_value')) {
+    /**
+     * Return a scalar value for the given value that might be an enum.
+     *
+     * @internal
+     *
+     * @template TValue
+     * @template TDefault
+     *
+     * @param  TValue  $value
+     * @param  TDefault|callable(TValue): TDefault  $default
+     * @return ($value is empty ? TDefault : mixed)
+     */
+    function settings_enum_value($value, $default = null)
+    {
+        return match (true) {
+            $value instanceof BackedEnum => $value->value,
+            $value instanceof UnitEnum => $value->name,
+
+            default => $value ?? value($default),
+        };
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Rawilk\Settings\Contracts\Setting as SettingContract;
 use Rawilk\Settings\Facades\Settings;
+use Rawilk\Settings\Support\SettingsConfig;
 
 /**
  * @property int $id
@@ -21,32 +22,27 @@ class Setting extends Model implements SettingContract
 {
     public $timestamps = false;
 
-    protected ?string $teamForeignKey = null;
-
     protected $guarded = ['id'];
 
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
 
-        $this->setTable(config('settings.table'));
-        $this->teamForeignKey = config('settings.team_foreign_key');
+        $this->setTable(SettingsConfig::getSettingsTable());
     }
 
-    public static function getValue(string $key, $default = null, $teamId = null)
+    public static function getValue(string $key, $teamId = null)
     {
-        $value = static::query()
+        return static::query()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
+                settings()->teamsAreEnabled() && $teamId !== false,
                 fn (Builder $query) => $query->where(
-                    static::make()->getTable() . '.' . config('settings.team_foreign_key'),
+                    static::getTeamColumn(),
                     $teamId,
                 ),
             )
             ->value('value');
-
-        return $value ?? $default;
     }
 
     public static function getAll($teamId = null, $keys = null): array|Arrayable
@@ -59,9 +55,9 @@ class Setting extends Model implements SettingContract
         return static::query()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
+                settings()->teamsAreEnabled() && $teamId !== false,
                 fn (Builder $query) => $query->where(
-                    static::make()->getTable() . '.' . config('settings.team_foreign_key'),
+                    static::getTeamColumn(),
                     $teamId,
                 ),
             )
@@ -73,9 +69,9 @@ class Setting extends Model implements SettingContract
         static::query()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
+                settings()->teamsAreEnabled() && $teamId !== false,
                 fn (Builder $query) => $query->where(
-                    static::make()->getTable() . '.' . config('settings.team_foreign_key'),
+                    static::getTeamColumn(),
                     $teamId,
                 ),
             )
@@ -86,8 +82,8 @@ class Setting extends Model implements SettingContract
     {
         $data = ['key' => $key];
 
-        if ($teamId !== false) {
-            $data[config('settings.team_foreign_key')] = $teamId;
+        if (settings()->teamsAreEnabled() && $teamId !== false) {
+            $data[SettingsConfig::getTeamsForeignKey()] = $teamId;
         }
 
         return static::updateOrCreate($data, compact('value'));
@@ -118,9 +114,9 @@ class Setting extends Model implements SettingContract
                 fn (Builder $query) => $query->whereIn('key', $keys),
             )
             ->when(
-                $teamId !== false,
+                settings()->teamsAreEnabled() && $teamId !== false,
                 fn (Builder $query) => $query->where(
-                    static::make()->getTable() . '.' . config('settings.team_foreign_key'),
+                    static::getTeamColumn(),
                     $teamId,
                 ),
             );
@@ -137,5 +133,10 @@ class Setting extends Model implements SettingContract
         }
 
         return collect($keys)->flatten()->filter();
+    }
+
+    protected static function getTeamColumn(): string
+    {
+        return SettingsConfig::getSettingsTable() . '.' . SettingsConfig::getTeamsForeignKey();
     }
 }

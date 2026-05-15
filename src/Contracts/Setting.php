@@ -8,7 +8,7 @@ use Illuminate\Contracts\Support\Arrayable;
 
 interface Setting
 {
-    public static function getValue(string $key, $default = null, $teamId = null);
+    public static function getValue(string $key, $teamId = null);
 
     public static function getAll($teamId = null, $keys = null): array|Arrayable;
 

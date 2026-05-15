@@ -4,126 +4,165 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings;
 
-use BackedEnum;
+use Closure;
+use DateInterval;
+use DateTimeInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Macroable;
-use Rawilk\Settings\Contracts\Driver;
-use Rawilk\Settings\Contracts\KeyGenerator;
-use Rawilk\Settings\Contracts\ValueSerializer;
+use Rawilk\Settings\Drivers\Factory;
 use Rawilk\Settings\Events\SettingsFlushed;
 use Rawilk\Settings\Events\SettingWasDeleted;
 use Rawilk\Settings\Events\SettingWasStored;
 use Rawilk\Settings\Exceptions\InvalidBulkValueResult;
-use Rawilk\Settings\Exceptions\InvalidEnumType;
 use Rawilk\Settings\Exceptions\InvalidKeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
+use Rawilk\Settings\Support\SettingsConfig;
+use Rawilk\Settings\Support\TeamResolver;
+use UnitEnum;
 
 class Settings
 {
     use Concerns\Settings\EncryptsSettings;
     use Concerns\Settings\HasContext;
+    use Concerns\Settings\HasDrivers;
     use Concerns\Settings\HasSerializers;
     use Concerns\Settings\HasTeams;
     use Concerns\Settings\InteractsWithCache;
+    use Conditionable;
     use Macroable;
 
-    public function __construct(
-        protected Driver $driver,
-        protected KeyGenerator $keyGenerator,
-        protected ValueSerializer $valueSerializer,
-    ) {
+    public function __construct(Factory $factory, protected TeamResolver $teamResolver)
+    {
+        $this->setDriver($factory->driver());
+
+        $this->configure();
     }
 
-    public function getDriver(): Driver
+    public function forget(string|UnitEnum $key): mixed
     {
-        return $this->driver;
-    }
+        $storageKey = $this->getKeyForStorage($this->normalizeKey($key));
+        $cacheKey = $this->getCacheKey($storageKey);
+        $teamId = $this->getTeamId();
 
-    public function forget(string|BackedEnum $key)
-    {
-        $key = $this->normalizeKey($key);
-
-        $generatedKey = $this->getKeyForStorage($key);
-
-        $driverResult = $this->driver->forget(
-            key: $generatedKey,
-            teamId: $this->teams ? $this->teamId : false,
+        $result = $this->driver()->forget(
+            key: $storageKey,
+            teamId: $teamId,
         );
 
         SettingWasDeleted::dispatch(
             $key,
-            $generatedKey,
-            $this->getCacheKey($generatedKey),
-            $this->teams ? $this->teamId : false,
-            $this->context,
+            $storageKey,
+            $cacheKey,
+            $teamId,
+            $this->getContext(),
         );
 
-        if ($this->temporarilyDisableCache || $this->cacheIsEnabled()) {
-            $this->cache->forget($this->getCacheKey($generatedKey));
-        }
+        $this->cache()->forget($cacheKey);
 
-        if ($this->resetContext) {
-            $this->context();
-        }
-
-        $this->temporarilyDisableCache = false;
-        $this->resetContext = true;
-
-        return $driverResult;
+        return $result;
     }
 
-    public function get(string|BackedEnum $key, $default = null, bool $resetTempTeam = true)
+    public function get(
+        string|UnitEnum $key,
+        mixed $default = null,
+        null|int|Closure|DateTimeInterface|DateInterval|array $cacheTtl = null,
+    ): mixed {
+        $storageKey = $this->getKeyForStorage($this->normalizeKey($key));
+
+        $value = $this->fetchValue($storageKey, $cacheTtl);
+
+        if (is_null($value)) {
+            if ($this->cacheDefaultValues && $default !== null) {
+                $this->cacheValue($storageKey, $this->prepareValueForStorage($default), $cacheTtl);
+            }
+
+            return $default;
+        }
+
+        return $this->unserializeValue($this->decryptValue($value));
+    }
+
+    public function has(string|UnitEnum $key): bool
     {
-        $key = $this->normalizeKey($key);
+        $storageKey = $this->getKeyForStorage($this->normalizeKey($key));
 
-        $generatedKey = $this->getKeyForStorage($key);
+        return $this->driver()->has(
+            key: $storageKey,
+            teamId: $this->getTeamId(),
+        );
+    }
 
-        if ($this->cacheIsEnabled()) {
-            $value = $this->cache->rememberForever(
-                $this->getCacheKey($generatedKey),
-                fn () => $this->driver->get(
-                    key: $generatedKey,
-                    default: $this->cacheDefaultValue ? $default : null,
-                    teamId: $this->teamIdForCall(),
-                )
-            );
-        } else {
-            $value = $this->driver->get(
-                key: $generatedKey,
-                default: $default,
-                teamId: $this->teamIdForCall(),
-            );
+    public function set(
+        string|UnitEnum $key,
+        mixed $value = null,
+        null|int|Closure|DateTimeInterface|DateInterval|array $cacheTtl = null,
+    ): mixed {
+        // Only perform an update if the value changed.
+        $originalValue = $this->withoutCache(function () use ($key): mixed {
+            return $this->get($key);
+        });
+
+        if ($originalValue === $value) {
+            return null;
         }
 
-        if ($value !== null && $value !== $default) {
-            $value = $this->unserializeValue($this->decryptValue($value));
-        }
+        $storageKey = $this->getKeyForStorage($this->normalizeKey($key));
+        $teamId = $this->getTeamId();
+        $cacheKey = $this->getCacheKey($storageKey);
+        $storageValue = $this->prepareValueForStorage($value);
 
-        if ($this->resetContext) {
-            $this->context();
-        }
+        $result = $this->driver()->set(
+            key: $storageKey,
+            value: $storageValue,
+            teamId: $teamId,
+        );
 
-        $this->temporarilyDisableCache = false;
-        $this->resetContext = true;
+        SettingWasStored::dispatch(
+            $key,
+            $storageKey,
+            $cacheKey,
+            $value,
+            $teamId,
+            $this->getContext(),
+        );
 
-        if ($resetTempTeam) {
-            $this->temporaryTeamId = false;
-        }
+        // Warm the cache for the updated setting value.
+        $this->cacheValue($storageKey, $storageValue, $cacheTtl);
 
-        return $value ?? $default;
+        return $result;
+    }
+
+    public function isFalse(
+        string|UnitEnum $key,
+        mixed $default = false,
+        null|int|Closure|DateTimeInterface|DateInterval|array $cacheTtl = null,
+    ): bool {
+        $value = $this->get(key: $key, default: $default, cacheTtl: $cacheTtl);
+
+        return $value === false || $value === '0' || $value === 0;
+    }
+
+    public function isTrue(
+        string|UnitEnum $key,
+        mixed $default = true,
+        null|int|Closure|DateTimeInterface|DateInterval|array $cacheTtl = null,
+    ): bool {
+        $value = $this->get(key: $key, default: $default, cacheTtl: $cacheTtl);
+
+        return $value === true || $value === '1' || $value === 1;
     }
 
     public function all($keys = null): Collection
     {
-        $keys = $this->normalizeBulkLookupKey($keys);
-
-        $values = collect($this->driver->all(
-            teamId: $this->teamIdForCall(),
-            keys: $keys,
+        return collect($this->driver()->all(
+            teamId: $this->getTeamId(),
+            keys: $this->normalizeBulkLookupKeys($keys),
         ))->map(function (mixed $record): mixed {
-            $record = $this->normalizeBulkRetrievedValue($record);
+            $record = $this->normalizeBulkValue($record);
             $value = $record->value;
 
             if ($value !== null) {
@@ -136,168 +175,128 @@ class Settings
 
             return $record;
         });
-
-        if ($this->resetContext) {
-            $this->context();
-        }
-
-        $this->temporarilyDisableCache = false;
-        $this->resetContext = true;
-        $this->temporaryTeamId = false;
-
-        return $values;
-    }
-
-    public function has(string|BackedEnum $key, bool $resetTempTeam = true): bool
-    {
-        $key = $this->normalizeKey($key);
-
-        $has = $this->driver->has(
-            key: $this->getKeyForStorage($key),
-            teamId: $this->teamIdForCall(),
-        );
-
-        if ($this->resetContext) {
-            $this->context();
-        }
-
-        $this->temporarilyDisableCache = false;
-        $this->resetContext = true;
-
-        if ($resetTempTeam) {
-            $this->temporaryTeamId = false;
-        }
-
-        return $has;
-    }
-
-    public function set(string|BackedEnum $key, $value = null): mixed
-    {
-        $key = $this->normalizeKey($key);
-
-        // We really only need to update the value if it has changed
-        // to prevent the cache being reset on the key.
-        if (! $this->shouldSetNewValue(key: $key, newValue: $value)) {
-            $this->context();
-
-            return null;
-        }
-
-        $generatedKey = $this->getKeyForStorage($key);
-        $serializedValue = $this->serializeValue($value);
-
-        $driverResult = $this->driver->set(
-            key: $generatedKey,
-            value: $this->encryptionIsEnabled() ? $this->encrypter->encrypt($serializedValue) : $serializedValue,
-            teamId: $this->teamIdForCall(),
-        );
-
-        SettingWasStored::dispatch(
-            $key,
-            $generatedKey,
-            $this->getCacheKey($generatedKey),
-            $value,
-            $this->teamIdForCall(),
-            $this->context,
-        );
-
-        if ($this->temporarilyDisableCache || $this->cacheIsEnabled()) {
-            $this->cache->forget($this->getCacheKey($generatedKey));
-        }
-
-        $this->context();
-        $this->temporarilyDisableCache = false;
-        $this->temporaryTeamId = false;
-
-        return $driverResult;
-    }
-
-    public function isFalse(string|BackedEnum $key, $default = false): bool
-    {
-        $value = $this->get(key: $key, default: $default);
-
-        return $value === false || $value === '0' || $value === 0;
-    }
-
-    public function isTrue(string|BackedEnum $key, $default = true): bool
-    {
-        $value = $this->get(key: $key, default: $default);
-
-        return $value === true || $value === '1' || $value === 1;
     }
 
     public function flush($keys = null): mixed
     {
-        $keys = $this->normalizeBulkLookupKey($keys);
+        $storageKeys = $this->normalizeBulkLookupKeys($keys);
 
-        $driverResult = $this->driver->flush(
-            teamId: $this->teamIdForCall(),
-            keys: $keys,
+        $teamId = $this->getTeamId();
+
+        $result = $this->driver()->flush(
+            teamId: $teamId,
+            keys: $storageKeys,
         );
 
         SettingsFlushed::dispatch(
-            $keys,
-            $this->teamIdForCall(),
-            $this->context,
+            $storageKeys,
+            $teamId,
+            $this->getContext(),
         );
 
-        // Flush the cache for all deleted keys.
-        // Note: Only works when a subset of keys is specified.
-        if ($keys instanceof Collection && ($this->temporarilyDisableCache || $this->cacheIsEnabled())) {
-            $keys->each(function (string $key) {
-                $this->cache->forget($this->getCacheKey($key));
+        // When a subset of keys is provided, we can flush the cache for the deleted keys.
+        // We currently do not have a way to invalid the cache for all settings that were stored.
+        if ($keys instanceof Collection) {
+            $cache = $this->cache();
+
+            $keys->each(function (string $key) use ($cache): void {
+                $cache->forget($this->getCacheKey($key));
             });
         }
 
-        if ($this->resetContext) {
-            $this->context();
-        }
-
-        $this->temporarilyDisableCache = false;
-        $this->resetContext = true;
-        $this->temporaryTeamId = false;
-
-        return $driverResult;
+        return $result;
     }
 
-    protected function normalizeKey(string|BackedEnum $key): string
+    protected function fetchValue(
+        string $key,
+        null|int|Closure|DateTimeInterface|DateInterval|array $cacheTtl = null,
+    ): mixed {
+        $callback = fn () => $this->driver()->get(
+            key: $key,
+            teamId: $this->getTeamId(),
+        );
+
+        if ($this->cacheStatus->disabled()) {
+            return $callback();
+        }
+
+        $ttl = $cacheTtl ?? $this->cacheStatus->getTtl();
+        $cacheKey = $this->getCacheKey($key);
+
+        if (is_array($ttl)) {
+            return $this->cache()->flexible(
+                $cacheKey,
+                $ttl,
+                $callback,
+            );
+        }
+
+        if (is_null($ttl)) {
+            return $this->cache()->rememberForever($cacheKey, $callback);
+        }
+
+        return $this->cache()->remember(
+            $cacheKey,
+            $ttl,
+            $callback,
+        );
+    }
+
+    protected function prepareValueForStorage(mixed $value): mixed
     {
-        if ($key instanceof BackedEnum) {
-            throw_unless(
-                is_string($key->value),
-                InvalidEnumType::make($key::class)
+        $serializedValue = $this->serializeValue($value);
+
+        if ($this->encryptionStatus->disabled()) {
+            return $serializedValue;
+        }
+
+        return Crypt::encrypt($serializedValue);
+    }
+
+    protected function normalizeKey(string|UnitEnum $key): string
+    {
+        $value = (string) settings_enum_value($key);
+
+        if (Str::startsWith($value, 'file_')) {
+            return str_replace('file_', 'file.', $value);
+        }
+
+        return $value;
+    }
+
+    protected function normalizeBulkLookupKeys($keys): string|Collection|bool
+    {
+        if (is_null($keys) && $this->getContext() !== null) {
+            throw_if(
+                $this->keyGenerator instanceof Md5KeyGenerator || $this->keyGenerator instanceof HashKeyGenerator,
+                InvalidKeyGenerator::forPartialLookup($this->keyGenerator::class),
             );
 
-            $key = $key->value;
+            $context = $this->getContext();
+
+            return is_bool($context)
+                ? $context
+                : $this->keyGenerator->generate('', $context);
         }
 
-        if (Str::startsWith(haystack: $key, needles: 'file_')) {
-            return str_replace(search: 'file_', replace: 'file.', subject: $key);
-        }
-
-        return $key;
+        return collect($keys)
+            ->flatten()
+            ->filter()
+            ->map(fn (string|UnitEnum $key): string => $this->getKeyForStorage($this->normalizeKey($key)));
     }
 
     protected function getKeyForStorage(string $key): string
     {
-        return $this->getKeyGenerator()->generate(key: $key, context: $this->context);
+        return $this->getKeyGenerator()->generate(key: $key, context: $this->getContext());
     }
 
-    protected function shouldSetNewValue(string $key, $newValue): bool
+    protected function configure(): void
     {
-        if (! $this->cacheIsEnabled()) {
-            return true;
-        }
-
-        // To prevent decryption errors, we will check if we have a setting set for the current context and key.
-        if (! $this->doNotResetContext()->has(key: $key, resetTempTeam: false)) {
-            return true;
-        }
-
-        return $newValue !== $this->doNotResetContext()->get(key: $key, resetTempTeam: false);
+        $this->prefixCacheWith(SettingsConfig::getCacheKeyPrefix());
+        $this->cacheDefaultValue(SettingsConfig::shouldCacheDefaultValues());
     }
 
-    protected function normalizeBulkRetrievedValue(mixed $record): object
+    protected function normalizeBulkValue(mixed $record): object
     {
         if (is_array($record)) {
             $record = (object) $record;
@@ -314,24 +313,5 @@ class Settings
         );
 
         return $record;
-    }
-
-    protected function normalizeBulkLookupKey($key): string|Collection|bool
-    {
-        if (is_null($key) && $this->context !== null) {
-            throw_if(
-                $this->keyGenerator instanceof Md5KeyGenerator || $this->keyGenerator instanceof HashKeyGenerator,
-                InvalidKeyGenerator::forPartialLookup($this->keyGenerator::class),
-            );
-
-            return is_bool($this->context)
-                ? $this->context
-                : $this->keyGenerator->generate('', $this->context);
-        }
-
-        return collect($key)
-            ->flatten()
-            ->filter()
-            ->map(fn (string|BackedEnum $key): string => $this->getKeyForStorage($this->normalizeKey($key)));
     }
 }

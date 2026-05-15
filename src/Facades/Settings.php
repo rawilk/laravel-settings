@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Rawilk\Settings\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use Rawilk\Settings\Settings as SettingsService;
+use Rawilk\Settings\Support\PendingSettings;
 
 /**
- * @see \Rawilk\Settings\Settings
+ * @see PendingSettings
  *
- * @method static \Rawilk\Settings\Settings context(null|\Rawilk\Settings\Support\Context $context = null)
+ * @method static SettingsService context(null|\Rawilk\Settings\Support\Context $context = null)
  * @method static null|mixed forget(string|\BackedEnum $key)
  * @method static mixed get(string|\BackedEnum $key, null|mixed $default = null)
  * @method static \Illuminate\Support\Collection all($keys)
@@ -35,8 +37,10 @@ use Illuminate\Support\Facades\Facade;
  */
 class Settings extends Facade
 {
+    protected static $cached = false;
+
     protected static function getFacadeAccessor(): string
     {
-        return \Rawilk\Settings\Settings::class;
+        return PendingSettings::class;
     }
 }

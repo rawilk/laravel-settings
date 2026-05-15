@@ -37,6 +37,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cache TTL
+    |--------------------------------------------------------------------------
+    |
+    | By default, we will cache settings forever. Set a ttl value here to limit
+    | how long the cached setting is valid. We will use Cache::flex() if you
+    | set an array ttl value here.
+    |
+    */
+    'cache_ttl' => null,
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption
     |--------------------------------------------------------------------------
     |
@@ -70,12 +82,9 @@ return [
     */
     'drivers' => [
         'database' => [
-            'driver' => 'database',
             'connection' => env('DB_CONNECTION', 'mysql'),
         ],
         'eloquent' => [
-            'driver' => 'eloquent',
-
             /*
              * You can use any model you like for the setting, but it needs to implement
              * the Rawilk\Settings\Contracts\Setting interface.
@@ -146,7 +155,7 @@ return [
     |
     | Supported:
     | - Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator (default)
-    | - Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator
+    | - Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator (deprecated)
     | - Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator
     |
     */

@@ -12,6 +12,10 @@ use Rawilk\Settings\Contracts\ValueSerializer;
  */
 trait HasSerializers
 {
+    protected KeyGenerator $keyGenerator;
+
+    protected ValueSerializer $valueSerializer;
+
     public function getKeyGenerator(): KeyGenerator
     {
         return $this->keyGenerator;

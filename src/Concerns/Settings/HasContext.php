@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Concerns\Settings;
 
+use Closure;
 use Rawilk\Settings\Support\Context;
 
 /**
@@ -12,10 +13,6 @@ use Rawilk\Settings\Support\Context;
 trait HasContext
 {
     protected null|Context|bool $context = null;
-
-    // Instruct us to reset the context after a call (such as `get()`).
-    // Meant for internal use only.
-    protected bool $resetContext = true;
 
     /**
      * Pass in `false` for context when calling `all()` to only return results
@@ -28,10 +25,20 @@ trait HasContext
         return $this;
     }
 
-    protected function doNotResetContext(): static
+    public function withContext(Context|bool|null $context, Closure $callback): mixed
     {
-        $this->resetContext = false;
+        $previousContext = $this->context;
+        $this->context($context);
 
-        return $this;
+        try {
+            return $callback($this);
+        } finally {
+            $this->context($previousContext);
+        }
+    }
+
+    public function getContext(): null|Context|bool
+    {
+        return $this->context;
     }
 }
