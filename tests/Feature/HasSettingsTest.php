@@ -11,6 +11,9 @@ use Rawilk\Settings\Tests\Support\Models\Company;
 use Rawilk\Settings\Tests\Support\Models\CustomUser;
 use Rawilk\Settings\Tests\Support\Models\User;
 
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
+
 beforeEach(function () {
     User::factory(2)->create();
 });
@@ -127,4 +130,30 @@ test("a model's settings will not be flushed if the md5 key generator is being u
     $user->delete();
 
     $this->assertDatabaseCount('settings', 1);
+});
+
+test('users can have settings on multiple teams', function () {
+    config()->set('settings.encryption', false);
+
+    Settings::defaultTeam(1);
+
+    $user = User::first();
+
+    $user->settings()->set('my-setting', 'team 1 value');
+
+    $user->settings()->usingTeam(2)->set('my-setting', 'team 2 value');
+
+    assertDatabaseCount('settings', 2);
+
+    assertDatabaseHas('settings', [
+        'key' => 'my-setting:c:::model:user::id:1',
+        'value' => json_encode('team 1 value'),
+        'team_id' => 1,
+    ]);
+
+    assertDatabaseHas('settings', [
+        'key' => 'my-setting:c:::model:user::id:1',
+        'value' => json_encode('team 2 value'),
+        'team_id' => 2,
+    ]);
 });
