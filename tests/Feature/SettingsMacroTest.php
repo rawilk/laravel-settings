@@ -7,8 +7,6 @@ use Rawilk\Settings\Settings;
 
 beforeEach(function () {
     config([
-        'settings.driver' => 'eloquent',
-        'settings.table' => 'settings',
         'settings.cache' => false,
         'settings.encryption' => false,
     ]);
@@ -24,6 +22,6 @@ test('custom functions can be added to settings', function () {
     SettingsFacade::set('foo', 'bar');
 
     expect(SettingsFacade::myCustomFunction('foo'))->toBe('BAR')
-        ->and(SettingsFacade::myCustomFunction('foo'))->not()->toBe('bar')
+        ->and(SettingsFacade::myCustomFunction('foo'))->not->toBe('bar')
         ->and(SettingsFacade::get('foo'))->toBe('bar');
 });

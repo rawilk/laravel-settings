@@ -12,8 +12,6 @@ use Rawilk\Settings\Tests\Support\Models\CustomUser;
 use Rawilk\Settings\Tests\Support\Models\User;
 
 beforeEach(function () {
-    migrateTestTables();
-
     User::factory(2)->create();
 });
 

@@ -2,190 +2,207 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\DB;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
 use Rawilk\Settings\Support\Context;
-use Rawilk\Settings\Support\ContextSerializers\KeyValueContextSerializer;
-use Rawilk\Settings\Support\KeyGenerators\ReadableKeyGenerator;
-use Rawilk\Settings\Support\ValueSerializers\JsonValueSerializer;
+use Rawilk\Settings\Support\TeamResolver;
 use Rawilk\Settings\Tests\Support\Models\Team;
+
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 
 beforeEach(function () {
     config([
-        'settings.driver' => 'database',
-        'settings.table' => 'settings',
         'settings.cache' => false,
-        'settings.cache_key_prefix' => 'settings.',
         'settings.encryption' => false,
         'settings.teams' => true,
-        'settings.team_foreign_key' => 'team_id',
-        'settings.value_serializer' => JsonValueSerializer::class,
-        'settings.key_generator' => ReadableKeyGenerator::class,
     ]);
-
-    migrateTestTables();
-    migrateTeams();
-
-    setDatabaseDriverConnection();
 
     Team::factory()->create();
 });
 
 test('teams can be enabled and disabled', function () {
-    // Should be enabled with the config value set to true
-    expect(SettingsFacade::teamsAreEnabled())->toBeTrue();
+    expect(app(TeamResolver::class)->disabled())->toBeFalse();
 
-    SettingsFacade::disableTeams();
-    expect(SettingsFacade::teamsAreEnabled())->toBeFalse();
+    settings()->disableTeams();
+    expect(app(TeamResolver::class)->disabled())->toBeTrue();
 
-    SettingsFacade::enableTeams();
-    expect(SettingsFacade::teamsAreEnabled())->toBeTrue();
+    settings()->enableTeams();
+    expect(app(TeamResolver::class)->disabled())->toBeFalse();
 });
 
-test('team id can be set', function () {
-    expect(SettingsFacade::getTeamId())->toBeNull();
+test('a default team can be set', function () {
+    SettingsFacade::defaultTeam(1);
 
-    SettingsFacade::setTeamId(1);
+    settings()->set('foo', 'bar');
 
-    expect(SettingsFacade::getTeamId())->toBe(1);
-});
-
-it('sets a team id when saving', function () {
-    $team = Team::first();
-    SettingsFacade::setTeamId($team);
-
-    SettingsFacade::set('foo', 'bar');
-
-    $setting = DB::table('settings')->first();
-
-    expect($setting->team_id)->toBe($team->id);
-});
-
-it('updates team settings', function () {
-    $team = Team::first();
-    SettingsFacade::setTeamId($team);
-
-    SettingsFacade::set('foo', 'bar');
-    SettingsFacade::set('foo', 'updated');
-
-    $this->assertDatabaseCount('settings', 1);
-
-    $setting = DB::table('settings')->first();
-    $value = json_decode($setting->value);
-
-    expect($setting)->team_id->toBe($team->id)
-        ->and($value)->toBe('updated');
-});
-
-test('two teams can have the same setting', function () {
-    $team1 = Team::first();
-    $team2 = Team::factory()->create();
-
-    SettingsFacade::setTeamId($team1);
-    SettingsFacade::set('foo', 'team 1 value');
-
-    SettingsFacade::setTeamId($team2);
-    SettingsFacade::set('foo', 'team 2 value');
-
-    $this->assertDatabaseCount('settings', 2);
-
-    $setting1 = DB::table('settings')->where('team_id', $team1->id)->first();
-    $setting2 = DB::table('settings')->where('team_id', $team2->id)->first();
-
-    expect($setting1->team_id)->toBe($team1->id)
-        ->and(json_decode($setting1->value))->toBe('team 1 value')
-        ->and($setting2->team_id)->toBe($team2->id)
-        ->and(json_decode($setting2->value))->toBe('team 2 value')
-        ->and($setting1->key)->toBe($setting2->key);
-});
-
-it('checks if a team has a setting', function () {
-    SettingsFacade::set('foo', 'null team');
-    expect(SettingsFacade::has('foo'))->toBeTrue();
-
-    $team = Team::first();
-
-    SettingsFacade::setTeamId($team);
-    expect(SettingsFacade::has('foo'))->toBeFalse();
-
-    SettingsFacade::set('foo', 'team value');
-    expect(SettingsFacade::has('foo'))->toBeTrue();
-});
-
-it('gets a team setting value', function () {
-    $team = Team::first();
-    $team2 = Team::factory()->create();
-
-    // Also verify that no team id can be used
-    SettingsFacade::setTeamId(null);
-    SettingsFacade::set('foo', 'no team value');
-    expect(SettingsFacade::get('foo'))->toBe('no team value');
-
-    SettingsFacade::setTeamId($team);
-    SettingsFacade::set('foo', 'team value');
-    expect(SettingsFacade::get('foo'))->toBe('team value');
-
-    SettingsFacade::setTeamId($team2);
-    SettingsFacade::set('foo', 'team 2 value');
-    expect(SettingsFacade::get('foo'))->toBe('team 2 value');
-});
-
-it('forgets the settings for a team', function () {
-    $team = Team::first();
-
-    SettingsFacade::set('foo', 'no team value');
-
-    SettingsFacade::setTeamId($team);
-    SettingsFacade::set('foo', 'team value');
-
-    $this->assertDatabaseCount('settings', 2);
-
-    SettingsFacade::forget('foo');
-
-    $this->assertDatabaseCount('settings', 1);
-    $this->assertDatabaseMissing('settings', [
-        'team_id' => $team->id,
+    assertDatabaseHas('settings', [
+        'key' => 'foo',
+        'team_id' => 1,
     ]);
-    $this->assertDatabaseHas('settings', [
+});
+
+test('default team can be scoped', function () {
+    SettingsFacade::defaultTeam(2);
+
+    SettingsFacade::defaultTeam(1, function () {
+        settings()->set('team', 'team 1 value');
+    });
+
+    settings()->set('team', 'team 2 value');
+
+    assertDatabaseCount('settings', 2);
+
+    assertDatabaseHas('settings', [
+        'key' => 'team',
+        'value' => json_encode('team 1 value'),
+        'team_id' => 1,
+    ]);
+
+    assertDatabaseHas('settings', [
+        'key' => 'team',
+        'value' => json_encode('team 2 value'),
+        'team_id' => 2,
+    ]);
+});
+
+test('a team can be set temporarily', function () {
+    SettingsFacade::usingTeam(1)->set('team-name', 'Team 1 Name');
+    SettingsFacade::usingTeam(2)->set('team-name', 'Team 2 Name');
+    SettingsFacade::set('team-name', 'Global Name');
+
+    assertDatabaseCount('settings', 3);
+
+    assertDatabaseHas('settings', [
+        'key' => 'team-name',
+        'value' => json_encode('Global Name'),
+        'team_id' => null,
+    ]);
+
+    assertDatabaseHas('settings', [
+        'key' => 'team-name',
+        'value' => json_encode('Team 1 Name'),
+        'team_id' => 1,
+    ]);
+
+    assertDatabaseHas('settings', [
+        'key' => 'team-name',
+        'value' => json_encode('Team 2 Name'),
+        'team_id' => 2,
+    ]);
+});
+
+test('a temporarily set team overrides the default team', function () {
+    SettingsFacade::defaultTeam(1);
+
+    SettingsFacade::usingTeam(2)->set('team-name', 'Team 2 Name');
+    SettingsFacade::set('team-name', 'Team 1 Name');
+
+    assertDatabaseHas('settings', [
+        'key' => 'team-name',
+        'value' => json_encode('Team 1 Name'),
+        'team_id' => 1,
+    ]);
+
+    assertDatabaseHas('settings', [
+        'key' => 'team-name',
+        'value' => json_encode('Team 2 Name'),
+        'team_id' => 2,
+    ]);
+});
+
+test('noTeam() can be used to set the team to null for the setting', function () {
+    SettingsFacade::defaultTeam(1);
+
+    SettingsFacade::noTeam()->set('foo', 'bar');
+
+    assertDatabaseHas('settings', [
+        'key' => 'foo',
+        'value' => json_encode('bar'),
         'team_id' => null,
     ]);
 });
 
+test('usingTeam() can be scoped', function () {
+    SettingsFacade::usingTeam(3, function () {
+        settings()->set('foo', 'bar');
+    });
+
+    settings()->set('foo', 'bar');
+
+    assertDatabaseHas('settings', [
+        'key' => 'foo',
+        'value' => json_encode('bar'),
+        'team_id' => 3,
+    ]);
+
+    assertDatabaseHas('settings', [
+        'key' => 'foo',
+        'value' => json_encode('bar'),
+        'team_id' => null,
+    ]);
+});
+
+test('noTeam() can be scoped', function () {
+    SettingsFacade::noTeam(function () {
+        settings()->set('foo', 'bar');
+    });
+
+    assertDatabaseHas('settings', [
+        'key' => 'foo',
+        'value' => json_encode('bar'),
+        'team_id' => null,
+    ]);
+});
+
+test('usingTeam() accepts a model instance', function () {
+    $team = Team::factory()->create();
+
+    SettingsFacade::usingTeam($team)->set('foo', 'bar');
+
+    assertDatabaseHas('settings', [
+        'key' => 'foo',
+        'value' => json_encode('bar'),
+        'team_id' => $team->getKey(),
+    ]);
+});
+
+it('checks if a team has a setting', function () {
+    SettingsFacade::set('foo', 'bar');
+
+    expect(SettingsFacade::usingTeam(1)->has('foo'))->toBeFalse();
+
+    SettingsFacade::usingTeam(1)->set('foo', 'bar');
+
+    expect(SettingsFacade::usingTeam(1)->has('foo'))->toBeTrue();
+});
+
 test('the cache is scoped for teams', function () {
-    $team = Team::first();
-    $team2 = Team::factory()->create();
-
-    SettingsFacade::setTeamId($team);
-    SettingsFacade::set('foo', 'team 1 value');
-
-    SettingsFacade::setTeamId($team2);
-    SettingsFacade::set('foo', 'team 2 value');
+    $this->storeSetting('my-setting', 'team 1', 1);
+    $this->storeSetting('my-setting', 'team 2', 2);
 
     SettingsFacade::enableCache();
 
-    expect(SettingsFacade::get('foo'))->toBe('team 2 value');
+    $team1Value = SettingsFacade::usingTeam(1)->get('my-setting');
+    $team2Value = SettingsFacade::usingTeam(2)->get('my-setting');
 
-    SettingsFacade::setTeamId($team);
-
-    expect(SettingsFacade::get('foo'))->toBe('team 1 value');
+    expect($team1Value)->toBe('team 1')
+        ->and($team2Value)->toBe('team 2');
 });
 
 test("all of a team's settings can be retrieved at once", function () {
     $team = Team::first();
 
-    $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
+    settings()->set('one', 'non-team value');
+    settings()->context(new Context(['id' => 'foo']))->set('one', 'non-team value context 1');
 
-    $settings->set('one', 'non-team value');
-    $settings->context(new Context(['id' => 'foo']))->set('one', 'non-team value context 1');
+    settings()->usingTeam($team, function () {
+        settings()->set('one', 'team value');
+        settings()->set('two', 'team value 2');
+        settings()->context(new Context(['id' => 'foo']))->set('one', 'team value context 1');
+    });
 
-    $settings->setTeamId($team);
-
-    $settings->set('one', 'team value');
-    $settings->set('two', 'team value 2');
-    $settings->context(new Context(['id' => 'foo']))->set('one', 'team value context 1');
-
-    $storedSettings = $settings->all();
+    $storedSettings = settings()->usingTeam($team)->all();
 
     expect($storedSettings)->toHaveCount(3)
         ->and($storedSettings[0]->key)->toBe('one')
@@ -200,7 +217,7 @@ test("all of a team's settings can be retrieved at once", function () {
         ->and($storedSettings[2]->original_key)->toBe('one:c:::id:foo');
 
     // Can get all team settings without context attached to them.
-    $nonContextSettings = $settings->context(false)->all();
+    $nonContextSettings = settings()->usingTeam($team)->context(false)->all();
 
     expect($nonContextSettings)->toHaveCount(2)
         ->and($nonContextSettings->pluck('value'))->not->toContain('team value context 1');
@@ -209,64 +226,18 @@ test("all of a team's settings can be retrieved at once", function () {
 test("a team's settings can be flushed", function () {
     $team = Team::first();
 
-    $settings = settings();
-    (fn () => $this->keyGenerator = (new ReadableKeyGenerator)->setContextSerializer(new KeyValueContextSerializer))->call($settings);
+    settings()->set('one', 'non-team value');
 
-    $settings->set('one', 'non-team value');
+    settings()->defaultTeam($team);
+    settings()->set('one', 'team value');
 
-    $settings->setTeamId($team);
-    $settings->set('one', 'team value');
+    assertDatabaseCount('settings', 2);
 
-    $this->assertDatabaseCount('settings', 2);
+    settings()->flush();
 
-    $settings->flush();
+    assertDatabaseCount('settings', 1);
 
-    $this->assertDatabaseCount('settings', 1);
-
-    $this->assertDatabaseMissing('settings', [
-        'team_id' => $team->id,
+    assertDatabaseMissing('settings', [
+        'team_id' => $team->getKey(),
     ]);
-});
-
-test('when a team is set, a different team can be used for a single call', function () {
-    $team = Team::first();
-    $otherTeam = Team::factory()->create();
-
-    SettingsFacade::setTeamId($team);
-    SettingsFacade::set('foo', 'team 1');
-
-    SettingsFacade::usingTeam($otherTeam)->set('foo', 'team 2');
-
-    $this->assertDatabaseCount('settings', 2);
-    expect(SettingsFacade::getTeamId())->toBe($team->id)
-        ->and(SettingsFacade::get('foo'))->toBe('team 1')
-        ->and(SettingsFacade::usingTeam($otherTeam)->get('foo'))->toBe('team 2');
-});
-
-test('when a team is set, team id can be set to null temporarily', function () {
-    $team = Team::first();
-
-    SettingsFacade::setTeamId($team);
-    SettingsFacade::set('foo', 'team 1');
-
-    SettingsFacade::withoutTeams()->set('foo', 'global');
-
-    $this->assertDatabaseCount('settings', 2);
-    expect(SettingsFacade::getTeamId())->toBe($team->id)
-        ->and(SettingsFacade::get('foo'))->toBe('team 1')
-        ->and(SettingsFacade::withoutTeams()->get('foo'))->toBe('global');
-});
-
-test('a team can be used temporarily when teams are not enabled', function () {
-    SettingsFacade::disableTeams();
-    SettingsFacade::set('foo', 'global');
-
-    $team = Team::first();
-    SettingsFacade::usingTeam($team)->set('foo', 'team 1');
-
-    $this->assertDatabaseCount('settings', 2);
-    expect(SettingsFacade::getTeamId())->toBeNull()
-        ->and(SettingsFacade::teamsAreEnabled())->toBeFalse()
-        ->and(SettingsFacade::get('foo'))->toBe('global')
-        ->and(SettingsFacade::usingTeam($team)->get('foo'))->toBe('team 1');
 });

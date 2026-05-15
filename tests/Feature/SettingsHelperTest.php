@@ -4,20 +4,25 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
-use Rawilk\Settings\Settings;
 use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Support\PendingSettings;
 
 beforeEach(function () {
     config([
-        'settings.driver' => 'eloquent',
-        'settings.table' => 'settings',
         'settings.cache' => false,
         'settings.encryption' => false,
     ]);
 });
 
 it('returns an instance of the settings class when no arguments are passed in', function () {
-    expect(settings())->toBeInstanceOf(Settings::class);
+    expect(settings())->toBeInstanceOf(PendingSettings::class);
+});
+
+it('returns a new instance of settings for each call', function () {
+    $instance1 = settings();
+    $instance2 = settings();
+
+    expect($instance1)->not->toBe($instance2);
 });
 
 it('sets values if an array is passed in as the first argument', function () {
