@@ -15,6 +15,10 @@ class JsonValueSerializer implements ValueSerializerContract
 
     public function unserialize(string $serialized): mixed
     {
+        if (! json_validate($serialized)) {
+            return $serialized;
+        }
+
         return json_decode($serialized, true, 512, JSON_THROW_ON_ERROR);
     }
 }
