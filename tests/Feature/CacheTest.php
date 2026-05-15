@@ -107,6 +107,45 @@ describe('cache enabled', function () {
             ->and(0)->toBeQueryCount()
             ->and(cache()->get('settings.foo'))->toBe(json_encode('updated'));
     });
+
+    it('will disable the cache for a callback', function () {
+        settings()->set('foo', 'bar');
+
+        $this->resetQueryCount();
+
+        settings()->get('foo');
+
+        expect(0)->toBeQueryCount();
+
+        $this->resetQueryCount();
+
+        settings()->withoutCache(function () {
+            settings()->get('foo');
+        });
+
+        expect(1)->toBeQueryCount();
+    });
+
+    it('will disable the cache for a callback without affecting previous state', function () {
+        settings()->set('foo', 'bar');
+
+        // 1. Initially, caching should be working.
+        $this->resetQueryCount();
+        settings()->get('foo');
+        expect(0)->toBeQueryCount();
+
+        // 2. Inside the callback, caching should be disabled (will trigger a query).
+        settings()->withoutCache(function () {
+            settings()->get('foo');
+        });
+
+        expect(1)->toBeQueryCount();
+
+        // 3. After the callback, caching should be restored (no query).
+        $this->resetQueryCount();
+        settings()->get('foo');
+        expect(0)->toBeQueryCount();
+    });
 });
 
 describe('cache disabled', function () {

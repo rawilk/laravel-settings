@@ -87,7 +87,7 @@ describe('encryption disabled', function () {
     });
 
     it('will disable encryption for a callback without affecting previous state even with exception', function () {
-        settings()->disableEncryption();
+        settings()->enableEncryption();
 
         try {
             settings()->withoutEncryption(function () {
@@ -107,7 +107,7 @@ describe('encryption disabled', function () {
 
         $storedSetting = DB::table('settings')->where('key', 'outer')->first();
 
-        expect($storedSetting->value)->toBeJson()
-            ->and(json_decode($storedSetting->value))->toBe('outer value');
+        expect($storedSetting->value)->not->toBeJson()
+            ->and(json_decode($storedSetting->value))->not->toBe('outer value');
     });
 });
