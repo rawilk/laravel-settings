@@ -63,8 +63,7 @@
                 "Rawilk\\Settings\\SettingsServiceProvider"
             ],
             "aliases": {
-                "Settings": "Rawilk\\Settings\\Facades\\Settings",
-                "SettingsFactory": "Rawilk\\Settings\\Drivers\\Factory"
+                "Settings": "Rawilk\\Settings\\Facades\\Settings"
             }
         }
     },
