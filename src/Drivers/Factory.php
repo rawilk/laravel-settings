@@ -4,103 +4,31 @@ declare(strict_types=1);
 
 namespace Rawilk\Settings\Drivers;
 
-use Closure;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Support\Arr;
-use InvalidArgumentException;
-use Rawilk\Settings\Contracts\Driver;
-use Rawilk\Settings\Contracts\Setting as SettingContract;
+use Illuminate\Support\Manager;
+use Rawilk\Settings\Support\SettingsConfig;
+use Rawilk\Settings\Support\TeamResolver;
 
-class Factory
+class Factory extends Manager
 {
-    protected array $drivers = [];
-
-    protected array $customCreators = [];
-
-    public function __construct(protected Application $app)
+    public function getDefaultDriver(): ?string
     {
+        return SettingsConfig::getDefaultDriver();
     }
 
-    public function driver(?string $driver = null): Driver
-    {
-        return $this->resolveDriver($driver);
-    }
-
-    public function extend(string $driver, Closure $callback): self
-    {
-        $this->customCreators[$driver] = $callback;
-
-        return $this;
-    }
-
-    public function setDefaultDriver(string $driver): void
-    {
-        $this->app['config']['settings.driver'] = $driver;
-    }
-
-    protected function createDatabaseDriver(array $config): DatabaseDriver
+    protected function createDatabaseDriver(): DatabaseDriver
     {
         return new DatabaseDriver(
-            connection: $this->app['db']->connection(Arr::get($config, 'connection')),
-            table: $this->app['config']['settings.table'],
-            teamForeignKey: $this->app['config']['settings.team_foreign_key'] ?? null,
+            connection: $this->getContainer()['db']->connection(SettingsConfig::getDatabaseDriverConnection()),
+            table: SettingsConfig::getSettingsTable(),
+            teamResolver: app(TeamResolver::class),
+            teamForeignKey: SettingsConfig::getTeamsForeignKey(),
         );
     }
 
     protected function createEloquentDriver(): EloquentDriver
     {
         return new EloquentDriver(
-            model: app(SettingContract::class),
+            model: SettingsConfig::getModel(),
         );
-    }
-
-    protected function getDefaultDriver(): string
-    {
-        return $this->app['config']['settings.driver'];
-    }
-
-    protected function getDriverConfig(string $driver): ?array
-    {
-        return $this->app['config']["settings.drivers.{$driver}"];
-    }
-
-    protected function resolveDriver(?string $driver = null): Driver
-    {
-        $driver = $driver ?: $this->getDefaultDriver();
-
-        return $this->drivers[$driver] = $this->resolve($driver);
-    }
-
-    protected function resolve(string $driver): Driver
-    {
-        if (isset($this->drivers[$driver])) {
-            return $this->drivers[$driver];
-        }
-
-        $driverConfig = $this->getDriverConfig($driver);
-
-        if (! $driverConfig) {
-            throw new InvalidArgumentException(
-                "Missing settings driver config for '{$driver}'."
-            );
-        }
-
-        if (isset($this->customCreators[$driverConfig['driver']])) {
-            return $this->callCustomCreator($driverConfig);
-        }
-
-        $method = 'create' . ucfirst($driverConfig['driver']) . 'Driver';
-        if (! method_exists($this, $method)) {
-            throw new InvalidArgumentException(
-                "Unsupported settings driver: {$driverConfig['driver']}."
-            );
-        }
-
-        return $this->$method($driverConfig);
-    }
-
-    protected function callCustomCreator(array $config): Driver
-    {
-        return $this->customCreators[$config['driver']]($this->app, $config);
     }
 }
