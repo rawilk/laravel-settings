@@ -11,7 +11,6 @@
         </testsuite>
     </testsuites>
     <php>
-        <server name="APP_KEY" value="base64:eoWhtZbA60jG9AjZ4e2laYeISTdFMD0JeWEafGIAaHM="/>
         <server name="DB_CONNECTION" value="sqlite"/>
         <server name="DB_DATABASE" value=":memory:"/>
         <server name="CACHE_DRIVER" value="array"/>
