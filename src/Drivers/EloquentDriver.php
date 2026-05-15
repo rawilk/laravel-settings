@@ -19,9 +19,9 @@ class EloquentDriver implements Driver
         $this->model::removeSetting($key, $teamId);
     }
 
-    public function get(string $key, $default = null, $teamId = null)
+    public function get(string $key, $teamId = null)
     {
-        return $this->model::getValue($key, $default, $teamId);
+        return $this->model::getValue($key, $teamId);
     }
 
     public function all($teamId = null, $keys = null): array|Arrayable

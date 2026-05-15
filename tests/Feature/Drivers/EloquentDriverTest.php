@@ -11,14 +11,10 @@ use Rawilk\Settings\Models\Setting;
 beforeEach(function () {
     config([
         'settings.driver' => 'eloquent',
-        'settings.teams' => true,
-        'settings.team_foreign_key' => 'team_id',
     ]);
 
     $this->driver = new EloquentDriver(app(Setting::class));
     $this->model = Setting::class;
-
-    migrateTeams();
 });
 
 it('creates new entries', function () {
@@ -108,21 +104,11 @@ it('gets a persisted setting value', function () {
     expect($this->driver->get(key: 'foo', teamId: false))->toBe('bar');
 });
 
-it('returns a default value for settings that are not persisted', function () {
-    expect($this->driver->get(key: 'foo', default: 'my default value', teamId: false))->toBe('my default value');
-});
-
 it('gets a persisted team value', function () {
     $this->driver->set('foo', 'no team value', null);
     $this->driver->set('foo', 'team value', 1);
 
     expect($this->driver->get(key: 'foo', teamId: 1))->toBe('team value');
-});
-
-it('gets a default value for a team', function () {
-    $this->driver->set('foo', 'no team value', null);
-
-    expect($this->driver->get(key: 'foo', default: 'my default', teamId: 1))->toBe('my default');
 });
 
 it('removes persisted settings', function () {

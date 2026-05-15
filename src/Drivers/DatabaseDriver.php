@@ -10,12 +10,14 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Rawilk\Settings\Contracts\Driver;
 use Rawilk\Settings\Facades\Settings;
+use Rawilk\Settings\Support\TeamResolver;
 
 class DatabaseDriver implements Driver
 {
     public function __construct(
         protected Connection $connection,
         protected string $table,
+        protected TeamResolver $teamResolver,
         protected ?string $teamForeignKey = null,
     ) {
     }
@@ -25,23 +27,22 @@ class DatabaseDriver implements Driver
         $this->db()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
-                fn (Builder $query) => $query->where("{$this->table}.{$this->teamForeignKey}", $teamId)
+                (! $this->teamResolver->disabled()) && $teamId !== false,
+                fn (Builder $query) => $query->where($this->teamColumn(), $teamId)
             )
             ->delete();
     }
 
-    public function get(string $key, $default = null, $teamId = null)
+    public function get(string $key, $teamId = null)
     {
-        $value = $this->db()
+        return $this
+            ->db()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
-                fn (Builder $query) => $query->where("{$this->table}.{$this->teamForeignKey}", $teamId)
+                (! $this->teamResolver->disabled()) && $teamId !== false,
+                fn (Builder $query) => $query->where($this->teamColumn(), $teamId)
             )
             ->value('value');
-
-        return $value ?? $default;
     }
 
     public function all($teamId = null, $keys = null): array|Arrayable
@@ -54,8 +55,8 @@ class DatabaseDriver implements Driver
         return $this->db()
             ->where('key', $key)
             ->when(
-                $teamId !== false,
-                fn (Builder $query) => $query->where("{$this->table}.{$this->teamForeignKey}", $teamId)
+                (! $this->teamResolver->disabled()) && $teamId !== false,
+                fn (Builder $query) => $query->where($this->teamColumn(), $teamId)
             )
             ->exists();
     }
@@ -66,7 +67,7 @@ class DatabaseDriver implements Driver
             'key' => $key,
         ];
 
-        if ($teamId !== false) {
+        if ((! $this->teamResolver->disabled()) && $teamId !== false) {
             $data[$this->teamForeignKey] = $teamId;
         }
 
@@ -96,6 +97,11 @@ class DatabaseDriver implements Driver
         return collect($keys)->flatten()->filter();
     }
 
+    protected function teamColumn(): string
+    {
+        return "{$this->table}.{$this->teamForeignKey}";
+    }
+
     private function baseBulkQuery($teamId, $keys): Builder
     {
         $keys = $this->normalizeKeys($keys);
@@ -116,8 +122,8 @@ class DatabaseDriver implements Driver
                 fn (Builder $query) => $query->whereIn('key', $keys),
             )
             ->when(
-                $teamId !== false,
-                fn (Builder $query) => $query->where("{$this->table}.{$this->teamForeignKey}", $teamId)
+                (! $this->teamResolver->disabled()) && $teamId !== false,
+                fn (Builder $query) => $query->where($this->teamColumn(), $teamId)
             );
     }
 }
