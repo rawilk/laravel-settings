@@ -10,7 +10,7 @@ interface Driver
 {
     public function forget($key, $teamId = null);
 
-    public function get(string $key, $default = null, $teamId = null);
+    public function get(string $key, $teamId = null);
 
     public function all($teamId = null, $keys = null): array|Arrayable;
 
