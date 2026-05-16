@@ -3,57 +3,129 @@ title: Custom Drivers
 sort: 1
 ---
 
-You can easily extend settings to use your own drivers for storing and retrieving settings, such as using a json
-or xml file. To do so, you will need to add your driver's configuration in the `drivers` key in the `config/settings.php`
+You may extend settings to use your own drivers for storing and retrieving settings, such as using a JSON
+or XML file. To do so, you will need to add your driver's configuration in the `drivers` key in the `config/settings.php`
 config file, with the following minimum configuration:
 
-```php
-'drivers' => [
-    // ... other drivers
-    'custom' => [
-        'driver' => 'custom',
-        // driver specific configuration
-    ],
-],
-```
-
-> {note} Replace **custom** with your driver name.
-
-You will then need to tell settings about your custom driver in a service provider:
+To start, create your custom driver class and have it implement the `Driver` interface. We'll showcase a mock JSON driver as an example:
 
 ```php
-app('SettingsFactory')->extend('custom', fn ($app, $config) => new CustomDriver($config));
-
-// You can also set your custom driver as the default driver here, or in the config/settings.php config file:
-app('SettingsFactory')->setDefaultDriver('custom');
-```
-
-Any custom drivers you make must implement the `Rawilk\Settings\Contracts\Driver` interface. Here is what
-the interface looks like:
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace Rawilk\Settings\Contracts;
-
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
+use Rawilk\Settings\Contracts\Driver;
 
-interface Driver
+class JsonDriver implements Driver
 {
-    public function forget($key, $teamId = null);
+    public function __construct(protected string $path) 
+    {
+    }
+    
+    public function forget($key, $teamId = null): void
+    {
+        $settings = $this->allSettings();
 
-    public function get(string $key, $default = null, $teamId = null);
+        Arr::forget($settings, $this->getStoreKey($key, $teamId));
 
-    public function all($teamId = null, $keys = null): array|Arrayable;
+        $this->save($settings);
+    }
 
-    public function has($key, $teamId = null): bool;
+    public function get(string $key, $teamId = null)
+    {
+        return Arr::get($this->allSettings(), $this->getStoreKey($key, $teamId));
+    }
 
-    public function set(string $key, $value = null, $teamId = null);
+    public function all($teamId = null, $keys = null): array|Arrayable
+    {
+        $settings = $this->allSettings();
 
-    public function flush($teamId = null, $keys = null);
+        if ($teamId !== null) {
+            $settings = Arr::get($settings, "team_{$teamId}", []);
+        }
+
+        if ($keys) {
+            return Arr::only($settings, (array) $keys);
+        }
+
+        return $settings;
+    }
+
+    public function has($key, $teamId = null): bool
+    {
+        return Arr::has($this->allSettings(), $this->getStoreKey($key, $teamId));
+    }
+
+    public function set(string $key, $value = null, $teamId = null): void
+    {
+        $settings = $this->allSettings();
+
+        Arr::set($settings, $this->getStoreKey($key, $teamId), $value);
+
+        $this->save($settings);
+    }
+
+    public function flush($teamId = null, $keys = null): void
+    {
+        if ($teamId === null && $keys === null) {
+            $this->save([]);
+
+            return;
+        }
+
+        $settings = $this->allSettings();
+
+        if ($teamId !== null && $keys === null) {
+            Arr::forget($settings, "team_{$teamId}");
+        } else {
+            // Handle specific keys or other logic if needed
+        }
+
+        $this->save($settings);
+    }
+
+    protected function allSettings(): array
+    {
+        if (! File::exists($this->path)) {
+            return [];
+        }
+
+        return json_decode(File::get($this->path), true) ?? [];
+    }
+
+    protected function save(array $settings): void
+    {
+        File::put($this->path, json_encode($settings, JSON_PRETTY_PRINT));
+    }
+
+    protected function getStoreKey(string $key, $teamId = null): string
+    {
+        return $teamId ? "team_{$teamId}.{$key}" : $key;
+    }
 }
 ```
 
 > {note} Your custom drivers **do not need to handle encryption or caching**; the settings service will handle that for you.
+
+With your custom driver created, you need to extend the settings service. A good place to do this would be in a service provider:
+
+```php
+// app/Providers/AppServiceProvider.php
+
+use App\Settings\Drivers\JsonDriver;
+use Rawilk\Settings\Facades\Settings;
+
+public function boot(): void
+{
+    Settings::extend('json', function ($app, array $config) {
+        return new JsonDriver(path: storage_path('settings.json'));
+    });
+}
+```
+
+Finally, you need to update the `driver` in the config file to your new driver name if you want it to be used as the default driver.
+
+```php
+// config/settings.php
+
+'driver' => 'json',
+```

@@ -5,20 +5,16 @@ sort: 3
 
 ## Introduction
 
-Settings ships with a few key generators and value serializers out-of-the-box, however you may wish to implement your own. You can easily do so by following
+Settings ships with a few key generators and value serializers out-of-the-box, however you may wish to implement your own. You can do so by following
 the steps listed below for each type.
 
 ## KeyGenerator
 
-A key generator is responsible for generating a key suitable for storage on the `key` column of a setting. By default, the package uses the `Md5KeyGenerator` class,
-which generates an md5 hash of a given key/context combination. This key generator is only default, however, to prevent a breaking change from
-upgrading from v2 of this package. We recommend using the `ReadableKeyGenerator` class instead, which will generate a key that is both readable for the key,
-and allows for searching for the key by context possible.
+A key generator is responsible for generating a key suitable for storage on the `key` column of a setting. By default, the package uses the `ReadableKeyGenerator` class, which will generate a key that is both readable for the key, and allows for searching the key by context.
 
-> {note} The `ReadableKeyGenerator` key generator (or a custom one) is required for using the `all` and `flush` methods on the `Settings` facade, as well as flushing
-> a model's settings when it is deleted.
+> {note} The `ReadableKeyGenerator` key generator (or a custom one) is required for using the `all` and `flush` methods on the `Settings` facade, as well as flushing a model's settings when it is deleted.
 
-If you'd like to use your own KeyGenerator, you may do so by implementing the `Rawilk\Settings\Contracts\KeyGenerator` interface. Here is what the interface looks like:
+If you'd like to use your own KeyGenerator, you may do so by implementing the `KeyGenerator` interface.
 
 Here's what a custom key generator might look like:
 
@@ -66,8 +62,7 @@ class CustomKeyGenerator implements KeyGenerator
 }
 ```
 
-Notice that the class requires a `ContextSerializer` object to be passed into a setter. This kind of generator is responsible for converting the context object into a string
-suitable for storage. See [ContextSerializer](#user-content-contextserializer) for more information.
+Notice that the class requires a `ContextSerializer` object to be passed into a setter. This kind of generator is responsible for converting the context object into a string suitable for storage. See [ContextSerializer](#user-content-contextserializer) for more information.
 
 After defining your class, you need to add it the settings config file:
 
@@ -78,10 +73,10 @@ After defining your class, you need to add it the settings config file:
 
 ## ContextSerializer
 
-The context serializer is responsible for taking a `Rawilk\Settings\Support\Context` object and converting it into a string suitable for storage. By default, the package will use
-the `ContextSerializer` class, which will use php's `serialize` method to convert the context into a string. If you're using the `ReadableKeyGenerator`, or a custom one of your own,
-we recommend using the `DotNotationContextSerializer` class instead, which doesn't rely on php's `serialize` method. You may also make your own context serializer by implementing the
-`Rawilk\Settings\Contracts\ContextSerializer` interface. Here is what a custom context serializer might look like:
+The context serializer is responsible for taking a `Context` object and converting it into a string suitable for storage. By default, the package will use
+the `KeyValueContextSerializer` class. You may also make your own context serializer by implementing the `ContextSerializer` interface. 
+
+Here is what a custom context serializer might look like:
 
 ```php
 use Rawilk\Settings\Contracts\ContextSerializer;
@@ -109,11 +104,9 @@ After defining your class, you need to add it the settings config file:
 
 ## ValueSerializer
 
-The value serializer is responsible for preparing a value for storage. By default, the package uses the `ValueSerializer` class, which will use php's `serialize` method to convert
-the value into a string, and then `unserialize` to return the original value. You can alternatively use the `JsonValueSerializer` class, which will use php's `json_encode` and `json_decode`
-instead.
+The value serializer is responsible for preparing a value for storage. The package uses the `JsonValueSerializer` by default, which will use php's `json_encode()` and `json_decode()` to serialize and unserialize the setting values.
 
-You are also free to create your own value serializer by implementing the `Rawilk\Settings\Contracts\ValueSerializer` interface. Here is what a custom value serializer might look like:
+You are free to create your own value serializer by implementing the `ValueSerializer` interface. Here is what a custom value serializer might look like:
 
 ```php
 use Rawilk\Settings\Contracts\ValueSerializer;
@@ -139,19 +132,17 @@ After defining your class, you need to add it the settings config file:
 'value_serializer' => CustomValueSerializer::class,
 ```
 
-### Unserializing Objects
+### ValueSerializer Limitations
 
 When using the default `ValueSerializer`, we will use php's `unserialize` method to re-hydrate the value. However, we use the `allowed_classes` option to prevent
-objects from being unserialized back into their original form. This means that if you are storing something like an eloquent model as a setting, it will be unserialized
-into something like this:
+objects from being unserialized back into their original form. This means that if you are storing something like an eloquent model as a setting, it will be unserialized into something like this:
 
 ```php
 __PHP_Incomplete_Class(App\Models\User) {...}
 ```
 
-Because of this, you will not have access to any kind of method or property on the model. As of `v3.3.0` of this package, you can now define a safelist of classes that
-should be allowed to be unserialized by settings. By default, we'll allow Carbon (date) classes to be unserialized. You can modify the safelist in the config to allow
-the user model from above to be unserialized as well:
+Because of this, you will not have access to any kind of method or property on the model. You can define a safelist of classes that
+should be allowed to be unserialized by settings. By default, we'll allow Carbon (date) classes to be unserialized. You can modify the safelist in the config to allow the user model from above to be unserialized as well:
 
 ```php
 // config/settings.php

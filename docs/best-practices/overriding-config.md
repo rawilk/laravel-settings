@@ -8,11 +8,12 @@ The best place to do this would be in the `boot()` method in a service provider,
 value before your application references the config value.
 
 ```php
+use Rawilk\Settings\Facades\Settings;
+
 public function boot()
 {
     config(['app.timezone' => Settings::get('app.timezone', 'UTC')]);
 }
 ```
 
-You can store the settings you are using to override config values with any keys you want, but for clarity you should store
-them as the same key that is used in the config.
+You can store the settings you are using to override config values with any keys you want, but for clarity you should store them as the same key used in the config.
