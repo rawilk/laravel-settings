@@ -50,7 +50,7 @@ if (! function_exists('settings_enum_value')) {
      * @param  TDefault|callable(TValue): TDefault  $default
      * @return ($value is empty ? TDefault : mixed)
      */
-    function settings_enum_value($value, $default = null)
+    function settings_enum_value($value, mixed $default = null): mixed
     {
         return match (true) {
             $value instanceof BackedEnum => $value->value,
