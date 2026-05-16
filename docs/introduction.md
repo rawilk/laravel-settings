@@ -30,6 +30,8 @@ settings()->get('foo');
 settings('foo');
 ```
 
+Note: The settings service is not a singleton anymore, so each call to `settings()` or `Settings::` will return a new instance of the service. Certain parts of the service are extracted into singleton bindings in the container, such as the cache status or encryption status to persist those configurations between settings calls.
+
 ## Alternatives
 
 -   [spatie/laravel-settings](https://github.com/spatie/laravel-settings)
