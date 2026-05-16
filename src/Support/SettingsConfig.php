@@ -132,4 +132,9 @@ final class SettingsConfig
     {
         return Config::boolean('settings.teams', default: false);
     }
+
+    public static function getHashAlgorithm(): string
+    {
+        return config('settings.hash_algorithm', 'xxh128');
+    }
 }

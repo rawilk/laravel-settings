@@ -7,6 +7,7 @@ namespace Rawilk\Settings\Support\KeyGenerators;
 use Rawilk\Settings\Contracts\ContextSerializer;
 use Rawilk\Settings\Contracts\KeyGenerator as KeyGeneratorContract;
 use Rawilk\Settings\Support\Context;
+use Rawilk\Settings\Support\SettingsConfig;
 use RuntimeException;
 
 class HashKeyGenerator implements KeyGeneratorContract
@@ -16,7 +17,7 @@ class HashKeyGenerator implements KeyGeneratorContract
     public function generate(string $key, ?Context $context = null): string
     {
         return hash(
-            config('settings.hash_algorithm', 'xxh128'),
+            SettingsConfig::getHashAlgorithm(),
             $key . $this->serializer->serialize($context),
         );
     }
