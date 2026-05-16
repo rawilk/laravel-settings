@@ -35,7 +35,7 @@ class PendingSettings
     }
 
     /**
-     * @deprecated Use defaultTeam() insstead.
+     * @deprecated Use defaultTeam() instead.
      */
     public function setTeamId(mixed $team, ?Closure $callback = null): mixed
     {
