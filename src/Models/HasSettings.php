@@ -6,10 +6,10 @@ namespace Rawilk\Settings\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Rawilk\Settings\Facades\Settings as SettingsFacade;
+use Rawilk\Settings\Settings;
 use Rawilk\Settings\Support\Context;
 use Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator;
 use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
-use Rawilk\Settings\Support\PendingSettings;
 
 /**
  * @mixin Model
@@ -25,7 +25,7 @@ trait HasSettings
         ]);
     }
 
-    public function settings(): PendingSettings
+    public function settings(): Settings
     {
         return SettingsFacade::context($this->context());
     }
