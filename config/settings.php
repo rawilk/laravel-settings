@@ -1,6 +1,12 @@
 <?php
 
 declare(strict_types=1);
+use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Rawilk\Settings\Models\Setting;
+use Rawilk\Settings\Support\ContextSerializers\ContextSerializer;
+use Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator;
+use Rawilk\Settings\Support\ValueSerializers\ValueSerializer;
 
 return [
     /*
@@ -78,7 +84,7 @@ return [
              * You can use any model you like for the setting, but it needs to implement
              * the \Rawilk\Settings\Contracts\Setting interface.
              */
-            'model' => \Rawilk\Settings\Models\Setting::class,
+            'model' => Setting::class,
         ],
     ],
 
@@ -129,7 +135,7 @@ return [
     | - \Rawilk\Settings\Support\ContextSerializers\DotNotationContextSerializer
     |
     */
-    'context_serializer' => \Rawilk\Settings\Support\ContextSerializers\ContextSerializer::class,
+    'context_serializer' => ContextSerializer::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -148,7 +154,7 @@ return [
     | - \Rawilk\Settings\Support\KeyGenerators\HashKeyGenerator
     |
     */
-    'key_generator' => \Rawilk\Settings\Support\KeyGenerators\Md5KeyGenerator::class,
+    'key_generator' => Md5KeyGenerator::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -163,7 +169,7 @@ return [
     | \Rawilk\Settings\Contracts\ValueSerializer interface.
     |
     */
-    'value_serializer' => \Rawilk\Settings\Support\ValueSerializers\ValueSerializer::class,
+    'value_serializer' => ValueSerializer::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -191,9 +197,9 @@ return [
     | an empty array.
     */
     'unserialize_safelist' => [
-        \Carbon\Carbon::class,
-        \Carbon\CarbonImmutable::class,
-        \Illuminate\Support\Carbon::class,
+        Carbon::class,
+        CarbonImmutable::class,
+        Illuminate\Support\Carbon::class,
     ],
 
     /*
