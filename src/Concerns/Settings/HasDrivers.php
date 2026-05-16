@@ -32,7 +32,7 @@ trait HasDrivers
     /**
      * Use a specific driver for a single callback.
      */
-    public function usingDriver(Driver|string|UnitEnum $driver, callable $callback): mixed
+    public function usingDriver(Driver|string|UnitEnum $driver, Closure $callback): mixed
     {
         $previous = $this->driver;
 
