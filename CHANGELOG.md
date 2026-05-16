@@ -2,6 +2,30 @@
 
 All notable changes to `laravel-settings` will be documented in this file
 
+## v4.0.0 - 2026-05-16
+
+### What's Changed
+
+* feat: add Laravel 13 support by @BJTheCod3r in https://github.com/rawilk/laravel-settings/pull/96
+* PHP 8.5 support
+* Drop Laravel 10.x and 11.x support
+* Add cache ttl support
+* `context_serializer` is now defaulted to the `KeyValueContextSerializer` instead of the `ContextSerializer` class.
+* `key_generator` is now defaulted to the `ReadableKeyGenerator` instead of the `Md5KeyGenerator` class.
+* `value_serializer` is now defaulted to the `JsonValueSerializer` instead of the `ValueSerializer` class.
+* Rename `DotNotationContextSerializer` to `KeyValueContextSerializer`
+* No longer bind the Setting service as a singleton
+* Remove `$teamForeignKey` property from Setting model
+* Remove `$default` parameters from `get()` methods in drivers
+* Deprecate `Md5KeyGenerator`
+* Deprecate `settings()->setTeamId()` method
+
+### New Contributors
+
+* @BJTheCod3r made their first contribution in https://github.com/rawilk/laravel-settings/pull/96
+
+**Full Changelog**: https://github.com/rawilk/laravel-settings/compare/v3.4.1...v4.0.0
+
 ## v3.4.1 - 2025-02-25
 
 ### What's Changed
